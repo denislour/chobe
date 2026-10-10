@@ -6,9 +6,9 @@ from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from sqlmodel import SQLModel
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from chobe_service_template import models  # noqa: F401
-from chobe_service_template.database import get_session
-from chobe_service_template.main import app
+from product_recommendation import models  # noqa: F401
+from product_recommendation.database import get_session
+from product_recommendation.main import app
 
 
 @pytest.fixture

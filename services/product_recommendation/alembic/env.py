@@ -8,8 +8,8 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 from sqlmodel import SQLModel
 
 from alembic import context
-from chobe_service_template import models  # noqa: F401
-from chobe_service_template.config import load_settings
+from product_recommendation import models  # noqa: F401
+from product_recommendation.config import load_settings
 
 config = context.config
 settings = load_settings()

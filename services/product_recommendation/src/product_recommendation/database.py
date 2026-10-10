@@ -5,7 +5,7 @@ from sqlalchemy import event
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from chobe_service_template.config import load_settings
+from product_recommendation.config import load_settings
 
 settings = load_settings()
 

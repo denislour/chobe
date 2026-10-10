@@ -1,8 +1,8 @@
 from fastapi import FastAPI
 
-from chobe_service_template.api import router
+from product_recommendation.api import router
 
-app = FastAPI(title="Chobe satellite service", version="1.0.0")
+app = FastAPI(title="Chobe Product Recommendation Service", version="1.0.0")
 app.include_router(router)
 
 

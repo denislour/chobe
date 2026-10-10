@@ -1,5 +1,5 @@
 # Chobe Services
 
-This directory contains independent FastAPI services for the Chobe marketplace. Each service owns its data and SQLite database and focuses on one capability, such as product recommendations.
+This directory contains independent FastAPI services for the Chobe marketplace. Each service owns its data and SQLite database and focuses on one capability.
 
-See each service's README for its purpose and local setup.
+`product_recommendation/` is the starter project for product recommendations. See its README for local setup.

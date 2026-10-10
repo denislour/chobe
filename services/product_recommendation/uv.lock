@@ -62,7 +62,7 @@ wheels = [
 ]
 
 [[package]]
-name = "chobe-service-template"
+name = "chobe-product-recommendation"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [

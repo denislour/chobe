@@ -4,9 +4,9 @@ from fastapi import APIRouter, Depends, status
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from chobe_service_template.database import get_session
-from chobe_service_template.models import Record
-from chobe_service_template.schemas import RecordCreate, RecordRead
+from product_recommendation.database import get_session
+from product_recommendation.models import Record
+from product_recommendation.schemas import RecordCreate, RecordRead
 
 router = APIRouter(prefix="/v1/records", tags=["records"])
 

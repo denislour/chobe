@@ -6,11 +6,11 @@ backend:
 frontend:
     cd frontend && mise exec node@24 -- pnpm install --frozen-lockfile && mise exec node@24 -- pnpm start
 
-# Apply template migrations and start the FastAPI service.
+# Apply migrations and start the product recommendation service.
 service:
-    cd services/service-template && uv run alembic upgrade head && uv run uvicorn chobe_service_template.main:app --reload
+    cd services/product_recommendation && uv run alembic upgrade head && uv run uvicorn product_recommendation.main:app --reload
 
-# Start the Django API, Angular app, and FastAPI template together.
+# Start the Django API, Angular app, and recommendation service together.
 all:
     #!/usr/bin/env bash
     set -e
