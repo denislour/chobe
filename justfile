@@ -1,6 +1,6 @@
 # Start the Django API and apply local migrations.
 backend:
-    cd backend && uv run python manage.py migrate && uv run python manage.py runserver
+    cd backend && uv run python manage.py migrate && uv run python manage.py runserver localhost:8000
 
 # Start the Angular app with the pinned Node.js and pnpm versions.
 frontend:
@@ -8,7 +8,7 @@ frontend:
 
 # Apply migrations and start the product recommendation service.
 service:
-    cd services/product_recommendation && uv run alembic upgrade head && uv run uvicorn product_recommendation.main:app --reload
+    cd services/product_recommendation && uv run alembic upgrade head && uv run uvicorn product_recommendation.main:app --reload --host localhost --port 8001
 
 # Start the Django API, Angular app, and recommendation service together.
 all:

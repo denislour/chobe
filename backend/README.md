@@ -9,7 +9,7 @@ Requirements: Python 3.14 and uv.
 ```bash
 uv sync
 uv run python manage.py migrate
-uv run python manage.py runserver
+uv run python manage.py runserver localhost:8000
 ```
 
-The API documentation is available at `http://127.0.0.1:8000/api/v1/docs/`.
+The API documentation is available at `http://localhost:8000/api/v1/docs/`.

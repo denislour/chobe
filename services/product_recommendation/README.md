@@ -9,7 +9,7 @@ Requirements: Python 3.14 and uv.
 ```bash
 uv sync
 uv run alembic upgrade head
-uv run uvicorn product_recommendation.main:app --reload
+uv run uvicorn product_recommendation.main:app --reload --host localhost --port 8001
 ```
 
-Open `http://127.0.0.1:8000/docs/` for the API documentation.
+Open `http://localhost:8001/docs/` for the API documentation.
