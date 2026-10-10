@@ -13,4 +13,4 @@ pnpm start
 
 Open `http://localhost:4200/` to view the app.
 
-`pnpm run prepare` sets up a Git pre-commit hook. It runs frontend lint and unit tests before each commit. A failed check blocks the commit.
+`pnpm run prepare` sets up a Git pre-commit hook. It runs lint and unit tests for the backend, frontend, and recommendation service before each commit. The hook uses `just`, `uv`, and `mise` with Node.js 24 and pnpm. A failed check blocks the commit.

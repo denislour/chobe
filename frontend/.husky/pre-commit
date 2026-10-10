@@ -1,3 +1,6 @@
-cd frontend
-pnpm lint
-pnpm test --watch=false
+just be lint
+just be test
+just fe lint
+just fe test
+just service lint
+just service test
