@@ -83,3 +83,5 @@ SPECTACULAR_SETTINGS = {
     "DESCRIPTION": "The core API for the Chobe portfolio.",
     "VERSION": "1.0.0",
 }
+
+UNFOLD = {"LOGIN": {"form": "accounts.forms.AdminLoginForm"}}

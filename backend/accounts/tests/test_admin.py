@@ -1,14 +1,17 @@
 from django.test import TestCase
 
+from accounts.constants import DEMO_ADMIN_PASSWORD, DEMO_ADMIN_USERNAME
 from accounts.models import User
 
 
 class AdminTests(TestCase):
     def setUp(self):
-        User.objects.create_superuser(username="admin", password="abc123ABC!!!")
+        User.objects.create_superuser(
+            username=DEMO_ADMIN_USERNAME, password=DEMO_ADMIN_PASSWORD
+        )
 
     def test_admin_pages_render_with_unfold(self):
-        user = User.objects.get(username="admin")
+        user = User.objects.get(username=DEMO_ADMIN_USERNAME)
         self.client.force_login(user)
         for path in (
             "/admin/",
@@ -26,3 +29,10 @@ class AdminTests(TestCase):
         self.assertRedirects(
             self.client.get("/"), "/admin/", fetch_redirect_response=False
         )
+
+    def test_login_fields_have_placeholders(self):
+        response = self.client.get("/admin/login/")
+
+        self.assertContains(response, f'placeholder="{DEMO_ADMIN_USERNAME}"')
+        self.assertContains(response, f'placeholder="{DEMO_ADMIN_PASSWORD}"')
+        self.assertContains(response, "unfold/css/styles.css")
