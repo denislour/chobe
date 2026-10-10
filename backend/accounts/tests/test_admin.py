@@ -21,3 +21,8 @@ class AdminTests(TestCase):
                 response = self.client.get(path)
                 self.assertEqual(response.status_code, 200)
                 self.assertContains(response, "unfold/css/styles.css")
+
+    def test_root_redirects_to_admin(self):
+        self.assertRedirects(
+            self.client.get("/"), "/admin/", fetch_redirect_response=False
+        )
