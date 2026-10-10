@@ -4,12 +4,12 @@ Chobe is a portfolio project for a Vietnamese marketplace. It shows a small syst
 
 ## Project folders
 
-- `backend/` contains the Django API.
-- `frontend/` contains the Angular web app.
-- `services/` contains independent FastAPI services. Each service has its own setup, README, and database. The recommendation service is the first example.
+- `backend/` contains the initialized Django API. See its README to run it.
+- `frontend/` will contain the Angular web app.
+- `services/` will contain independent FastAPI services. Each service will have its own setup, README, and database. The recommendation service will be the first example.
 
 Each project folder has its own README and `.gitignore`. Project notes and agent instructions are kept locally in `docs/` and `.pi/` and are not part of this repository.
 
 ## Status
 
-The portfolio is being set up. See each folder's README for local setup instructions.
+The Django backend is initialized. The Angular frontend and recommendation service will be added next.
