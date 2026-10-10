@@ -1,1 +1,66 @@
-/* You can add global styles to this file, and also import other style files */
+@font-face {
+  font-family: 'Be Vietnam Pro';
+  src: url('/fonts/BeVietnamPro-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Be Vietnam Pro';
+  src: url('/fonts/BeVietnamPro-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-display: swap;
+}
+
+:root {
+  --yellow: #ffd53d;
+  --yellow-hover: #f3c523;
+  --ink: #24251f;
+  --muted: #64665d;
+  --line: #e5e6df;
+  --focus: #795c00;
+  --success: #2b6046;
+  --error: #a2352a;
+}
+
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  color: var(--ink);
+  font:
+    400 14px/1.65 'Be Vietnam Pro',
+    sans-serif;
+}
+button,
+input {
+  font: inherit;
+  color: inherit;
+}
+button {
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+p {
+  margin: 0 0 16px;
+}
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 4px;
+}
+input {
+  caret-color: var(--focus);
+}
+input::placeholder {
+  color: var(--muted);
+}
+::selection {
+  background: var(--yellow);
+  color: var(--ink);
+}

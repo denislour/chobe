@@ -1,0 +1,72 @@
+<main class="login-page">
+  <section class="login-panel" aria-labelledby="login-title">
+    <header class="modal-header">
+      <h1 id="login-title">Log in</h1>
+    </header>
+    @if (user(); as currentUser) {
+      <p class="success" role="status">You are logged in as {{ currentUser.username }}.</p>
+    } @else {
+      <p class="hint" id="login-help">Log in to your Chobe account.</p>
+      <form
+        [formGroup]="form"
+        (ngSubmit)="submit()"
+        [attr.aria-busy]="pending()"
+        aria-describedby="login-help"
+      >
+        <div class="field">
+          <label for="login-username">Username or email</label>
+          <input
+            id="login-username"
+            formControlName="username"
+            autocomplete="username"
+            placeholder="you@example.com"
+            required
+            maxlength="254"
+            [attr.aria-invalid]="form.controls.username.touched && form.controls.username.invalid"
+            aria-describedby="username-error"
+          />
+          <small id="username-error" class="error">
+            @if (form.controls.username.touched && form.controls.username.invalid) {
+              Enter your username or email.
+            }
+          </small>
+        </div>
+        <div class="field">
+          <label for="login-password">Password</label>
+          <div class="password-input">
+            <input
+              id="login-password"
+              formControlName="password"
+              autocomplete="current-password"
+              [type]="showPassword() ? 'text' : 'password'"
+              required
+              maxlength="128"
+              [attr.aria-invalid]="form.controls.password.touched && form.controls.password.invalid"
+              aria-describedby="password-error"
+            />
+            <button
+              type="button"
+              class="password-toggle"
+              aria-controls="login-password"
+              [attr.aria-pressed]="showPassword()"
+              (click)="showPassword.set(!showPassword())"
+            >
+              {{ showPassword() ? 'Hide' : 'Show' }}
+            </button>
+          </div>
+          <small id="password-error" class="error">
+            @if (form.controls.password.touched && form.controls.password.invalid) {
+              Enter your password.
+            }
+          </small>
+        </div>
+        @if (error()) {
+          <p class="error" role="alert">{{ error() }}</p>
+        }
+        <button class="btn btn-block" type="submit" [disabled]="pending()">
+          {{ pending() ? 'Logging in…' : 'Log in' }}
+        </button>
+      </form>
+    }
+  </section>
+</main>
