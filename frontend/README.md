@@ -5,6 +5,7 @@ The frontend is the Angular web app for the Chobe marketplace. It uses Node.js 2
 ## Run locally
 
 ```bash
+npm install --global --allow-scripts=pnpm pnpm@12.11.2
 pnpm install
 pnpm start
 ```
