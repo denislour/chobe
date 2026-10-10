@@ -77,6 +77,11 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.SessionAuthentication"
+    ],
+    "DEFAULT_THROTTLE_RATES": {"login_ip": "20/min", "login_account": "5/min"},
+    "NUM_PROXIES": 0,
 }
 SPECTACULAR_SETTINGS = {
     "TITLE": "Chobe API",
@@ -85,3 +90,12 @@ SPECTACULAR_SETTINGS = {
 }
 
 UNFOLD = {"LOGIN": {"form": "accounts.forms.AdminLoginForm"}}
+
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SECURE = not DEBUG
+SESSION_COOKIE_SAMESITE = "Lax"
+SESSION_COOKIE_AGE = 8 * 60 * 60
+CSRF_COOKIE_NAME = "XSRF-TOKEN"
+CSRF_HEADER_NAME = "HTTP_X_XSRF_TOKEN"
+CSRF_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SAMESITE = "Lax"
