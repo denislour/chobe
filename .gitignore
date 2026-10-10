@@ -1,0 +1,28 @@
+# Local project documentation and agent instructions
+/docs/
+/.pi/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+
+# Node and Angular
+node_modules/
+.angular/cache/
+dist/
+coverage/
+
+# Local databases and environment files
+*.sqlite3
+.env
+.env.*
+!.env.example
+
+# Editor and operating system files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
