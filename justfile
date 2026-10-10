@@ -8,6 +8,20 @@ backend:
 frontend:
     @just fe
 
+# Start the Django API and Angular app together.
+dev:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    set -m
+    just be &
+    backend_pid=$!
+    just fe &
+    frontend_pid=$!
+    trap 'kill -- "-$backend_pid" "-$frontend_pid" 2>/dev/null || true' EXIT
+    trap 'exit 130' INT
+    trap 'exit 143' TERM
+    wait -n "$backend_pid" "$frontend_pid"
+
 # Run, test, migrate, or lint the product recommendation service.
 service action="run":
     #!/usr/bin/env bash
