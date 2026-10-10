@@ -8,7 +8,7 @@ Chobe is a portfolio project for a Vietnamese marketplace. It shows a small syst
 - `frontend/` will contain the Angular web app.
 - `services/` will contain independent FastAPI services. Each service will have its own setup, README, and database. The recommendation service will be the first example.
 
-Each project folder has its own README and `.gitignore`. Project notes and agent instructions are kept locally in `docs/` and `.pi/` and are not part of this repository.
+Each initialized project folder has its own README and `.gitignore`. Project notes and agent instructions are kept locally in `docs/` and `.pi/` and are not part of this repository.
 
 ## Status
 
