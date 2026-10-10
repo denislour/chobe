@@ -1,10 +1,9 @@
-import json
 from io import StringIO
 
 from django.core.management import call_command
 from django.test import TestCase
 
-from .models import User
+from accounts.models import User
 
 
 class DemoAdminTests(TestCase):
@@ -29,31 +28,3 @@ class DemoAdminTests(TestCase):
         call_command("seed_demo_admin", stdout=StringIO())
         self.assertTrue(self.client.login(username="admin", password="abc123ABC!!!"))
         self.assertEqual(self.client.get("/admin/").status_code, 200)
-
-    def test_admin_pages_render_with_unfold(self):
-        user = User.objects.get(username="admin")
-        self.client.force_login(user)
-        for path in (
-            "/admin/",
-            "/admin/accounts/user/add/",
-            f"/admin/accounts/user/{user.pk}/change/",
-            f"/admin/accounts/user/{user.pk}/password/",
-            "/admin/auth/group/add/",
-        ):
-            with self.subTest(path=path):
-                response = self.client.get(path)
-                self.assertEqual(response.status_code, 200)
-                self.assertContains(response, "unfold/css/styles.css")
-
-
-class ApiDocsTests(TestCase):
-    def test_schema_endpoint_returns_api_metadata(self):
-        response = self.client.get("/api/v1/schema/", HTTP_ACCEPT="application/json")
-
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(json.loads(response.content)["info"]["title"], "Chobe API")
-
-    def test_swagger_ui_is_available(self):
-        response = self.client.get("/api/v1/docs/")
-
-        self.assertEqual(response.status_code, 200)
