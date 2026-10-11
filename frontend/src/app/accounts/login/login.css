@@ -8,6 +8,7 @@
 
 .login-panel {
   width: min(530px, 100%);
+  min-width: 0;
   padding: 25px;
   border: 1px solid var(--line);
   border-radius: 12px;
@@ -90,5 +91,31 @@ small:empty {
 }
 .success {
   color: var(--success);
-  margin-bottom: 0;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 600px) {
+  .login-page {
+    padding: 16px 12px;
+  }
+
+  .login-panel {
+    padding: 20px;
+  }
+
+  input {
+    font-size: 16px;
+    min-height: 44px;
+  }
+
+  .password-toggle {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .hint,
+  label,
+  .error {
+    font-size: 14px;
+  }
 }
