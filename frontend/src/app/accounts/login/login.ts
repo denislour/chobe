@@ -1,9 +1,7 @@
-import { HttpErrorResponse } from '@angular/common/http';
-import { Component, DestroyRef, inject, signal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Component, effect, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { finalize } from 'rxjs';
-import { LoginApi, LoginUser } from '../login-api';
+import { AuthStore } from '../auth.store';
+import { LoginUser } from '../login-api';
 
 @Component({
   selector: 'app-login',
@@ -12,42 +10,29 @@ import { LoginApi, LoginUser } from '../login-api';
   styleUrl: './login.css',
 })
 export class Login {
-  private readonly api = inject(LoginApi);
-  private readonly destroyRef = inject(DestroyRef);
-  readonly pending = signal(false);
-  readonly error = signal('');
-  readonly user = signal<LoginUser | null>(null);
-  readonly showPassword = signal(false);
-  readonly form = inject(FormBuilder).nonNullable.group({
-    username: ['', [Validators.required, Validators.maxLength(254)]],
-    password: ['', [Validators.required, Validators.maxLength(128)]],
-  });
+  protected readonly showPassword = signal(false);
+  protected readonly form;
 
-  submit() {
-    if (this.pending() || this.user()) return;
+  constructor(
+    protected readonly auth: AuthStore,
+    formBuilder: FormBuilder,
+  ) {
+    this.form = formBuilder.nonNullable.group({
+      username: ['', [Validators.required, Validators.maxLength(254)]],
+      password: ['', [Validators.required, Validators.maxLength(128)]],
+    });
+    effect(() => this.resetForm(this.auth.user()));
+  }
+
+  protected submit(): void {
+    if (this.auth.pending() || this.auth.user()) return;
     this.form.markAllAsTouched();
-    if (this.form.invalid) return;
-    this.pending.set(true);
-    this.error.set('');
-    this.api
-      .login(this.form.getRawValue())
-      .pipe(
-        takeUntilDestroyed(this.destroyRef),
-        finalize(() => this.pending.set(false)),
-      )
-      .subscribe({
-        next: (user) => {
-          this.user.set(user);
-          this.form.controls.password.reset();
-        },
-        error: (error: HttpErrorResponse) => {
-          const messages: Record<number, string> = {
-            400: 'Invalid username or password.',
-            403: 'Your security check expired. Please try again.',
-            429: 'Too many login attempts. Wait a minute and try again.',
-          };
-          this.error.set(messages[error.status] ?? 'Unable to connect. Please try again.');
-        },
-      });
+    if (this.form.valid) this.auth.login(this.form.getRawValue());
+  }
+
+  private resetForm(user: LoginUser | null): void {
+    this.form.controls.password.reset();
+    this.showPassword.set(false);
+    if (!user) this.form.controls.username.reset();
   }
 }

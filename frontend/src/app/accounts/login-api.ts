@@ -1,19 +1,34 @@
 import { HttpClient } from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
-import { switchMap } from 'rxjs';
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+
+export interface LoginCredentials {
+  username: string;
+  password: string;
+}
 
 export interface LoginUser {
   id: number;
   username: string;
 }
 
+export interface SessionResponse {
+  user: LoginUser | null;
+}
+
 @Injectable({ providedIn: 'root' })
 export class LoginApi {
-  private readonly http = inject(HttpClient);
+  constructor(private readonly http: HttpClient) {}
 
-  login(credentials: { username: string; password: string }) {
-    return this.http
-      .get<void>('/api/v1/auth/csrf/')
-      .pipe(switchMap(() => this.http.post<LoginUser>('/api/v1/auth/login/', credentials)));
+  session(): Observable<SessionResponse> {
+    return this.http.get<SessionResponse>('/api/v1/auth/session/');
+  }
+
+  logout(): Observable<void> {
+    return this.http.post<void>('/api/v1/auth/logout/', {});
+  }
+
+  login(credentials: LoginCredentials): Observable<LoginUser> {
+    return this.http.post<LoginUser>('/api/v1/auth/login/', credentials);
   }
 }

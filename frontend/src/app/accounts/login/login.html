@@ -3,14 +3,30 @@
     <header class="modal-header">
       <h1 id="login-title">Log in</h1>
     </header>
-    @if (user(); as currentUser) {
+    @if (auth.error() || auth.sessionError()) {
+      <p class="error" role="alert">{{ auth.error() || auth.sessionError() }}</p>
+    }
+    @if (auth.sessionError()) {
+      <button
+        class="btn btn-block"
+        type="button"
+        [disabled]="auth.pending()"
+        (click)="auth.restoreSession()"
+      >
+        {{ auth.pending() ? 'Checking session…' : 'Retry session check' }}
+      </button>
+    }
+    @if (auth.user(); as currentUser) {
       <p class="success" role="status">You are logged in as {{ currentUser.username }}.</p>
+      <button class="btn btn-block" type="button" [disabled]="auth.pending()" (click)="auth.logout()">
+        {{ auth.pending() ? 'Logging out…' : 'Log out' }}
+      </button>
     } @else {
       <p class="hint" id="login-help">Log in to your Chobe account.</p>
       <form
         [formGroup]="form"
         (ngSubmit)="submit()"
-        [attr.aria-busy]="pending()"
+        [attr.aria-busy]="auth.pending()"
         aria-describedby="login-help"
       >
         <div class="field">
@@ -60,11 +76,8 @@
             }
           </small>
         </div>
-        @if (error()) {
-          <p class="error" role="alert">{{ error() }}</p>
-        }
-        <button class="btn btn-block" type="submit" [disabled]="pending()">
-          {{ pending() ? 'Logging in…' : 'Log in' }}
+        <button class="btn btn-block" type="submit" [disabled]="auth.pending()">
+          {{ auth.pending() ? 'Logging in…' : 'Log in' }}
         </button>
       </form>
     }
