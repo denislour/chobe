@@ -1,4 +1,4 @@
-from django.contrib.auth import login
+from django.contrib.auth import login, logout
 from django.middleware.csrf import get_token
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
@@ -8,20 +8,19 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
-from .schema import LoginSchema
+from .schema import AuthSchema
 from .serializers import LoginSerializer, LoginUserSerializer
 from .throttles import LoginAccountThrottle, LoginIPThrottle
 
 
 @method_decorator(never_cache, name="dispatch")
-class LoginViewSet(GenericViewSet):
-    authentication_classes = ()
+class AuthViewSet(GenericViewSet):
     permission_classes = (AllowAny,)
     serializer_class = LoginSerializer
-    schema = LoginSchema()
+    schema = AuthSchema()
 
     def initial(self, request, *args, **kwargs):
-        if self.action == "login":
+        if self.action in ("login", "logout"):
             SessionAuthentication().enforce_csrf(request)
         super().initial(request, *args, **kwargs)
 
@@ -33,6 +32,7 @@ class LoginViewSet(GenericViewSet):
     @action(
         detail=False,
         methods=["post"],
+        authentication_classes=(),
         throttle_classes=[LoginIPThrottle, LoginAccountThrottle],
     )
     def login(self, request):
@@ -41,3 +41,17 @@ class LoginViewSet(GenericViewSet):
         user = serializer.validated_data["user"]
         login(request, user)
         return Response(LoginUserSerializer(user).data)
+
+    @action(detail=False, methods=["get"])
+    def session(self, request):
+        user = (
+            LoginUserSerializer(request.user).data
+            if request.user.is_authenticated
+            else None
+        )
+        return Response({"user": user})
+
+    @action(detail=False, methods=["post"])
+    def logout(self, request):
+        logout(request)
+        return Response(status=204)

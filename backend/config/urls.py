@@ -4,10 +4,10 @@ from django.views.generic import RedirectView
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework.routers import SimpleRouter
 
-from accounts.views import LoginViewSet
+from accounts.views import AuthViewSet
 
 router = SimpleRouter()
-router.register("auth", LoginViewSet, basename="auth")
+router.register("auth", AuthViewSet, basename="auth")
 
 urlpatterns = [
     path("api/v1/", include(router.urls)),
