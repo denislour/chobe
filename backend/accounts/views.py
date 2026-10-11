@@ -24,11 +24,6 @@ class AuthViewSet(GenericViewSet):
             SessionAuthentication().enforce_csrf(request)
         super().initial(request, *args, **kwargs)
 
-    @action(detail=False, methods=["get"])
-    def csrf(self, request):
-        get_token(request)
-        return Response(status=204)
-
     @action(
         detail=False,
         methods=["post"],
@@ -44,6 +39,7 @@ class AuthViewSet(GenericViewSet):
 
     @action(detail=False, methods=["get"])
     def session(self, request):
+        get_token(request)
         user = (
             LoginUserSerializer(request.user).data
             if request.user.is_authenticated

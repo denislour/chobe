@@ -15,7 +15,7 @@ class SessionTests(APITestCase):
         self.client = APIClient(enforce_csrf_checks=True)
 
     def post_logout(self):
-        self.client.get("/api/v1/auth/csrf/")
+        self.client.get("/api/v1/auth/session/")
         return self.client.post(
             "/api/v1/auth/logout/",
             HTTP_X_XSRF_TOKEN=self.client.cookies[settings.CSRF_COOKIE_NAME].value,
@@ -26,6 +26,8 @@ class SessionTests(APITestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data, {"user": None})
         self.assertNotIn(settings.SESSION_COOKIE_NAME, response.cookies)
+        self.assertIn(settings.CSRF_COOKIE_NAME, response.cookies)
+        self.assertFalse(response.cookies[settings.CSRF_COOKIE_NAME]["httponly"])
         self.assertIn("no-store", response["Cache-Control"])
 
     def test_session_returns_current_user_from_cookie(self):
@@ -44,7 +46,7 @@ class SessionTests(APITestCase):
     def test_real_login_is_restored_by_a_new_client_and_logout_clears_it(self):
         self.user.set_password(DEMO_ADMIN_PASSWORD)
         self.user.save()
-        self.client.get("/api/v1/auth/csrf/")
+        self.client.get("/api/v1/auth/session/")
         response = self.client.post(
             "/api/v1/auth/login/",
             {"username": self.user.username, "password": DEMO_ADMIN_PASSWORD},
@@ -58,7 +60,11 @@ class SessionTests(APITestCase):
         self.assertEqual(
             self.client.get("/api/v1/auth/session/").data["user"]["id"], self.user.pk
         )
-        self.assertEqual(self.post_logout().status_code, 204)
+        response = self.client.post(
+            "/api/v1/auth/logout/",
+            HTTP_X_XSRF_TOKEN=self.client.cookies[settings.CSRF_COOKIE_NAME].value,
+        )
+        self.assertEqual(response.status_code, 204)
         self.assertEqual(self.client.get("/api/v1/auth/session/").data, {"user": None})
 
     def test_invalid_cookie_returns_null(self):
@@ -95,7 +101,7 @@ class SessionTests(APITestCase):
 
     def test_cross_origin_logout_does_not_revoke_session(self):
         self.client.force_login(self.user)
-        self.client.get("/api/v1/auth/csrf/")
+        self.client.get("/api/v1/auth/session/")
         response = self.client.post(
             "/api/v1/auth/logout/",
             HTTP_X_XSRF_TOKEN=self.client.cookies[settings.CSRF_COOKIE_NAME].value,

@@ -9,7 +9,7 @@ class AuthSchema(AutoSchema):
         return super().get_request_serializer() if self.view.action == "login" else None
 
     def get_response_serializers(self):
-        if self.view.action in ("csrf", "logout"):
+        if self.view.action == "logout":
             return {204: None}
         if self.view.action == "session":
             return SessionSerializer

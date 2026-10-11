@@ -18,7 +18,7 @@ class LoginTests(APITestCase):
             password=DEMO_ADMIN_PASSWORD,
         )
         self.client = APIClient(enforce_csrf_checks=True)
-        self.client.get("/api/v1/auth/csrf/")
+        self.client.get("/api/v1/auth/session/")
         self.token = self.client.cookies[settings.CSRF_COOKIE_NAME].value
         self.credentials = {
             "username": DEMO_ADMIN_USERNAME,
@@ -184,7 +184,7 @@ class LoginTests(APITestCase):
 
     @override_settings(DEBUG=False, SESSION_COOKIE_SECURE=True, CSRF_COOKIE_SECURE=True)
     def test_https_cookies_are_secure(self):
-        self.client.get("/api/v1/auth/csrf/", secure=True)
+        self.client.get("/api/v1/auth/session/", secure=True)
         response = self.client.post(
             "/api/v1/auth/login/",
             self.credentials,
@@ -202,7 +202,6 @@ class LoginTests(APITestCase):
             "/api/v1/schema/", HTTP_ACCEPT="application/json"
         ).json()
         login = schema["paths"]["/api/v1/auth/login/"]["post"]
-        csrf = schema["paths"]["/api/v1/auth/csrf/"]["get"]
         self.assertEqual(
             login["requestBody"]["content"]["application/json"]["schema"]["$ref"],
             "#/components/schemas/Login",
@@ -214,6 +213,6 @@ class LoginTests(APITestCase):
         self.assertEqual(login["parameters"][0]["name"], "X-XSRF-TOKEN")
         self.assertEqual(login["parameters"][0]["in"], "header")
         self.assertTrue(login["parameters"][0]["required"])
-        self.assertNotIn("content", csrf["responses"]["204"])
-        self.assertNotIn("parameters", csrf)
+        self.assertNotIn("/api/v1/auth/csrf/", schema["paths"])
+        self.assertEqual(self.client.get("/api/v1/auth/csrf/").status_code, 404)
         self.assertNotIn("/api/v1/auth/", schema["paths"])
