@@ -8,19 +8,43 @@ backend:
 frontend:
     @just fe
 
-# Start the Django API and Angular app together.
+# Set up and start Django, Angular, Mailpit, and the email worker.
 dev:
     #!/usr/bin/env bash
     set -euo pipefail
     set -m
-    just be &
-    backend_pid=$!
-    just fe &
-    frontend_pid=$!
-    trap 'kill -- "-$backend_pid" "-$frontend_pid" 2>/dev/null || true' EXIT
+    just mailpit-setup
+    just be migrate
+    pids=()
+    trap 'for pid in "${pids[@]}"; do kill -- "-$pid" 2>/dev/null || true; done' EXIT
     trap 'exit 130' INT
     trap 'exit 143' TERM
-    wait -n "$backend_pid" "$frontend_pid"
+    just mailpit &
+    pids+=($!)
+    for attempt in {1..40}; do
+        if curl --silent --fail http://localhost:8025/readyz >/dev/null; then break; fi
+        sleep 0.25
+    done
+    curl --silent --show-error --fail http://localhost:8025/readyz >/dev/null
+    just worker &
+    pids+=($!)
+    just be &
+    pids+=($!)
+    just fe &
+    pids+=($!)
+    wait -n "${pids[@]}"
+
+# Download the pinned Mailpit binary and verify its checksum.
+mailpit-setup:
+    cd backend && uv run python scripts/install_mailpit.py
+
+# Open the local inbox at http://localhost:8025; SMTP uses localhost:1025.
+mailpit: mailpit-setup
+    backend/.tools/mailpit/v1.31.5/mailpit --listen localhost:8025 --smtp localhost:1025 --database backend/.tools/mailpit/inbox.sqlite3
+
+# Process Django tasks from the local database.
+worker:
+    cd backend && uv run python manage.py db_worker
 
 # Run, test, migrate, or lint the product recommendation service.
 service action="run":
