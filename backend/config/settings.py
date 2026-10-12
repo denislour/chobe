@@ -19,6 +19,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "drf_spectacular",
+    "django_tasks_db",
     "accounts",
 ]
 
@@ -103,3 +104,24 @@ CSRF_COOKIE_NAME = "XSRF-TOKEN"
 CSRF_HEADER_NAME = "HTTP_X_XSRF_TOKEN"
 CSRF_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_SAMESITE = "Lax"
+
+TASKS = {
+    "default": {
+        "BACKEND": "django_tasks_db.DatabaseBackend",
+        "QUEUES": ["default"],
+    }
+}
+DEFAULT_FROM_EMAIL = os.environ.get("DJANGO_FROM_EMAIL", "Chobe <hello@chobe.test>")
+MAILERS = {
+    "default": {
+        "BACKEND": "django.core.mail.backends.smtp.EmailBackend",
+        "OPTIONS": {
+            "host": os.environ.get("DJANGO_SMTP_HOST", "localhost"),
+            "port": int(os.environ.get("DJANGO_SMTP_PORT", "1025")),
+            "username": os.environ.get("DJANGO_SMTP_USERNAME", ""),
+            "password": os.environ.get("DJANGO_SMTP_PASSWORD", ""),
+            "use_tls": os.environ.get("DJANGO_SMTP_TLS", "false").lower() == "true",
+            "timeout": 10,
+        },
+    }
+}

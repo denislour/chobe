@@ -1,8 +1,11 @@
 from unittest.mock import patch
 
 from django.conf import settings
+from django.core import mail
 from django.core.cache import cache
 from django.db import IntegrityError
+from django.tasks import TaskResultStatus
+from django_tasks_db.models import DBTaskResult
 from rest_framework.test import APIClient, APITestCase
 
 from accounts.constants import DEMO_ADMIN_PASSWORD
@@ -47,6 +50,20 @@ class RegisterTests(APITestCase):
             response.cookies[settings.CSRF_COOKIE_NAME].value, old_token
         )
         self.assertIn("no-store", response["Cache-Control"])
+        task = DBTaskResult.objects.get()
+        self.assertEqual(task.task_path, "accounts.tasks.send_welcome_email")
+        self.assertEqual(task.args_kwargs, {"args": [user.pk], "kwargs": {}})
+        self.assertEqual(task.status, TaskResultStatus.READY)
+        self.assertEqual(mail.outbox, [])
+
+    def test_queue_failure_rolls_back_the_new_account(self):
+        with (
+            patch("django.tasks.base.Task.enqueue", side_effect=RuntimeError),
+            self.assertRaises(RuntimeError),
+        ):
+            self.register()
+        self.assertFalse(User.objects.exists())
+        self.assertFalse(DBTaskResult.objects.exists())
 
     def test_existing_session_cannot_create_another_account(self):
         self.register()
@@ -103,6 +120,7 @@ class RegisterTests(APITestCase):
                 self.assertEqual(response.status_code, 400)
                 self.assertIn(field, response.data)
         self.assertFalse(User.objects.exists())
+        self.assertFalse(DBTaskResult.objects.exists())
 
     def test_django_password_validators_are_applied(self):
         for password in ["short", "123456789", "password", "new_member", "x" * 129]:

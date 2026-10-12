@@ -1,4 +1,5 @@
 from django.contrib.auth import login, logout
+from django.db import transaction
 from django.middleware.csrf import get_token
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
@@ -10,6 +11,7 @@ from rest_framework.viewsets import GenericViewSet
 
 from .schema import AuthSchema
 from .serializers import LoginSerializer, LoginUserSerializer, RegisterSerializer
+from .tasks import send_welcome_email
 from .throttles import LoginAccountThrottle, LoginIPThrottle, RegisterIPThrottle
 
 
@@ -51,7 +53,9 @@ class AuthViewSet(GenericViewSet):
             )
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = serializer.save()
+        with transaction.atomic():
+            user = serializer.save()
+            send_welcome_email.enqueue(user.pk)
         login(request, user, backend="django.contrib.auth.backends.ModelBackend")
         return Response(LoginUserSerializer(user).data, status=201)
 
