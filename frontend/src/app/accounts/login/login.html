@@ -18,7 +18,12 @@
     }
     @if (auth.user(); as currentUser) {
       <p class="success" role="status">You are logged in as {{ currentUser.username }}.</p>
-      <button class="btn btn-block" type="button" [disabled]="auth.pending()" (click)="auth.logout()">
+      <button
+        class="btn btn-block"
+        type="button"
+        [disabled]="auth.pending()"
+        (click)="auth.logout()"
+      >
         {{ auth.pending() ? 'Logging out…' : 'Log out' }}
       </button>
     } @else {
@@ -80,6 +85,9 @@
           {{ auth.pending() ? 'Logging in…' : 'Log in' }}
         </button>
       </form>
+      <nav class="auth-links" aria-label="Account options">
+        <a routerLink="/register">Create an account</a>
+      </nav>
     }
   </section>
 </main>

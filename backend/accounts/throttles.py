@@ -24,3 +24,7 @@ class LoginAccountThrottle(SimpleRateThrottle):
             return None
         ident = sha256(username.strip().casefold().encode()).hexdigest()
         return self.cache_format % {"scope": self.scope, "ident": ident}
+
+
+class RegisterIPThrottle(LoginIPThrottle):
+    scope = "register_ip"

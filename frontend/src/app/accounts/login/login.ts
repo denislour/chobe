@@ -1,11 +1,12 @@
 import { Component, effect, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthStore } from '../auth.store';
 import { LoginUser } from '../login-api';
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, RouterLink],
   templateUrl: './login.html',
   styleUrl: './login.css',
 })
@@ -17,6 +18,7 @@ export class Login {
     protected readonly auth: AuthStore,
     formBuilder: FormBuilder,
   ) {
+    this.auth.clearErrors();
     this.form = formBuilder.nonNullable.group({
       username: ['', [Validators.required, Validators.maxLength(254)]],
       password: ['', [Validators.required, Validators.maxLength(128)]],

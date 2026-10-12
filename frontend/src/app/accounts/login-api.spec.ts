@@ -39,6 +39,22 @@ describe('LoginApi', () => {
     request.flush({ user: null });
   });
 
+  it('registers with the CSRF header and returns the new user', () => {
+    document.cookie = `XSRF-TOKEN=${'x'.repeat(32)}; path=/`;
+    const registration = { ...credentials, email: 'admin@example.com', accept_terms: true };
+    let userId = 0;
+    TestBed.inject(LoginApi)
+      .register(registration)
+      .subscribe((user) => (userId = user.id));
+    const request = http.expectOne('/api/v1/auth/register/');
+    expect(request.request.method).toBe('POST');
+    expect(request.request.body).toEqual(registration);
+    expect(request.request.headers.get('X-XSRF-TOKEN')).toBe('x'.repeat(32));
+    request.flush({ id: 2, username: 'admin' }, { status: 201, statusText: 'Created' });
+    expect(userId).toBe(2);
+    http.expectNone('/api/v1/auth/csrf/');
+  });
+
   it('sends the CSRF cookie in the login header', () => {
     document.cookie = `XSRF-TOKEN=${'x'.repeat(32)}; path=/`;
     TestBed.inject(LoginApi).login(credentials).subscribe();

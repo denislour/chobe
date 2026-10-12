@@ -9,24 +9,24 @@ from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from .schema import AuthSchema
-from .serializers import LoginSerializer, LoginUserSerializer
-from .throttles import LoginAccountThrottle, LoginIPThrottle
+from .serializers import LoginSerializer, LoginUserSerializer, RegisterSerializer
+from .throttles import LoginAccountThrottle, LoginIPThrottle, RegisterIPThrottle
 
 
 @method_decorator(never_cache, name="dispatch")
 class AuthViewSet(GenericViewSet):
     permission_classes = (AllowAny,)
-    serializer_class = LoginSerializer
     schema = AuthSchema()
 
     def initial(self, request, *args, **kwargs):
-        if self.action in ("login", "logout"):
+        if self.action in ("login", "logout", "register"):
             SessionAuthentication().enforce_csrf(request)
         super().initial(request, *args, **kwargs)
 
     @action(
         detail=False,
         methods=["post"],
+        serializer_class=LoginSerializer,
         authentication_classes=(),
         throttle_classes=[LoginIPThrottle, LoginAccountThrottle],
     )
@@ -36,6 +36,24 @@ class AuthViewSet(GenericViewSet):
         user = serializer.validated_data["user"]
         login(request, user)
         return Response(LoginUserSerializer(user).data)
+
+    @action(
+        detail=False,
+        methods=["post"],
+        serializer_class=RegisterSerializer,
+        throttle_classes=[RegisterIPThrottle],
+    )
+    def register(self, request):
+        if request.user.is_authenticated:
+            return Response(
+                {"non_field_errors": ["Log out before creating another account."]},
+                status=400,
+            )
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        login(request, user, backend="django.contrib.auth.backends.ModelBackend")
+        return Response(LoginUserSerializer(user).data, status=201)
 
     @action(detail=False, methods=["get"])
     def session(self, request):

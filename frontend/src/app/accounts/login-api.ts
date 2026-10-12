@@ -7,6 +7,15 @@ export interface LoginCredentials {
   password: string;
 }
 
+export interface RegisterCredentials extends LoginCredentials {
+  email: string;
+  accept_terms: boolean;
+}
+
+export type RegistrationErrors = Partial<
+  Record<keyof RegisterCredentials | 'non_field_errors', string[]>
+>;
+
 export interface LoginUser {
   id: number;
   username: string;
@@ -30,5 +39,9 @@ export class LoginApi {
 
   login(credentials: LoginCredentials): Observable<LoginUser> {
     return this.http.post<LoginUser>('/api/v1/auth/login/', credentials);
+  }
+
+  register(credentials: RegisterCredentials): Observable<LoginUser> {
+    return this.http.post<LoginUser>('/api/v1/auth/register/', credentials);
   }
 }

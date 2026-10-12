@@ -80,7 +80,11 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework.authentication.SessionAuthentication"
     ],
-    "DEFAULT_THROTTLE_RATES": {"login_ip": "20/min", "login_account": "5/min"},
+    "DEFAULT_THROTTLE_RATES": {
+        "login_ip": "20/min",
+        "login_account": "5/min",
+        "register_ip": "5/min",
+    },
     "NUM_PROXIES": 0,
 }
 SPECTACULAR_SETTINGS = {

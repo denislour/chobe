@@ -4,13 +4,20 @@ import { tapResponse } from '@ngrx/operators';
 import { patchState, signalState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { exhaustMap, filter, firstValueFrom, pipe, tap, timeout } from 'rxjs';
-import { LoginApi, LoginCredentials, LoginUser } from './login-api';
+import {
+  LoginApi,
+  LoginCredentials,
+  LoginUser,
+  RegisterCredentials,
+  RegistrationErrors,
+} from './login-api';
 
 interface AuthState {
   user: LoginUser | null;
   pending: boolean;
   error: string;
   sessionError: string;
+  registrationErrors: RegistrationErrors;
 }
 
 const securityError = 'Your security check expired. Reload this page and try again.';
@@ -27,14 +34,32 @@ export class AuthStore {
     pending: false,
     error: '',
     sessionError: '',
+    registrationErrors: {},
   });
 
   readonly user = this.state.user;
   readonly pending = this.state.pending;
   readonly error = this.state.error;
   readonly sessionError = this.state.sessionError;
+  readonly registrationErrors = this.state.registrationErrors;
 
   constructor(private readonly api: LoginApi) {}
+
+  readonly register = rxMethod<RegisterCredentials>(
+    pipe(
+      filter(() => !this.pending() && !this.user()),
+      tap(() => this.startRequest()),
+      exhaustMap((credentials) =>
+        this.api.register(credentials).pipe(
+          tapResponse({
+            next: (user) => this.setUser(user),
+            error: (error: HttpErrorResponse) => this.setRegistrationError(error),
+            finalize: () => this.finishRequest(),
+          }),
+        ),
+      ),
+    ),
+  );
 
   readonly login = rxMethod<LoginCredentials>(
     pipe(
@@ -84,8 +109,12 @@ export class AuthStore {
     );
   }
 
+  clearErrors(): void {
+    patchState(this.state, { error: '', registrationErrors: {} });
+  }
+
   private startRequest(): void {
-    patchState(this.state, { pending: true, error: '' });
+    patchState(this.state, { pending: true, error: '', registrationErrors: {} });
   }
 
   private finishRequest(): void {
@@ -110,5 +139,18 @@ export class AuthStore {
 
   private setSessionError(): void {
     patchState(this.state, { sessionError: 'Unable to check your session. Please try again.' });
+  }
+
+  private setRegistrationError(error: HttpErrorResponse): void {
+    const registrationErrors: RegistrationErrors = error.status === 400 ? (error.error ?? {}) : {};
+    const messages: Record<number, string> = {
+      400: registrationErrors.non_field_errors?.[0] ?? 'Check the highlighted fields.',
+      403: securityError,
+      429: 'Too many sign-up attempts. Wait a minute and try again.',
+    };
+    patchState(this.state, {
+      registrationErrors,
+      error: messages[error.status] ?? 'Unable to create your account. Please try again.',
+    });
   }
 }

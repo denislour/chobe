@@ -49,6 +49,51 @@ describe('AuthStore', () => {
     http.expectNone('/api/v1/auth/session/');
   });
 
+  it('shares the registered session and blocks overlapping auth requests', () => {
+    const registration = {
+      username: 'admin',
+      email: 'admin@example.com',
+      password: 'demo-password',
+      accept_terms: true,
+    };
+    store.register(registration);
+    store.register(registration);
+    store.login(registration);
+    store.logout();
+    expect(store.pending()).toBe(true);
+    http.expectNone('/api/v1/auth/login/');
+    http.expectNone('/api/v1/auth/logout/');
+    http.expectOne('/api/v1/auth/register/').flush(user, { status: 201, statusText: 'Created' });
+    expect(store.user()).toEqual(user);
+    expect(store.pending()).toBe(false);
+    store.register(registration);
+    http.expectNone('/api/v1/auth/register/');
+  });
+
+  it('keeps registration usable after validation failure and clears errors on retry', () => {
+    const registration = {
+      username: 'admin',
+      email: 'admin@example.com',
+      password: 'demo-password',
+      accept_terms: true,
+    };
+    store.register(registration);
+    http
+      .expectOne('/api/v1/auth/register/')
+      .flush(
+        { email: ['This email is already in use.'] },
+        { status: 400, statusText: 'Bad Request' },
+      );
+    expect(store.registrationErrors().email).toEqual(['This email is already in use.']);
+    expect(store.user()).toBeNull();
+    expect(store.pending()).toBe(false);
+    store.register(registration);
+    expect(store.registrationErrors()).toEqual({});
+    expect(store.error()).toBe('');
+    http.expectOne('/api/v1/auth/register/').flush(user, { status: 201, statusText: 'Created' });
+    expect(store.user()).toEqual(user);
+  });
+
   it('blocks mutations during restoration and login for an authenticated user', async () => {
     const restoration = store.restoreSession();
     const credentials = { username: 'admin', password: 'demo-password' };
