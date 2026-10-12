@@ -8,7 +8,7 @@ import { LoginUser } from '../login-api';
   selector: 'app-login',
   imports: [ReactiveFormsModule, RouterLink],
   templateUrl: './login.html',
-  styleUrl: './login.css',
+  styleUrl: '../auth.css',
 })
 export class Login {
   protected readonly showPassword = signal(false);

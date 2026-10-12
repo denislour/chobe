@@ -1,4 +1,4 @@
-.login-page {
+.auth-page {
   display: grid;
   place-items: center;
   min-height: 100dvh;
@@ -6,7 +6,7 @@
   background: rgb(36 37 31 / 45%);
 }
 
-.login-panel {
+.auth-panel {
   width: min(530px, 100%);
   min-width: 0;
   padding: 25px;
@@ -83,6 +83,7 @@ input {
   width: 100%;
 }
 .error {
+  overflow-wrap: anywhere;
   color: var(--error);
   font-size: 12px;
 }
@@ -95,11 +96,11 @@ small:empty {
 }
 
 @media (max-width: 600px) {
-  .login-page {
+  .auth-page {
     padding: 16px 12px;
   }
 
-  .login-panel {
+  .auth-panel {
     padding: 20px;
   }
 
@@ -116,6 +117,22 @@ small:empty {
   .hint,
   label,
   .error {
+    overflow-wrap: anywhere;
     font-size: 14px;
   }
+}
+
+.auth-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 18px;
+}
+.auth-links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--ink);
+  font-weight: 600;
+  text-underline-offset: 3px;
 }

@@ -7,7 +7,7 @@ import { AuthStore } from '../auth.store';
   selector: 'app-register',
   imports: [ReactiveFormsModule, RouterLink],
   templateUrl: './register.html',
-  styleUrl: './register.css',
+  styleUrls: ['../auth.css', './register.css'],
 })
 export class Register {
   protected readonly showPassword = signal(false);
