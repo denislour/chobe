@@ -24,7 +24,7 @@ class AuthViewSet(GenericViewSet):
     schema = CSRFSchema()
 
     def initial(self, request, *args, **kwargs):
-        if self.action in ("login", "logout", "register"):
+        if request.method not in ("GET", "HEAD", "OPTIONS"):
             SessionAuthentication().enforce_csrf(request)
         super().initial(request, *args, **kwargs)
 
