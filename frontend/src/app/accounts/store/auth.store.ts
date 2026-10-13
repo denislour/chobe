@@ -113,6 +113,11 @@ export class AuthStore {
     patchState(this.state, { error: '', registrationErrors: {} });
   }
 
+  clearSession(): void {
+    this.setUser(null);
+    this.clearErrors();
+  }
+
   private startRequest(): void {
     patchState(this.state, { pending: true, error: '', registrationErrors: {} });
   }

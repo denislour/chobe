@@ -39,6 +39,23 @@ describe('LoginApi', () => {
     request.flush({ user: null });
   });
 
+  it('posts the reset token and new password without fetching CSRF again', () => {
+    document.cookie = `XSRF-TOKEN=${'x'.repeat(32)}; path=/`;
+    const reset = {
+      uid: 'MQ',
+      token: 'token',
+      password: 'new-safe-password',
+      password_confirm: 'new-safe-password',
+    };
+    TestBed.inject(LoginApi).resetPassword(reset).subscribe();
+    const request = http.expectOne('/api/v1/auth/reset-password/');
+    expect(request.request.method).toBe('POST');
+    expect(request.request.body).toEqual(reset);
+    expect(request.request.headers.get('X-XSRF-TOKEN')).toBe('x'.repeat(32));
+    http.expectNone('/api/v1/auth/csrf/');
+    request.flush(null, { status: 204, statusText: 'No Content' });
+  });
+
   it('registers with the CSRF header and returns the new user', () => {
     document.cookie = `XSRF-TOKEN=${'x'.repeat(32)}; path=/`;
     const registration = { ...credentials, email: 'admin@example.com', accept_terms: true };

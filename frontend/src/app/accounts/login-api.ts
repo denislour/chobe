@@ -25,6 +25,17 @@ export interface SessionResponse {
   user: LoginUser | null;
 }
 
+export interface ResetPasswordCredentials {
+  uid: string;
+  token: string;
+  password: string;
+  password_confirm: string;
+}
+
+export type PasswordResetErrors = Partial<
+  Record<'email' | keyof ResetPasswordCredentials | 'non_field_errors', string[]>
+>;
+
 @Injectable({ providedIn: 'root' })
 export class LoginApi {
   constructor(private readonly http: HttpClient) {}
@@ -43,5 +54,13 @@ export class LoginApi {
 
   register(credentials: RegisterCredentials): Observable<LoginUser> {
     return this.http.post<LoginUser>('/api/v1/auth/register/', credentials);
+  }
+
+  forgotPassword(email: string): Observable<void> {
+    return this.http.post<void>('/api/v1/auth/forgot-password/', { email });
+  }
+
+  resetPassword(credentials: ResetPasswordCredentials): Observable<void> {
+    return this.http.post<void>('/api/v1/auth/reset-password/', credentials);
   }
 }
