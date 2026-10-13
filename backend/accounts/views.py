@@ -19,8 +19,18 @@ from accounts.serializers.password_recovery import (
 )
 from accounts.serializers.register import RegisterSerializer
 from accounts.serializers.session import AuthUserSerializer
-from accounts.tasks import send_password_recovery_email, send_welcome_email
-from accounts.throttles import LoginAccountThrottle, LoginIPThrottle, RegisterIPThrottle
+from accounts.tasks import (
+    send_password_recovery_email,
+    send_welcome_email,
+)
+from accounts.throttles import (
+    ChangePasswordIPThrottle,
+    ForgotPasswordAccountThrottle,
+    ForgotPasswordIPThrottle,
+    LoginAccountThrottle,
+    LoginIPThrottle,
+    RegisterIPThrottle,
+)
 
 
 @method_decorator(never_cache, name="dispatch")
@@ -90,6 +100,10 @@ class AuthViewSet(GenericViewSet):
         url_path="forgot-password",
         schema=PasswordRecoverySchema(),
         serializer_class=ForgotPasswordSerializer,
+        throttle_classes=[
+            ForgotPasswordIPThrottle,
+            ForgotPasswordAccountThrottle,
+        ],
     )
     def forgot_password(self, request):
         serializer = self.get_serializer(data=request.data)
@@ -103,6 +117,7 @@ class AuthViewSet(GenericViewSet):
         url_path="change-password",
         schema=PasswordRecoverySchema(),
         serializer_class=ChangePasswordSerializer,
+        throttle_classes=[ChangePasswordIPThrottle],
     )
     def change_password(self, request):
         serializer = self.get_serializer(data=request.data)

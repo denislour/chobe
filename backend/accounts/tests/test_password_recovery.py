@@ -195,6 +195,36 @@ class PasswordRecoveryTests(APITestCase):
                 self.assertEqual(response.status_code, 403)
         self.assertFalse(DBTaskResult.objects.exists())
 
+    def test_forgot_password_requests_are_limited_by_email_and_ip(self):
+        for _ in range(3):
+            self.assertEqual(
+                self.post(
+                    "forgot-password", {"email": "unknown@example.com"}
+                ).status_code,
+                202,
+            )
+        response = self.post("forgot-password", {"email": "UNKNOWN@example.com"})
+        self.assertEqual(response.status_code, 429)
+        self.assertIn("Retry-After", response)
+        cache.clear()
+        for index in range(5):
+            self.assertEqual(
+                self.post(
+                    "forgot-password", {"email": f"unknown{index}@example.com"}
+                ).status_code,
+                202,
+            )
+        self.assertEqual(
+            self.post("forgot-password", {"email": "last@example.com"}).status_code, 429
+        )
+
+    def test_password_changes_are_limited_by_ip(self):
+        for _ in range(10):
+            self.assertEqual(
+                self.post(payload=self.payload | {"token": "wrong"}).status_code, 400
+            )
+        self.assertEqual(self.post().status_code, 429)
+
     def test_two_validated_password_changes_cannot_reuse_one_link(self):
         first = ChangePasswordSerializer(data=self.payload)
         second = ChangePasswordSerializer(data=self.payload)
