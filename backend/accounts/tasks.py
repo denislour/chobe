@@ -18,6 +18,18 @@ def send_welcome_email(user_id: int) -> int:
 
 
 @task
+def send_password_changed_email(user_id: int) -> int:
+    user = User.objects.filter(pk=user_id, is_active=True).first()
+    if user is None or not user.email:
+        return 0
+    return send_account_email(
+        "password_changed",
+        user,
+        {"frontend_url": settings.FRONTEND_URL.rstrip("/")},
+    )
+
+
+@task
 def send_password_recovery_email(email: str) -> int:
     sent = 0
     for user in PasswordResetForm().get_users(email):

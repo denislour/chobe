@@ -136,6 +136,50 @@ class PasswordRecoveryTests(APITestCase):
         self.user.refresh_from_db()
         self.assertTrue(self.user.check_password(DEMO_ADMIN_PASSWORD))
 
+    def test_password_change_queues_one_html_notification_without_secrets(self):
+        self.assertEqual(self.post().status_code, 204)
+        self.assertEqual(DBTaskResult.objects.count(), 1)
+        self.assertEqual(mail.outbox, [])
+        self.assertEqual(self.post().status_code, 400)
+        self.assertEqual(DBTaskResult.objects.count(), 1)
+        with patch(
+            "django_tasks_db.management.commands.db_worker.Worker.configure_signals"
+        ):
+            call_command(
+                "db_worker", batch=True, reload=False, startup_delay=False, verbosity=0
+            )
+        self.assertEqual(len(mail.outbox), 1)
+        message = mail.outbox[0]
+        self.assertEqual(message.subject, "Your Chobe password was changed")
+        self.assertEqual(message.to, [self.user.email])
+        self.assertEqual(message.message().get_content_type(), "text/html")
+        self.assertIn("changed successfully", message.body)
+        self.assertIn(f"{settings.FRONTEND_URL}/forgot-password", message.body)
+        for secret in [
+            DEMO_ADMIN_PASSWORD,
+            self.payload["password"],
+            self.payload["token"],
+        ]:
+            self.assertNotIn(secret, message.body)
+        self.assertEqual(DBTaskResult.objects.get().status, TaskResultStatus.SUCCESSFUL)
+
+    def test_notification_queue_failure_rolls_back_password_change(self):
+        with (
+            patch(
+                "accounts.views.send_password_changed_email",
+                **{"enqueue.side_effect": RuntimeError("Queue unavailable")},
+            ),
+            self.assertRaises(RuntimeError),
+        ):
+            self.post()
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.check_password(DEMO_ADMIN_PASSWORD))
+        self.assertTrue(
+            default_token_generator.check_token(self.user, self.payload["token"])
+        )
+        self.assertFalse(DBTaskResult.objects.exists())
+        self.assertEqual(mail.outbox, [])
+
     def test_invalid_or_inactive_user_link_is_rejected(self):
         for changes in [
             {"uid": "bad-uid"},
@@ -215,7 +259,8 @@ class PasswordRecoveryTests(APITestCase):
                 202,
             )
         self.assertEqual(
-            self.post("forgot-password", {"email": "last@example.com"}).status_code, 429
+            self.post("forgot-password", {"email": "last@example.com"}).status_code,
+            429,
         )
 
     def test_password_changes_are_limited_by_ip(self):

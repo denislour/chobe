@@ -20,6 +20,7 @@ from accounts.serializers.password_recovery import (
 from accounts.serializers.register import RegisterSerializer
 from accounts.serializers.session import AuthUserSerializer
 from accounts.tasks import (
+    send_password_changed_email,
     send_password_recovery_email,
     send_welcome_email,
 )
@@ -123,6 +124,7 @@ class AuthViewSet(GenericViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         with transaction.atomic():
-            serializer.save()
+            user = serializer.save()
+            send_password_changed_email.enqueue(user.pk)
         logout(request)
         return Response(status=204)

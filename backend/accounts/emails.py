@@ -4,8 +4,9 @@ from django.template.loader import render_to_string
 from accounts.models import User
 
 EMAIL_SUBJECTS = {
-    "password_recovery": "Change your Chobe password",
     "welcome": "Welcome to Chobe",
+    "password_recovery": "Change your Chobe password",
+    "password_changed": "Your Chobe password was changed",
 }
 
 

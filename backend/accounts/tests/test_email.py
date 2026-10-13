@@ -10,7 +10,11 @@ from django_tasks_db.models import DBTaskResult
 
 from accounts.constants import DEMO_ADMIN_PASSWORD
 from accounts.models import User
-from accounts.tasks import send_password_recovery_email, send_welcome_email
+from accounts.tasks import (
+    send_password_changed_email,
+    send_password_recovery_email,
+    send_welcome_email,
+)
 
 
 class WelcomeEmailTests(TestCase):
@@ -24,7 +28,11 @@ class WelcomeEmailTests(TestCase):
             "django_tasks_db.management.commands.db_worker.Worker.configure_signals"
         ):
             call_command(
-                "db_worker", batch=True, reload=False, startup_delay=False, verbosity=0
+                "db_worker",
+                batch=True,
+                reload=False,
+                startup_delay=False,
+                verbosity=0,
             )
 
     def test_worker_sends_the_queued_email(self):
@@ -44,15 +52,22 @@ class WelcomeEmailTests(TestCase):
 
     def test_missing_inactive_or_email_less_user_receives_no_email(self):
         self.assertEqual(send_welcome_email.call(0), 0)
+        self.assertEqual(send_password_changed_email.call(0), 0)
         for changes in [{"is_active": False}, {"is_active": True, "email": ""}]:
             with self.subTest(changes=changes):
                 User.objects.filter(pk=self.user.pk).update(**changes)
                 self.assertEqual(send_welcome_email.call(self.user.pk), 0)
+                self.assertEqual(send_password_changed_email.call(self.user.pk), 0)
         self.assertEqual(mail.outbox, [])
 
     def test_account_emails_use_html_only(self):
         for send, argument, subject in [
             (send_welcome_email, self.user.pk, "Welcome to Chobe"),
+            (
+                send_password_changed_email,
+                self.user.pk,
+                "Your Chobe password was changed",
+            ),
             (
                 send_password_recovery_email,
                 self.user.email,
@@ -76,6 +91,7 @@ class WelcomeEmailTests(TestCase):
         self.user.save()
         for send, argument in [
             (send_welcome_email, self.user.pk),
+            (send_password_changed_email, self.user.pk),
             (send_password_recovery_email, self.user.email),
         ]:
             with self.subTest(task=send.module_path):
