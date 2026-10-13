@@ -9,7 +9,8 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
-from accounts.schema import AuthSchema
+from accounts.schemas.auth import AuthSchema
+from accounts.schemas.base import CSRFSchema
 from accounts.serializers.login import LoginSerializer
 from accounts.serializers.register import RegisterSerializer
 from accounts.serializers.session import AuthUserSerializer
@@ -20,7 +21,7 @@ from accounts.throttles import LoginAccountThrottle, LoginIPThrottle, RegisterIP
 @method_decorator(never_cache, name="dispatch")
 class AuthViewSet(GenericViewSet):
     permission_classes = (AllowAny,)
-    schema = AuthSchema()
+    schema = CSRFSchema()
 
     def initial(self, request, *args, **kwargs):
         if self.action in ("login", "logout", "register"):
@@ -31,6 +32,7 @@ class AuthViewSet(GenericViewSet):
         detail=False,
         methods=["post"],
         serializer_class=LoginSerializer,
+        schema=AuthSchema(),
         authentication_classes=(),
         throttle_classes=[LoginIPThrottle, LoginAccountThrottle],
     )
@@ -45,6 +47,7 @@ class AuthViewSet(GenericViewSet):
         detail=False,
         methods=["post"],
         serializer_class=RegisterSerializer,
+        schema=AuthSchema(),
         throttle_classes=[RegisterIPThrottle],
     )
     def register(self, request):
@@ -61,7 +64,7 @@ class AuthViewSet(GenericViewSet):
         login(request, user, backend="django.contrib.auth.backends.ModelBackend")
         return Response(AuthUserSerializer(user).data, status=201)
 
-    @action(detail=False, methods=["get"])
+    @action(detail=False, methods=["get"], schema=AuthSchema())
     def session(self, request):
         get_token(request)
         user = (
@@ -71,7 +74,7 @@ class AuthViewSet(GenericViewSet):
         )
         return Response({"user": user})
 
-    @action(detail=False, methods=["post"])
+    @action(detail=False, methods=["post"], schema=AuthSchema())
     def logout(self, request):
         logout(request)
         return Response(status=204)
