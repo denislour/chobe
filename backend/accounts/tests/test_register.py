@@ -176,7 +176,8 @@ class RegisterTests(APITestCase):
 
     def test_unique_conflict_during_save_returns_validation_error(self):
         with patch(
-            "accounts.serializers.User.objects.create_user", side_effect=IntegrityError
+            "accounts.serializers.register.User.objects.create_user",
+            side_effect=IntegrityError,
         ):
             response = self.register()
         self.assertEqual(response.status_code, 400)

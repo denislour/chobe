@@ -10,11 +10,9 @@ from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from accounts.schema import AuthSchema
-from accounts.serializers import (
-    LoginSerializer,
-    LoginUserSerializer,
-    RegisterSerializer,
-)
+from accounts.serializers.login import LoginSerializer
+from accounts.serializers.register import RegisterSerializer
+from accounts.serializers.session import LoginUserSerializer
 from accounts.tasks import send_welcome_email
 from accounts.throttles import LoginAccountThrottle, LoginIPThrottle, RegisterIPThrottle
 
