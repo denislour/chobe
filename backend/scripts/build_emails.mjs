@@ -1,4 +1,4 @@
-import { mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import mjml2html from 'mjml';
 
@@ -20,4 +20,8 @@ for (const name of templates) {
 
 mkdirSync(output, { recursive: true });
 for (const [name, html] of compiled) writeFileSync(new URL(name, output), html);
+const active = new Set(compiled.map(([name]) => name));
+for (const name of readdirSync(output)) {
+  if (name.endsWith('.html') && !active.has(name)) rmSync(new URL(name, output));
+}
 console.log(`Built ${compiled.length} MJML email templates.`);
