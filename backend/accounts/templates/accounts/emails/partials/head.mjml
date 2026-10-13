@@ -1,0 +1,10 @@
+<mj-head>
+  <mj-title>{{ subject }}</mj-title>
+  <mj-breakpoint width="480px" />
+  <mj-attributes>
+    <mj-all font-family="Arial, sans-serif" color="#24251f" />
+    <mj-text font-size="16px" line-height="1.6" padding="0 0 16px" />
+    <mj-button background-color="#ffd43b" color="#24251f" font-size="16px" font-weight="bold" border-radius="7px" inner-padding="12px 20px" padding="0 0 16px" align="left" />
+  </mj-attributes>
+  <mj-style inline="inline">.recovery-link { word-break: break-all; }</mj-style>
+</mj-head>

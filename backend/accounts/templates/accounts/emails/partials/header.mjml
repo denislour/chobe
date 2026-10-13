@@ -1,0 +1,2 @@
+<mj-text font-weight="bold">Chobe</mj-text>
+<mj-text font-size="22px" font-weight="bold" line-height="1.3">{{ subject }}</mj-text>

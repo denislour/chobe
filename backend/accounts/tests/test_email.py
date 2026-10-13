@@ -8,6 +8,7 @@ from django.tasks import TaskResultStatus
 from django.test import TestCase
 from django_tasks_db.models import DBTaskResult
 
+from accounts.constants import DEMO_ADMIN_PASSWORD
 from accounts.models import User
 from accounts.tasks import send_welcome_email
 
@@ -15,7 +16,7 @@ from accounts.tasks import send_welcome_email
 class WelcomeEmailTests(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(
-            username="member", email="member@example.com"
+            username="member", email="member@example.com", password=DEMO_ADMIN_PASSWORD
         )
 
     def run_worker(self):
@@ -23,11 +24,7 @@ class WelcomeEmailTests(TestCase):
             "django_tasks_db.management.commands.db_worker.Worker.configure_signals"
         ):
             call_command(
-                "db_worker",
-                batch=True,
-                reload=False,
-                startup_delay=False,
-                verbosity=0,
+                "db_worker", batch=True, reload=False, startup_delay=False, verbosity=0
             )
 
     def test_worker_sends_the_queued_email(self):
@@ -53,9 +50,35 @@ class WelcomeEmailTests(TestCase):
                 self.assertEqual(send_welcome_email.call(self.user.pk), 0)
         self.assertEqual(mail.outbox, [])
 
+    def test_account_emails_use_html_only(self):
+        for send, argument, subject in [
+            (send_welcome_email, self.user.pk, "Welcome to Chobe")
+        ]:
+            with self.subTest(subject=subject):
+                self.assertEqual(send.call(argument), 1)
+                message = mail.outbox[-1]
+                self.assertEqual(message.subject, subject)
+                self.assertIn("Chobe is a portfolio project.", message.body)
+                self.assertEqual(message.message().get_content_type(), "text/html")
+                self.assertFalse(message.message().is_multipart())
+                self.assertIn(subject, message.body)
+                self.assertIn(self.user.username, message.body)
+                self.assertNotIn("<mjml", message.body)
+                self.assertNotIn("{{", message.body)
+
+    def test_html_escapes_user_content(self):
+        self.user.username = "<b>member</b>&"
+        self.user.save()
+        for send, argument in [(send_welcome_email, self.user.pk)]:
+            with self.subTest(task=send.module_path):
+                self.assertEqual(send.call(argument), 1)
+                message = mail.outbox[-1]
+                self.assertIn("&lt;b&gt;member&lt;/b&gt;&amp;", message.body)
+                self.assertNotIn(self.user.username, message.body)
+
     def test_smtp_failure_is_recorded_without_deleting_the_account(self):
         result = send_welcome_email.enqueue(self.user.pk)
-        with patch("accounts.tasks.send_mail", side_effect=SMTPException):
+        with patch("accounts.emails.EmailMessage.send", side_effect=SMTPException):
             self.run_worker()
         self.assertEqual(
             DBTaskResult.objects.get(pk=result.id).status, TaskResultStatus.FAILED
