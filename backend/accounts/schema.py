@@ -1,3 +1,5 @@
+from typing import ClassVar
+
 from drf_spectacular.openapi import AutoSchema
 from drf_spectacular.utils import OpenApiParameter
 
@@ -5,21 +7,20 @@ from accounts.serializers.session import AuthUserSerializer, SessionSerializer
 
 
 class AuthSchema(AutoSchema):
+    responses: ClassVar[dict] = {
+        "login": AuthUserSerializer,
+        "register": {201: AuthUserSerializer},
+        "session": SessionSerializer,
+        "logout": {204: None},
+    }
+
     def get_request_serializer(self):
-        return (
-            super().get_request_serializer()
-            if self.view.action in ("login", "register")
-            else None
-        )
+        if self.view.action not in ("login", "register"):
+            return None
+        return super().get_request_serializer()
 
     def get_response_serializers(self):
-        if self.view.action == "logout":
-            return {204: None}
-        if self.view.action == "session":
-            return SessionSerializer
-        if self.view.action == "register":
-            return {201: AuthUserSerializer}
-        return AuthUserSerializer
+        return self.responses[self.view.action]
 
     def get_override_parameters(self):
         if self.view.action not in ("login", "logout", "register"):
