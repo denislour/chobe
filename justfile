@@ -13,6 +13,7 @@ dev:
     #!/usr/bin/env bash
     set -euo pipefail
     set -m
+    just emails
     just mailpit-setup
     just be migrate
     pids=()
@@ -46,6 +47,11 @@ mailpit: mailpit-setup
 worker:
     cd backend && uv run python manage.py db_worker
 
+# Compile MJML to Django HTML templates before starting or packaging the backend.
+emails:
+    cd backend && mise exec node@24 -- pnpm install --frozen-lockfile
+    cd backend && mise exec node@24 -- pnpm run build:emails
+
 # Run, test, migrate, or lint the product recommendation service.
 service action="run":
     #!/usr/bin/env bash
@@ -65,8 +71,8 @@ be action="run":
     set -euo pipefail
     cd backend
     case "$1" in
-        run) uv run python manage.py migrate; uv run python manage.py runserver localhost:8000 ;;
-        test) uv run python manage.py test ;;
+        run) just emails; uv run python manage.py migrate; uv run python manage.py runserver localhost:8000 ;;
+        test) just emails; uv run python manage.py test ;;
         migrate) uv run python manage.py migrate ;;
         lint) uv run ruff check .; uv run ruff format --check . ;;
         *) echo "Unknown backend command: $1. Use run, test, migrate, or lint." >&2; exit 1 ;;
