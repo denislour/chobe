@@ -1,7 +1,7 @@
 from drf_spectacular.openapi import AutoSchema
 from drf_spectacular.utils import OpenApiParameter
 
-from .serializers import LoginUserSerializer, SessionSerializer
+from accounts.serializers import LoginUserSerializer, SessionSerializer
 
 
 class AuthSchema(AutoSchema):

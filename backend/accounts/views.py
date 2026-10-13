@@ -9,10 +9,14 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
-from .schema import AuthSchema
-from .serializers import LoginSerializer, LoginUserSerializer, RegisterSerializer
-from .tasks import send_welcome_email
-from .throttles import LoginAccountThrottle, LoginIPThrottle, RegisterIPThrottle
+from accounts.schema import AuthSchema
+from accounts.serializers import (
+    LoginSerializer,
+    LoginUserSerializer,
+    RegisterSerializer,
+)
+from accounts.tasks import send_welcome_email
+from accounts.throttles import LoginAccountThrottle, LoginIPThrottle, RegisterIPThrottle
 
 
 @method_decorator(never_cache, name="dispatch")

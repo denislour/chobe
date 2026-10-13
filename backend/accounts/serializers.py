@@ -7,7 +7,7 @@ from django.db.models import Q
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
-from .models import User
+from accounts.models import User
 
 
 class LoginSerializer(serializers.Serializer):
