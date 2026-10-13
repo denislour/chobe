@@ -208,7 +208,7 @@ class LoginTests(APITestCase):
         )
         self.assertEqual(
             login["responses"]["200"]["content"]["application/json"]["schema"]["$ref"],
-            "#/components/schemas/LoginUser",
+            "#/components/schemas/AuthUser",
         )
         self.assertEqual(login["parameters"][0]["name"], "X-XSRF-TOKEN")
         self.assertEqual(login["parameters"][0]["in"], "header")

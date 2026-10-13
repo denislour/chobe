@@ -215,6 +215,6 @@ class RegisterTests(APITestCase):
             operation["responses"]["201"]["content"]["application/json"]["schema"][
                 "$ref"
             ],
-            "#/components/schemas/LoginUser",
+            "#/components/schemas/AuthUser",
         )
         self.assertEqual(operation["parameters"][0]["name"], "X-XSRF-TOKEN")

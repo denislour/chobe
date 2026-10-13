@@ -12,7 +12,7 @@ from rest_framework.viewsets import GenericViewSet
 from accounts.schema import AuthSchema
 from accounts.serializers.login import LoginSerializer
 from accounts.serializers.register import RegisterSerializer
-from accounts.serializers.session import LoginUserSerializer
+from accounts.serializers.session import AuthUserSerializer
 from accounts.tasks import send_welcome_email
 from accounts.throttles import LoginAccountThrottle, LoginIPThrottle, RegisterIPThrottle
 
@@ -39,7 +39,7 @@ class AuthViewSet(GenericViewSet):
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data["user"]
         login(request, user)
-        return Response(LoginUserSerializer(user).data)
+        return Response(AuthUserSerializer(user).data)
 
     @action(
         detail=False,
@@ -59,13 +59,13 @@ class AuthViewSet(GenericViewSet):
             user = serializer.save()
             send_welcome_email.enqueue(user.pk)
         login(request, user, backend="django.contrib.auth.backends.ModelBackend")
-        return Response(LoginUserSerializer(user).data, status=201)
+        return Response(AuthUserSerializer(user).data, status=201)
 
     @action(detail=False, methods=["get"])
     def session(self, request):
         get_token(request)
         user = (
-            LoginUserSerializer(request.user).data
+            AuthUserSerializer(request.user).data
             if request.user.is_authenticated
             else None
         )

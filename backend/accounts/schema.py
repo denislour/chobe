@@ -1,7 +1,7 @@
 from drf_spectacular.openapi import AutoSchema
 from drf_spectacular.utils import OpenApiParameter
 
-from accounts.serializers.session import LoginUserSerializer, SessionSerializer
+from accounts.serializers.session import AuthUserSerializer, SessionSerializer
 
 
 class AuthSchema(AutoSchema):
@@ -18,8 +18,8 @@ class AuthSchema(AutoSchema):
         if self.view.action == "session":
             return SessionSerializer
         if self.view.action == "register":
-            return {201: LoginUserSerializer}
-        return LoginUserSerializer
+            return {201: AuthUserSerializer}
+        return AuthUserSerializer
 
     def get_override_parameters(self):
         if self.view.action not in ("login", "logout", "register"):
