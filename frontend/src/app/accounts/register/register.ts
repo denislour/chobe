@@ -1,7 +1,8 @@
 import { Component, effect, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthStore } from '@app/accounts/store/auth.store';
+import { safeReturnUrl } from '@app/accounts/return-url';
 
 @Component({
   selector: 'app-register',
@@ -12,12 +13,15 @@ import { AuthStore } from '@app/accounts/store/auth.store';
 export class Register {
   protected readonly showPassword = signal(false);
   protected readonly form;
+  protected readonly returnUrl;
 
   constructor(
     protected readonly auth: AuthStore,
     private readonly router: Router,
     formBuilder: FormBuilder,
+    route: ActivatedRoute,
   ) {
+    this.returnUrl = safeReturnUrl(route.snapshot.queryParamMap.get('returnUrl'));
     this.auth.clearErrors();
     this.form = formBuilder.nonNullable.group({
       username: [
@@ -46,6 +50,6 @@ export class Register {
   private finishRegistration(): void {
     this.form.controls.password.reset();
     this.showPassword.set(false);
-    void this.router.navigateByUrl('/login');
+    void this.router.navigateByUrl(this.returnUrl ?? '/login');
   }
 }

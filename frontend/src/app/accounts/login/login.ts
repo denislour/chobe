@@ -1,8 +1,9 @@
 import { Component, effect, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthStore } from '@app/accounts/store/auth.store';
 import { LoginUser } from '@app/accounts/login-api';
+import { safeReturnUrl } from '@app/accounts/return-url';
 
 @Component({
   selector: 'app-login',
@@ -13,11 +14,15 @@ import { LoginUser } from '@app/accounts/login-api';
 export class Login {
   protected readonly showPassword = signal(false);
   protected readonly form;
+  protected readonly returnUrl;
 
   constructor(
     protected readonly auth: AuthStore,
     formBuilder: FormBuilder,
+    route: ActivatedRoute,
+    private readonly router: Router,
   ) {
+    this.returnUrl = safeReturnUrl(route.snapshot.queryParamMap.get('returnUrl'));
     this.auth.clearErrors();
     this.form = formBuilder.nonNullable.group({
       username: ['', [Validators.required, Validators.maxLength(254)]],
@@ -36,5 +41,8 @@ export class Login {
     this.form.controls.password.reset();
     this.showPassword.set(false);
     if (!user) this.form.controls.username.reset();
+    if (user && this.returnUrl && !this.auth.sessionError()) {
+      void this.router.navigateByUrl(this.returnUrl);
+    }
   }
 }

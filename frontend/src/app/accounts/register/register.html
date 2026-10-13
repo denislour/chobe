@@ -139,7 +139,7 @@
       </button>
     </form>
     <nav class="auth-links" aria-label="Account options">
-      <a routerLink="/login">Back to log in</a>
+      <a routerLink="/login" [queryParams]="{ returnUrl }">Back to log in</a>
     </nav>
   </section>
 </main>

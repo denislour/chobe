@@ -86,7 +86,7 @@
         </button>
       </form>
       <nav class="auth-links" aria-label="Account options">
-        <a routerLink="/register">Create an account</a>
+        <a routerLink="/register" [queryParams]="{ returnUrl }">Create an account</a>
       </nav>
     }
   </section>
