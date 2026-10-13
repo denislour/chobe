@@ -15,6 +15,17 @@ module.exports = defineConfig([
     ],
     processor: angular.processInlineTemplates,
     rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['../**'],
+              message: 'Use @app/ for parent imports. Use ./ for files in the same folder.',
+            },
+          ],
+        },
+      ],
       '@angular-eslint/prefer-inject': 'off',
       '@angular-eslint/directive-selector': [
         'error',

@@ -3,7 +3,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { ApplicationInitStatus } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { vi } from 'vitest';
-import { appConfig } from '../../app.config';
+import { appConfig } from '@app/app.config';
 import { AuthStore } from './auth.store';
 
 describe('AuthStore', () => {

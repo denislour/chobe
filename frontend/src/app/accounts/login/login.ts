@@ -1,8 +1,8 @@
 import { Component, effect, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { AuthStore } from '../store/auth.store';
-import { LoginUser } from '../login-api';
+import { AuthStore } from '@app/accounts/store/auth.store';
+import { LoginUser } from '@app/accounts/login-api';
 
 @Component({
   selector: 'app-login',
