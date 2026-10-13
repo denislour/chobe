@@ -16,11 +16,11 @@ from rest_framework.test import APIClient, APITestCase
 
 from accounts.constants import DEMO_ADMIN_PASSWORD
 from accounts.models import User
-from accounts.serializers.password_recovery import ChangePasswordSerializer
-from accounts.tasks import send_password_recovery_email
+from accounts.serializers.password_reset import ResetPasswordSerializer
+from accounts.tasks import send_password_reset_email
 
 
-class PasswordRecoveryTests(APITestCase):
+class PasswordResetTests(APITestCase):
     def setUp(self):
         cache.clear()
         self.addCleanup(cache.clear)
@@ -36,7 +36,7 @@ class PasswordRecoveryTests(APITestCase):
             "password_confirm": "New-safe-password-2026!",
         }
 
-    def post(self, path="change-password", payload=None, **headers):
+    def post(self, path="reset-password", payload=None, **headers):
         return self.client.post(
             f"/api/v1/auth/{path}/",
             self.payload if payload is None else payload,
@@ -55,7 +55,7 @@ class PasswordRecoveryTests(APITestCase):
         self.assertEqual(DBTaskResult.objects.count(), 2)
         self.assertEqual(mail.outbox, [])
 
-    def test_worker_sends_a_password_change_link_to_the_configured_frontend(self):
+    def test_worker_sends_a_password_reset_link_to_the_configured_frontend(self):
         response = self.post(
             "forgot-password",
             {"email": self.user.email.upper()},
@@ -73,21 +73,21 @@ class PasswordRecoveryTests(APITestCase):
         message = mail.outbox[0]
         self.assertEqual(message.to, [self.user.email])
         self.assertIn(
-            f"{settings.FRONTEND_URL}/change-password/{self.payload['uid']}/",
+            f"{settings.FRONTEND_URL}/reset-password/{self.payload['uid']}/",
             message.body,
         )
         self.assertIn("30 minutes", message.body)
         self.assertEqual(DBTaskResult.objects.get().status, TaskResultStatus.SUCCESSFUL)
 
     def test_unknown_inactive_or_unusable_accounts_receive_no_email(self):
-        self.assertEqual(send_password_recovery_email.call("unknown@example.com"), 0)
+        self.assertEqual(send_password_reset_email.call("unknown@example.com"), 0)
         self.user.is_active = False
         self.user.save()
-        self.assertEqual(send_password_recovery_email.call(self.user.email), 0)
+        self.assertEqual(send_password_reset_email.call(self.user.email), 0)
         self.user.is_active = True
         self.user.set_unusable_password()
         self.user.save()
-        self.assertEqual(send_password_recovery_email.call(self.user.email), 0)
+        self.assertEqual(send_password_reset_email.call(self.user.email), 0)
         self.assertEqual(mail.outbox, [])
 
     def test_smtp_errors_are_not_silently_swallowed(self):
@@ -95,9 +95,9 @@ class PasswordRecoveryTests(APITestCase):
             patch("accounts.emails.EmailMessage.send", side_effect=SMTPException),
             self.assertRaises(SMTPException),
         ):
-            send_password_recovery_email.call(self.user.email)
+            send_password_reset_email.call(self.user.email)
 
-    def test_change_password_and_invalidates_all_old_sessions_and_token(self):
+    def test_reset_password_and_invalidates_all_old_sessions_and_token(self):
         other_client = APIClient()
         other_client.force_login(self.user)
         self.client.force_login(self.user)
@@ -136,7 +136,7 @@ class PasswordRecoveryTests(APITestCase):
         self.user.refresh_from_db()
         self.assertTrue(self.user.check_password(DEMO_ADMIN_PASSWORD))
 
-    def test_password_change_queues_one_html_notification_without_secrets(self):
+    def test_password_reset_queues_one_html_notification_without_secrets(self):
         self.assertEqual(self.post().status_code, 204)
         self.assertEqual(DBTaskResult.objects.count(), 1)
         self.assertEqual(mail.outbox, [])
@@ -163,7 +163,7 @@ class PasswordRecoveryTests(APITestCase):
             self.assertNotIn(secret, message.body)
         self.assertEqual(DBTaskResult.objects.get().status, TaskResultStatus.SUCCESSFUL)
 
-    def test_notification_queue_failure_rolls_back_password_change(self):
+    def test_notification_queue_failure_rolls_back_password_reset(self):
         with (
             patch(
                 "accounts.views.send_password_changed_email",
@@ -226,7 +226,7 @@ class PasswordRecoveryTests(APITestCase):
     def test_csrf_and_origin_checks_cover_both_recovery_endpoints(self):
         for path, payload in [
             ("forgot-password", {"email": self.user.email}),
-            ("change-password", self.payload),
+            ("reset-password", self.payload),
         ]:
             with self.subTest(path=path):
                 response = self.client.post(
@@ -263,16 +263,16 @@ class PasswordRecoveryTests(APITestCase):
             429,
         )
 
-    def test_password_changes_are_limited_by_ip(self):
+    def test_password_resets_are_limited_by_ip(self):
         for _ in range(10):
             self.assertEqual(
                 self.post(payload=self.payload | {"token": "wrong"}).status_code, 400
             )
         self.assertEqual(self.post().status_code, 429)
 
-    def test_two_validated_password_changes_cannot_reuse_one_link(self):
-        first = ChangePasswordSerializer(data=self.payload)
-        second = ChangePasswordSerializer(data=self.payload)
+    def test_two_validated_password_resets_cannot_reuse_one_link(self):
+        first = ResetPasswordSerializer(data=self.payload)
+        second = ResetPasswordSerializer(data=self.payload)
         first.is_valid(raise_exception=True)
         second.is_valid(raise_exception=True)
         first.save()
@@ -283,9 +283,16 @@ class PasswordRecoveryTests(APITestCase):
         paths = self.client.get(
             "/api/v1/schema/", HTTP_ACCEPT="application/json"
         ).json()["paths"]
+        self.assertNotIn("/api/v1/auth/change-password/", paths)
+        self.assertEqual(
+            self.client.post(
+                "/api/v1/auth/change-password/", {}, format="json"
+            ).status_code,
+            404,
+        )
         for path, status, serializer in [
             ("forgot-password", "202", "ForgotPassword"),
-            ("change-password", "204", "ChangePassword"),
+            ("reset-password", "204", "ResetPassword"),
         ]:
             operation = paths[f"/api/v1/auth/{path}/"]["post"]
             self.assertEqual(

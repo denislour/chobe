@@ -40,5 +40,5 @@ class ForgotPasswordAccountThrottle(LoginAccountThrottle):
     identifier_field = "email"
 
 
-class ChangePasswordIPThrottle(LoginIPThrottle):
-    scope = "change_password_ip"
+class ResetPasswordIPThrottle(LoginIPThrottle):
+    scope = "reset_password_ip"

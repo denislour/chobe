@@ -3,10 +3,10 @@ from typing import ClassVar
 from accounts.schemas.base import CSRFSchema
 
 
-class PasswordRecoverySchema(CSRFSchema):
+class PasswordResetSchema(CSRFSchema):
     responses: ClassVar[dict] = {
         "forgot_password": {202: None},
-        "change_password": {204: None},
+        "reset_password": {204: None},
     }
 
     def get_response_serializers(self):

@@ -30,11 +30,11 @@ def send_password_changed_email(user_id: int) -> int:
 
 
 @task
-def send_password_recovery_email(email: str) -> int:
+def send_password_reset_email(email: str) -> int:
     sent = 0
     for user in PasswordResetForm().get_users(email):
         sent += send_account_email(
-            "password_recovery",
+            "password_reset",
             user,
             {
                 "frontend_url": settings.FRONTEND_URL.rstrip("/"),

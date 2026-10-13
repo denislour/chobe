@@ -12,7 +12,7 @@ from accounts.constants import DEMO_ADMIN_PASSWORD
 from accounts.models import User
 from accounts.tasks import (
     send_password_changed_email,
-    send_password_recovery_email,
+    send_password_reset_email,
     send_welcome_email,
 )
 
@@ -69,9 +69,9 @@ class WelcomeEmailTests(TestCase):
                 "Your Chobe password was changed",
             ),
             (
-                send_password_recovery_email,
+                send_password_reset_email,
                 self.user.email,
-                "Change your Chobe password",
+                "Reset your Chobe password",
             ),
         ]:
             with self.subTest(subject=subject):
@@ -92,7 +92,7 @@ class WelcomeEmailTests(TestCase):
         for send, argument in [
             (send_welcome_email, self.user.pk),
             (send_password_changed_email, self.user.pk),
-            (send_password_recovery_email, self.user.email),
+            (send_password_reset_email, self.user.email),
         ]:
             with self.subTest(task=send.module_path):
                 self.assertEqual(send.call(argument), 1)

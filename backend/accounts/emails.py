@@ -5,7 +5,7 @@ from accounts.models import User
 
 EMAIL_SUBJECTS = {
     "welcome": "Welcome to Chobe",
-    "password_recovery": "Change your Chobe password",
+    "password_reset": "Reset your Chobe password",
     "password_changed": "Your Chobe password was changed",
 }
 

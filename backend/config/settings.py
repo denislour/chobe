@@ -87,7 +87,7 @@ REST_FRAMEWORK = {
         "register_ip": "5/min",
         "forgot_password_ip": "5/hour",
         "forgot_password_account": "3/hour",
-        "change_password_ip": "10/min",
+        "reset_password_ip": "10/min",
     },
     "NUM_PROXIES": 0,
 }

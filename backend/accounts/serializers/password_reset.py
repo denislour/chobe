@@ -11,7 +11,7 @@ class ForgotPasswordSerializer(serializers.Serializer):
     email = serializers.EmailField(max_length=254)
 
 
-class ChangePasswordSerializer(serializers.Serializer):
+class ResetPasswordSerializer(serializers.Serializer):
     uid = serializers.CharField(max_length=128, write_only=True)
     token = serializers.CharField(max_length=128, write_only=True)
     password = serializers.CharField(
@@ -33,7 +33,7 @@ class ChangePasswordSerializer(serializers.Serializer):
             or not default_token_generator.check_token(user, attrs["token"])
         ):
             raise serializers.ValidationError(
-                "This password change link is invalid or has expired. Request a new link."
+                "This password reset link is invalid or has expired. Request a new link."
             )
         form = SetPasswordForm(
             user,
@@ -61,7 +61,7 @@ class ChangePasswordSerializer(serializers.Serializer):
             is_active=True,
         ).update(password=user.password):
             raise serializers.ValidationError(
-                "This password change link has already been used. Request a new link."
+                "This password reset link has already been used. Request a new link."
             )
         password_changed(validated_data["password"], user)
         return user

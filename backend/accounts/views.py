@@ -11,26 +11,26 @@ from rest_framework.viewsets import GenericViewSet
 
 from accounts.schemas.auth import AuthSchema
 from accounts.schemas.base import CSRFSchema
-from accounts.schemas.password_recovery import PasswordRecoverySchema
+from accounts.schemas.password_reset import PasswordResetSchema
 from accounts.serializers.login import LoginSerializer
-from accounts.serializers.password_recovery import (
-    ChangePasswordSerializer,
+from accounts.serializers.password_reset import (
     ForgotPasswordSerializer,
+    ResetPasswordSerializer,
 )
 from accounts.serializers.register import RegisterSerializer
 from accounts.serializers.session import AuthUserSerializer
 from accounts.tasks import (
     send_password_changed_email,
-    send_password_recovery_email,
+    send_password_reset_email,
     send_welcome_email,
 )
 from accounts.throttles import (
-    ChangePasswordIPThrottle,
     ForgotPasswordAccountThrottle,
     ForgotPasswordIPThrottle,
     LoginAccountThrottle,
     LoginIPThrottle,
     RegisterIPThrottle,
+    ResetPasswordIPThrottle,
 )
 
 
@@ -99,7 +99,7 @@ class AuthViewSet(GenericViewSet):
         detail=False,
         methods=["post"],
         url_path="forgot-password",
-        schema=PasswordRecoverySchema(),
+        schema=PasswordResetSchema(),
         serializer_class=ForgotPasswordSerializer,
         throttle_classes=[
             ForgotPasswordIPThrottle,
@@ -109,18 +109,18 @@ class AuthViewSet(GenericViewSet):
     def forgot_password(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        send_password_recovery_email.enqueue(serializer.validated_data["email"])
+        send_password_reset_email.enqueue(serializer.validated_data["email"])
         return Response(status=202)
 
     @action(
         detail=False,
         methods=["post"],
-        url_path="change-password",
-        schema=PasswordRecoverySchema(),
-        serializer_class=ChangePasswordSerializer,
-        throttle_classes=[ChangePasswordIPThrottle],
+        url_path="reset-password",
+        schema=PasswordResetSchema(),
+        serializer_class=ResetPasswordSerializer,
+        throttle_classes=[ResetPasswordIPThrottle],
     )
-    def change_password(self, request):
+    def reset_password(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         with transaction.atomic():
