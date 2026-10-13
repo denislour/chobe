@@ -1,7 +1,7 @@
 import { Component, effect, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { AuthStore } from '../auth.store';
+import { AuthStore } from '../store/auth.store';
 import { LoginUser } from '../login-api';
 
 @Component({

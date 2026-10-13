@@ -10,7 +10,7 @@ import {
   LoginUser,
   RegisterCredentials,
   RegistrationErrors,
-} from './login-api';
+} from '../login-api';
 
 interface AuthState {
   user: LoginUser | null;
