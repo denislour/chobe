@@ -1,3 +1,4 @@
+from datetime import timedelta
 from smtplib import SMTPException
 from unittest.mock import patch
 
@@ -10,10 +11,12 @@ from django.tasks import TaskResultStatus
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from django_tasks_db.models import DBTaskResult
+from rest_framework.exceptions import ValidationError
 from rest_framework.test import APIClient, APITestCase
 
 from accounts.constants import DEMO_ADMIN_PASSWORD
 from accounts.models import User
+from accounts.serializers.password_recovery import ChangePasswordSerializer
 from accounts.tasks import send_password_recovery_email
 
 
@@ -93,3 +96,128 @@ class PasswordRecoveryTests(APITestCase):
             self.assertRaises(SMTPException),
         ):
             send_password_recovery_email.call(self.user.email)
+
+    def test_change_password_and_invalidates_all_old_sessions_and_token(self):
+        other_client = APIClient()
+        other_client.force_login(self.user)
+        self.client.force_login(self.user)
+        self.user.refresh_from_db()
+        self.payload["token"] = default_token_generator.make_token(self.user)
+        response = self.post()
+        self.assertEqual(response.status_code, 204)
+        self.assertIn("no-store", response["Cache-Control"])
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.check_password(self.payload["password"]))
+        self.assertFalse(
+            default_token_generator.check_token(self.user, self.payload["token"])
+        )
+        self.assertEqual(other_client.get("/api/v1/auth/session/").data, {"user": None})
+        self.assertEqual(self.client.get("/api/v1/auth/session/").data, {"user": None})
+        self.assertEqual(self.post().status_code, 400)
+        for password, status in [
+            (DEMO_ADMIN_PASSWORD, 400),
+            (self.payload["password"], 200),
+        ]:
+            response = self.post(
+                "login", {"username": self.user.email, "password": password}
+            )
+            self.assertEqual(response.status_code, status)
+
+    def test_expired_token_is_rejected(self):
+        now = default_token_generator._now()
+        with patch.object(
+            default_token_generator,
+            "_now",
+            return_value=now - timedelta(seconds=settings.PASSWORD_RESET_TIMEOUT + 1),
+        ):
+            token = default_token_generator.make_token(self.user)
+        response = self.post(payload=self.payload | {"token": token})
+        self.assertEqual(response.status_code, 400)
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.check_password(DEMO_ADMIN_PASSWORD))
+
+    def test_invalid_or_inactive_user_link_is_rejected(self):
+        for changes in [
+            {"uid": "bad-uid"},
+            {"uid": "!"},
+            {"uid": "MA"},
+            {"token": "wrong"},
+        ]:
+            with self.subTest(changes=changes):
+                self.assertEqual(
+                    self.post(payload=self.payload | changes).status_code, 400
+                )
+        self.user.is_active = False
+        self.user.save()
+        self.assertEqual(self.post().status_code, 400)
+        self.assertFalse(DBTaskResult.objects.exists())
+
+    def test_password_validation_preserves_a_valid_recovery_link(self):
+        for changes in [
+            {"password_confirm": "different-password"},
+            {"password": "short", "password_confirm": "short"},
+            {"password": "123456789", "password_confirm": "123456789"},
+            {"password": "password", "password_confirm": "password"},
+        ]:
+            with self.subTest(changes=changes):
+                response = self.post(payload=self.payload | changes)
+                self.assertEqual(response.status_code, 400)
+                self.assertIn("password_confirm", response.data)
+                self.assertTrue(
+                    default_token_generator.check_token(
+                        self.user, self.payload["token"]
+                    )
+                )
+        self.assertEqual(self.post().status_code, 204)
+
+    def test_missing_fields_and_invalid_input_are_rejected(self):
+        for payload in [{}, [], self.payload | {"password": None}]:
+            with self.subTest(payload=payload):
+                self.assertEqual(self.post(payload=payload).status_code, 400)
+        for payload in [{}, {"email": "invalid"}, []]:
+            with self.subTest(payload=payload):
+                self.assertEqual(self.post("forgot-password", payload).status_code, 400)
+        self.assertFalse(DBTaskResult.objects.exists())
+
+    def test_csrf_and_origin_checks_cover_both_recovery_endpoints(self):
+        for path, payload in [
+            ("forgot-password", {"email": self.user.email}),
+            ("change-password", self.payload),
+        ]:
+            with self.subTest(path=path):
+                response = self.client.post(
+                    f"/api/v1/auth/{path}/", payload, format="json"
+                )
+                self.assertEqual(response.status_code, 403)
+                response = self.post(
+                    path, payload, HTTP_ORIGIN="https://attacker.example"
+                )
+                self.assertEqual(response.status_code, 403)
+        self.assertFalse(DBTaskResult.objects.exists())
+
+    def test_two_validated_password_changes_cannot_reuse_one_link(self):
+        first = ChangePasswordSerializer(data=self.payload)
+        second = ChangePasswordSerializer(data=self.payload)
+        first.is_valid(raise_exception=True)
+        second.is_valid(raise_exception=True)
+        first.save()
+        with self.assertRaises(ValidationError):
+            second.save()
+
+    def test_openapi_describes_recovery_requests_and_empty_responses(self):
+        paths = self.client.get(
+            "/api/v1/schema/", HTTP_ACCEPT="application/json"
+        ).json()["paths"]
+        for path, status, serializer in [
+            ("forgot-password", "202", "ForgotPassword"),
+            ("change-password", "204", "ChangePassword"),
+        ]:
+            operation = paths[f"/api/v1/auth/{path}/"]["post"]
+            self.assertEqual(
+                operation["requestBody"]["content"]["application/json"]["schema"][
+                    "$ref"
+                ],
+                f"#/components/schemas/{serializer}",
+            )
+            self.assertNotIn("content", operation["responses"][status])
+            self.assertTrue(operation["parameters"][0]["required"])

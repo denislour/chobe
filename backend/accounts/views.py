@@ -13,7 +13,10 @@ from accounts.schemas.auth import AuthSchema
 from accounts.schemas.base import CSRFSchema
 from accounts.schemas.password_recovery import PasswordRecoverySchema
 from accounts.serializers.login import LoginSerializer
-from accounts.serializers.password_recovery import ForgotPasswordSerializer
+from accounts.serializers.password_recovery import (
+    ChangePasswordSerializer,
+    ForgotPasswordSerializer,
+)
 from accounts.serializers.register import RegisterSerializer
 from accounts.serializers.session import AuthUserSerializer
 from accounts.tasks import send_password_recovery_email, send_welcome_email
@@ -93,3 +96,18 @@ class AuthViewSet(GenericViewSet):
         serializer.is_valid(raise_exception=True)
         send_password_recovery_email.enqueue(serializer.validated_data["email"])
         return Response(status=202)
+
+    @action(
+        detail=False,
+        methods=["post"],
+        url_path="change-password",
+        schema=PasswordRecoverySchema(),
+        serializer_class=ChangePasswordSerializer,
+    )
+    def change_password(self, request):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        with transaction.atomic():
+            serializer.save()
+        logout(request)
+        return Response(status=204)
