@@ -10,7 +10,7 @@ from django_tasks_db.models import DBTaskResult
 
 from accounts.constants import DEMO_ADMIN_PASSWORD
 from accounts.models import User
-from accounts.tasks import send_welcome_email
+from accounts.tasks import send_password_recovery_email, send_welcome_email
 
 
 class WelcomeEmailTests(TestCase):
@@ -52,7 +52,12 @@ class WelcomeEmailTests(TestCase):
 
     def test_account_emails_use_html_only(self):
         for send, argument, subject in [
-            (send_welcome_email, self.user.pk, "Welcome to Chobe")
+            (send_welcome_email, self.user.pk, "Welcome to Chobe"),
+            (
+                send_password_recovery_email,
+                self.user.email,
+                "Change your Chobe password",
+            ),
         ]:
             with self.subTest(subject=subject):
                 self.assertEqual(send.call(argument), 1)
@@ -69,7 +74,10 @@ class WelcomeEmailTests(TestCase):
     def test_html_escapes_user_content(self):
         self.user.username = "<b>member</b>&"
         self.user.save()
-        for send, argument in [(send_welcome_email, self.user.pk)]:
+        for send, argument in [
+            (send_welcome_email, self.user.pk),
+            (send_password_recovery_email, self.user.email),
+        ]:
             with self.subTest(task=send.module_path):
                 self.assertEqual(send.call(argument), 1)
                 message = mail.outbox[-1]

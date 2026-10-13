@@ -111,6 +111,8 @@ TASKS = {
         "QUEUES": ["default"],
     }
 }
+FRONTEND_URL = os.environ.get("DJANGO_FRONTEND_URL", "http://localhost:4200")
+PASSWORD_RESET_TIMEOUT = 30 * 60
 DEFAULT_FROM_EMAIL = os.environ.get("DJANGO_FROM_EMAIL", "Chobe <hello@chobe.test>")
 MAILERS = {
     "default": {
