@@ -66,6 +66,25 @@ def update_privacy(instance, values):
     return instance
 
 
+def viewing_history_for(user):
+    if not privacy_for(user).record_history:
+        return ViewingHistory.objects.none()
+    return ViewingHistory.objects.filter(
+        user=user, viewed_at__gte=timezone.now() - timedelta(days=30)
+    )[:100]
+
+
+def record_viewing_history(user, listing_id):
+    with transaction.atomic():
+        if not privacy_for(user).record_history:
+            return None
+        entry, _ = ViewingHistory.objects.update_or_create(
+            user=user, listing_id=listing_id
+        )
+        keep = list(viewing_history_for(user).values_list("pk", flat=True))
+        ViewingHistory.objects.filter(user=user).exclude(pk__in=keep).delete()
+    return entry
+
 
 def clear_viewing_history(user):
     ViewingHistory.objects.filter(user=user).delete()

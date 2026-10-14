@@ -55,3 +55,6 @@ class AccountMutationThrottle(UserRateThrottle):
         return request.method in ("GET", "HEAD", "OPTIONS") or super().allow_request(
             request, view
         )
+
+class HistoryThrottle(UserRateThrottle):
+    scope = "viewing_history"

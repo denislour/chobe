@@ -2,7 +2,7 @@ from typing import ClassVar
 
 from rest_framework import serializers
 
-from accounts.models import PrivacySettings
+from accounts.models import PrivacySettings, ViewingHistory
 from accounts.services.privacy import update_privacy
 
 
@@ -28,3 +28,12 @@ class PrivacySerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         return update_privacy(instance, validated_data)
+
+
+class ViewingHistorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ViewingHistory
+        fields = ("listing_id", "viewed_at")
+        read_only_fields = ("viewed_at",)
+        validators = ()
+        extra_kwargs: ClassVar[dict] = {"listing_id": {"min_value": 1}}
