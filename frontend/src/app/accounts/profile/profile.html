@@ -24,7 +24,22 @@
       @if (profile.profile(); as current) {
         <form [formGroup]="form" (ngSubmit)="submit()" [attr.aria-busy]="profile.pending()">
           <section class="settings-section" aria-labelledby="profile-title">
-            <h2 id="profile-title">Your profile</h2>
+            <div class="seller-line">
+              @if (current.avatar_url) {
+                <img
+                  class="avatar"
+                  [src]="current.avatar_url"
+                  alt="Your profile avatar"
+                  width="72"
+                  height="72"
+                />
+              } @else {
+                <span class="avatar" aria-hidden="true">{{
+                  current.display_name.slice(0, 1)
+                }}</span>
+              }
+              <h2 id="profile-title">Your profile</h2>
+            </div>
             <div class="form-grid">
               <div class="field">
                 <label for="profile-name">Display name</label
@@ -95,6 +110,29 @@
               <label for="profile-bio">About you</label
               ><textarea id="profile-bio" formControlName="bio" maxlength="200" rows="3"></textarea>
             </div>
+            <div class="field">
+              <label for="profile-avatar">Avatar</label
+              ><input
+                #avatarInput
+                id="profile-avatar"
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                (change)="chooseAvatar($event)"
+                aria-describedby="avatar-help avatar-error"
+              /><small id="avatar-help" class="hint"
+                >JPEG, PNG, or WebP. Up to 2 MiB and 4096 pixels per side.</small
+              ><small id="avatar-error" class="error"
+                >{{ uploadError() }}
+                @if (profile.fieldErrors()['avatar']; as errors) {
+                  {{ errors.join(' ') }}
+                }
+              </small>
+            </div>
+            @if (current.avatar_url) {
+              <label class="check-row"
+                ><input type="checkbox" formControlName="remove_avatar" />Remove my avatar</label
+              >
+            }
             <button class="btn" type="submit" [disabled]="profile.pending() || profile.loading()">
               {{ profile.pending() ? 'Saving…' : 'Save profile' }}
             </button>

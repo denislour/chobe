@@ -77,4 +77,21 @@ describe('Profile', () => {
     expect(element.textContent).toContain('8 to 15 digits');
   });
 
+  it('uploads a selected file as multipart and clears the file after success', async () => {
+    const input = element.querySelector<HTMLInputElement>('#profile-avatar')!;
+    const file = new File(['image'], 'avatar.png', { type: 'image/png' });
+    Object.defineProperty(input, 'files', { configurable: true, value: [file] });
+    input.dispatchEvent(new Event('change'));
+    submit();
+    const request = http.expectOne('/api/v1/me/profile/');
+    expect((request.request.body as FormData).get('avatar')).toBe(file);
+    request.flush({
+      ...profileFixture,
+      version: 2,
+      avatar_url: '/api/v1/me/profile/avatar/?version=2',
+    });
+    await fixture.whenStable();
+    expect(element.querySelector('img')?.getAttribute('src')).toContain('version=2');
+    expect(input.value).toBe('');
+  });
 });
