@@ -69,6 +69,54 @@
           }
         </section>
       }
+      <section class="settings-section" aria-labelledby="export-title">
+        <h2 id="export-title">Export your account data</h2>
+        <p class="hint">
+          Download your username, email, profile and avatar, privacy choices, phone-sharing consent
+          history, and viewing history as JSON. Passwords and session tokens are not included.
+          Downloads are available for 24 hours. You can request up to 2 exports per hour.
+        </p>
+        <div class="toolbar">
+          <button
+            class="btn secondary"
+            type="button"
+            [disabled]="
+              accountData.pending() || accountData.activeExport()
+            "
+            (click)="accountData.createExport()"
+          >
+            {{ accountData.pending() ? 'Requesting…' : 'Request account data export' }}</button
+          ><button
+            class="btn secondary"
+            type="button"
+            [disabled]="accountData.loading()"
+            (click)="accountData.load()"
+          >
+            Check export status
+          </button>
+        </div>
+        @if (accountData.loading()) {
+          <p role="status">Checking your exports…</p>
+        }
+        <ul>
+          @for (job of accountData.jobs(); track job.job_id) {
+            <li>
+              {{ job.created_at | date: 'medium' }} · {{ job.status }}
+              @if (job.status === 'ready') {
+                <a
+                  class="btn secondary"
+                  [href]="'/api/v1/me/data-exports/' + job.job_id + '/download/'"
+                  download
+                  >Download account data (JSON)</a
+                >
+              }
+              @if (job.status === 'failed') {
+                <span class="error">Preparation failed. Request a new export.</span>
+              }
+            </li>
+          }
+        </ul>
+      </section>
     </div>
   </div>
   <div class="notifications">
@@ -81,6 +129,18 @@
           type="button"
           aria-label="Dismiss privacy notification"
           (click)="privacy.dismissNotification()"
+        >
+          ×
+        </button>
+      </div>
+    }
+    @if (accountData.error()) {
+      <div class="notification error">
+        <span role="alert">{{ accountData.error() }}</span>
+        <button
+          type="button"
+          aria-label="Dismiss data notification"
+          (click)="accountData.dismissNotification()"
         >
           ×
         </button>

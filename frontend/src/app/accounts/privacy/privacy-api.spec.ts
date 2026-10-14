@@ -26,10 +26,11 @@ describe('PrivacyApi', () => {
     http.expectOne('/api/v1/me/viewing-history/').flush([]);
   });
 
-  it('sends versioned privacy and history clear requests', () => {
+  it('sends versioned privacy, history clear, and data export requests', () => {
     const values = { share_phone: false, record_history: false, version: 1 };
     api.savePrivacy(values).subscribe();
     api.clearHistory().subscribe();
+    api.createAccountDataExport().subscribe();
     const privacy = http.expectOne('/api/v1/me/privacy-settings/');
     expect(privacy.request.method).toBe('PATCH');
     expect(privacy.request.body).toEqual(values);
@@ -37,6 +38,12 @@ describe('PrivacyApi', () => {
     const history = http.expectOne('/api/v1/me/viewing-history/');
     expect(history.request.method).toBe('DELETE');
     history.flush(null, { status: 204, statusText: 'No Content' });
+    const exportRequest = http.expectOne('/api/v1/me/data-exports/');
+    expect(exportRequest.request.method).toBe('POST');
+    exportRequest.flush(
+      { job_id: 'job', status: 'queued' },
+      { status: 202, statusText: 'Accepted' },
+    );
   });
 
 });

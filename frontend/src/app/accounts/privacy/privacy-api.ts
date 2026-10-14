@@ -15,6 +15,13 @@ export interface HistoryEntry {
   viewed_at: string;
 }
 
+export interface AccountDataExportJob {
+  job_id: string;
+  status: 'queued' | 'processing' | 'ready' | 'failed' | 'expired';
+  created_at: string;
+  expires_at: string | null;
+}
+
 @Injectable({ providedIn: 'root' })
 export class PrivacyApi {
   constructor(private readonly http: HttpClient) {}
@@ -35,5 +42,13 @@ export class PrivacyApi {
 
   clearHistory(): Observable<void> {
     return this.http.delete<void>('/api/v1/me/viewing-history/');
+  }
+
+  accountDataExports(): Observable<AccountDataExportJob[]> {
+    return this.http.get<AccountDataExportJob[]>('/api/v1/me/data-exports/');
+  }
+
+  createAccountDataExport(): Observable<AccountDataExportJob> {
+    return this.http.post<AccountDataExportJob>('/api/v1/me/data-exports/', {});
   }
 }

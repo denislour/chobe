@@ -29,6 +29,8 @@ describe('Privacy', () => {
     fixture.detectChanges();
     http.expectOne('/api/v1/me/privacy-settings/').flush(privacyFixture);
     http.expectOne('/api/v1/me/viewing-history/').flush([]);
+    vi.advanceTimersByTime(0);
+    http.expectOne('/api/v1/me/data-exports/').flush([]);
     await fixture.whenStable();
     element = fixture.nativeElement;
   });
@@ -84,6 +86,31 @@ describe('Privacy', () => {
     expect(checkbox.checked).toBe(false);
     expect(element.querySelector('#consent-error')?.textContent).toContain(
       'Add a phone number first.',
+    );
+  });
+
+  it('shows empty history and only exposes downloads after the export is ready', async () => {
+    expect(element.textContent).toContain('No viewing history saved.');
+    expect(element.textContent).toContain('Export your account data');
+    expect(element.textContent).toContain('Passwords and session tokens are not included.');
+    expect(element.textContent).toContain('Check export status');
+    const button = [...element.querySelectorAll<HTMLButtonElement>('button')].find((item) =>
+      item.textContent?.includes('Request account data export'),
+    )!;
+    button.click();
+    http.expectOne('/api/v1/me/data-exports/').flush({
+      job_id: 'job',
+      status: 'queued',
+      created_at: '2026-10-13T00:00:00Z',
+      expires_at: null,
+    });
+    vi.advanceTimersByTime(0);
+    http
+      .expectOne('/api/v1/me/data-exports/')
+      .flush([{ job_id: 'job', status: 'ready', created_at: '2026-10-13T00:00:00Z' }]);
+    await fixture.whenStable();
+    expect(element.querySelector('a[download]')?.getAttribute('href')).toBe(
+      '/api/v1/me/data-exports/job/download/',
     );
   });
 

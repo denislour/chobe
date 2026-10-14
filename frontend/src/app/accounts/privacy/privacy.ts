@@ -5,11 +5,12 @@ import { Router, RouterLink } from '@angular/router';
 import { AccountNav } from '@app/accounts/account-nav/account-nav';
 import { AuthStore } from '@app/auth/auth.store';
 import { PrivacyStore } from './privacy.store';
+import { AccountDataStore } from './account-data.store';
 
 @Component({
   selector: 'app-privacy',
   imports: [ReactiveFormsModule, AccountNav, DatePipe, RouterLink],
-  providers: [PrivacyStore],
+  providers: [PrivacyStore, AccountDataStore],
   templateUrl: './privacy.html',
   styleUrl: '../account.css',
 })
@@ -18,6 +19,7 @@ export class Privacy implements OnInit {
 
   constructor(
     protected readonly privacy: PrivacyStore,
+    protected readonly accountData: AccountDataStore,
     protected readonly auth: AuthStore,
     formBuilder: FormBuilder,
     private readonly router: Router,
@@ -32,6 +34,7 @@ export class Privacy implements OnInit {
 
   ngOnInit(): void {
     this.privacy.load();
+    this.accountData.load();
   }
 
   protected save(): void {
