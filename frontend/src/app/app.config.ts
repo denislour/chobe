@@ -8,7 +8,7 @@ import {
 import { provideRouter } from '@angular/router';
 
 import { routes } from './app.routes';
-import { AuthStore } from './accounts/store/auth.store';
+import { AuthStore } from '@app/auth/auth.store';
 
 export const appConfig: ApplicationConfig = {
   providers: [

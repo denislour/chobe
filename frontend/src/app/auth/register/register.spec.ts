@@ -2,7 +2,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
-import { AuthStore } from '@app/accounts/store/auth.store';
+import { AuthStore } from '@app/auth/auth.store';
 import { Register } from './register';
 
 describe('Register', () => {
@@ -19,7 +19,7 @@ describe('Register', () => {
         provideRouter([
           {
             path: 'login',
-            loadComponent: () => import('@app/accounts/login/login').then((m) => m.Login),
+            loadComponent: () => import('@app/auth/login/login').then((m) => m.Login),
           },
         ]),
       ],

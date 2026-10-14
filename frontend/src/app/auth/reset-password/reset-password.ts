@@ -1,8 +1,8 @@
 import { Component, effect, signal } from '@angular/core';
 import { AbstractControl, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { AuthStore } from '@app/accounts/store/auth.store';
-import { PasswordResetStore } from '@app/accounts/store/password-reset.store';
+import { AuthStore } from '@app/auth/auth.store';
+import { PasswordResetStore } from '@app/auth/password-reset.store';
 
 @Component({
   selector: 'app-reset-password',
@@ -39,8 +39,7 @@ export class ResetPassword {
     );
     effect(() => {
       if (this.passwordReset.completed()) {
-        this.form.reset();
-        this.showPassword.set(false);
+        this.resetForm();
       }
     });
   }
@@ -51,5 +50,10 @@ export class ResetPassword {
     const values = this.form.getRawValue();
     if (this.form.valid)
       this.passwordReset.resetPassword({ uid: this.uid, token: this.token, ...values });
+  }
+
+  private resetForm(): void {
+    this.form.reset();
+    this.showPassword.set(false);
   }
 }

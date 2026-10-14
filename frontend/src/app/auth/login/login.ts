@@ -1,9 +1,9 @@
 import { Component, effect, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { AuthStore } from '@app/accounts/store/auth.store';
-import { LoginUser } from '@app/accounts/login-api';
-import { safeReturnUrl } from '@app/accounts/return-url';
+import { AuthStore } from '@app/auth/auth.store';
+import { AuthUser } from '@app/auth/auth-api';
+import { safeReturnUrl } from '@app/auth/return-url';
 
 @Component({
   selector: 'app-login',
@@ -37,7 +37,7 @@ export class Login {
     if (this.form.valid) this.auth.login(this.form.getRawValue());
   }
 
-  private resetForm(user: LoginUser | null): void {
+  private resetForm(user: AuthUser | null): void {
     this.form.controls.password.reset();
     this.showPassword.set(false);
     if (!user) this.form.controls.username.reset();

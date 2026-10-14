@@ -5,7 +5,7 @@ import { patchState, signalState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { exhaustMap, filter, pipe, tap } from 'rxjs';
 import { AuthStore } from './auth.store';
-import { LoginApi, PasswordResetErrors, ResetPasswordCredentials } from '@app/accounts/login-api';
+import { AuthApi, PasswordResetErrors, ResetPasswordCredentials } from './auth-api';
 
 interface PasswordResetState {
   pending: boolean;
@@ -29,7 +29,7 @@ export class PasswordResetStore {
   readonly fieldErrors = this.state.fieldErrors;
 
   constructor(
-    private readonly api: LoginApi,
+    private readonly api: AuthApi,
     private readonly auth: AuthStore,
   ) {}
 
@@ -56,10 +56,7 @@ export class PasswordResetStore {
       exhaustMap((credentials) =>
         this.api.resetPassword(credentials).pipe(
           tapResponse({
-            next: () => {
-              this.auth.clearSession();
-              patchState(this.state, { completed: true });
-            },
+            next: () => this.finishReset(),
             error: (error: HttpErrorResponse) => this.setError(error),
             finalize: () => patchState(this.state, { pending: false }),
           }),
@@ -67,6 +64,11 @@ export class PasswordResetStore {
       ),
     ),
   );
+
+  private finishReset(): void {
+    this.auth.clearSession();
+    patchState(this.state, { completed: true });
+  }
 
   private startRequest(): void {
     patchState(this.state, { pending: true, completed: false, error: '', fieldErrors: {} });

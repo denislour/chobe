@@ -1,9 +1,9 @@
 import { Component } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { AuthStore } from '@app/accounts/store/auth.store';
-import { PasswordResetStore } from '@app/accounts/store/password-reset.store';
-import { safeReturnUrl } from '@app/accounts/return-url';
+import { AuthStore } from '@app/auth/auth.store';
+import { PasswordResetStore } from '@app/auth/password-reset.store';
+import { safeReturnUrl } from '@app/auth/return-url';
 
 @Component({
   selector: 'app-forgot-password',

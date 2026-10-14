@@ -2,7 +2,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { AuthStore } from '@app/accounts/store/auth.store';
+import { AuthStore } from '@app/auth/auth.store';
 import { Login } from './login';
 
 describe('Login', () => {

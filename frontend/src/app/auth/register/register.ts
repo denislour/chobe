@@ -1,8 +1,8 @@
 import { Component, effect, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { AuthStore } from '@app/accounts/store/auth.store';
-import { safeReturnUrl } from '@app/accounts/return-url';
+import { AuthStore } from '@app/auth/auth.store';
+import { safeReturnUrl } from '@app/auth/return-url';
 
 @Component({
   selector: 'app-register',

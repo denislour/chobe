@@ -5,15 +5,15 @@ import { patchState, signalState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { exhaustMap, filter, firstValueFrom, pipe, tap, timeout } from 'rxjs';
 import {
-  LoginApi,
+  AuthApi,
   LoginCredentials,
-  LoginUser,
+  AuthUser,
   RegisterCredentials,
   RegistrationErrors,
-} from '@app/accounts/login-api';
+} from './auth-api';
 
 interface AuthState {
-  user: LoginUser | null;
+  user: AuthUser | null;
   pending: boolean;
   error: string;
   sessionError: string;
@@ -43,7 +43,7 @@ export class AuthStore {
   readonly sessionError = this.state.sessionError;
   readonly registrationErrors = this.state.registrationErrors;
 
-  constructor(private readonly api: LoginApi) {}
+  constructor(private readonly api: AuthApi) {}
 
   readonly register = rxMethod<RegisterCredentials>(
     pipe(
@@ -126,7 +126,7 @@ export class AuthStore {
     patchState(this.state, { pending: false });
   }
 
-  private setUser(user: LoginUser | null): void {
+  private setUser(user: AuthUser | null): void {
     patchState(this.state, { user, sessionError: '' });
   }
 

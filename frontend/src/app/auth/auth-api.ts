@@ -16,13 +16,13 @@ export type RegistrationErrors = Partial<
   Record<keyof RegisterCredentials | 'non_field_errors', string[]>
 >;
 
-export interface LoginUser {
+export interface AuthUser {
   id: number;
   username: string;
 }
 
 export interface SessionResponse {
-  user: LoginUser | null;
+  user: AuthUser | null;
 }
 
 export interface ResetPasswordCredentials {
@@ -37,7 +37,7 @@ export type PasswordResetErrors = Partial<
 >;
 
 @Injectable({ providedIn: 'root' })
-export class LoginApi {
+export class AuthApi {
   constructor(private readonly http: HttpClient) {}
 
   session(): Observable<SessionResponse> {
@@ -48,12 +48,12 @@ export class LoginApi {
     return this.http.post<void>('/api/v1/auth/logout/', {});
   }
 
-  login(credentials: LoginCredentials): Observable<LoginUser> {
-    return this.http.post<LoginUser>('/api/v1/auth/login/', credentials);
+  login(credentials: LoginCredentials): Observable<AuthUser> {
+    return this.http.post<AuthUser>('/api/v1/auth/login/', credentials);
   }
 
-  register(credentials: RegisterCredentials): Observable<LoginUser> {
-    return this.http.post<LoginUser>('/api/v1/auth/register/', credentials);
+  register(credentials: RegisterCredentials): Observable<AuthUser> {
+    return this.http.post<AuthUser>('/api/v1/auth/register/', credentials);
   }
 
   forgotPassword(email: string): Observable<void> {

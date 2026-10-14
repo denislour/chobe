@@ -5,9 +5,9 @@ import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { authGuard } from './auth-guard';
-import { AuthStore } from '@app/accounts/store/auth.store';
-import { Login } from '@app/accounts/login/login';
-import { Register } from '@app/accounts/register/register';
+import { AuthStore } from './auth.store';
+import { Login } from '@app/auth/login/login';
+import { Register } from '@app/auth/register/register';
 
 @Component({ selector: 'app-test-destination', template: 'Protected action' })
 class TestDestination {}

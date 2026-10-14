@@ -1,9 +1,9 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import { LoginApi } from './login-api';
+import { AuthApi } from './auth-api';
 
-describe('LoginApi', () => {
+describe('AuthApi', () => {
   let http: HttpTestingController;
   const credentials = { username: 'admin', password: 'demo-password' };
 
@@ -20,7 +20,7 @@ describe('LoginApi', () => {
 
   it('posts credentials directly and returns the user', () => {
     let username = '';
-    TestBed.inject(LoginApi)
+    TestBed.inject(AuthApi)
       .login(credentials)
       .subscribe((user) => (username = user.username));
     http.expectNone('/api/v1/auth/csrf/');
@@ -32,7 +32,7 @@ describe('LoginApi', () => {
   });
 
   it('gets session without sending a CSRF header', () => {
-    TestBed.inject(LoginApi).session().subscribe();
+    TestBed.inject(AuthApi).session().subscribe();
     const request = http.expectOne('/api/v1/auth/session/');
     expect(request.request.method).toBe('GET');
     expect(request.request.headers.has('X-XSRF-TOKEN')).toBe(false);
@@ -47,7 +47,7 @@ describe('LoginApi', () => {
       password: 'new-safe-password',
       password_confirm: 'new-safe-password',
     };
-    TestBed.inject(LoginApi).resetPassword(reset).subscribe();
+    TestBed.inject(AuthApi).resetPassword(reset).subscribe();
     const request = http.expectOne('/api/v1/auth/reset-password/');
     expect(request.request.method).toBe('POST');
     expect(request.request.body).toEqual(reset);
@@ -60,7 +60,7 @@ describe('LoginApi', () => {
     document.cookie = `XSRF-TOKEN=${'x'.repeat(32)}; path=/`;
     const registration = { ...credentials, email: 'admin@example.com', accept_terms: true };
     let userId = 0;
-    TestBed.inject(LoginApi)
+    TestBed.inject(AuthApi)
       .register(registration)
       .subscribe((user) => (userId = user.id));
     const request = http.expectOne('/api/v1/auth/register/');
@@ -74,14 +74,14 @@ describe('LoginApi', () => {
 
   it('sends the CSRF cookie in the login header', () => {
     document.cookie = `XSRF-TOKEN=${'x'.repeat(32)}; path=/`;
-    TestBed.inject(LoginApi).login(credentials).subscribe();
+    TestBed.inject(AuthApi).login(credentials).subscribe();
     const login = http.expectOne('/api/v1/auth/login/');
     expect(login.request.headers.get('X-XSRF-TOKEN')).toBe('x'.repeat(32));
     login.flush({ id: 1, username: 'admin' });
   });
 
   it('reads the rotated cookie for logout without fetching CSRF again', () => {
-    const api = TestBed.inject(LoginApi);
+    const api = TestBed.inject(AuthApi);
     document.cookie = `XSRF-TOKEN=${'x'.repeat(32)}; path=/`;
     api.login(credentials).subscribe();
     http.expectOne('/api/v1/auth/login/').flush({ id: 1, username: 'admin' });

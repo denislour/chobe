@@ -18,6 +18,9 @@
     }
     @if (auth.user(); as currentUser) {
       <p class="success" role="status">You are logged in as {{ currentUser.username }}.</p>
+      <nav class="auth-links" aria-label="Account settings">
+        <a routerLink="/account/profile">Manage your account</a>
+      </nav>
       <button
         class="btn btn-block"
         type="button"
