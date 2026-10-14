@@ -1,0 +1,14 @@
+<nav aria-label="Account settings">
+  <a routerLink="/account/profile" routerLinkActive="active" ariaCurrentWhenActive="page"
+    >Profile</a
+  >
+  <a routerLink="/account/privacy" routerLinkActive="active" ariaCurrentWhenActive="page"
+    >Privacy and data</a
+  >
+  <button type="button" [disabled]="auth.pending()" (click)="auth.logout()">
+    {{ auth.pending() ? 'Logging out…' : 'Log out' }}
+  </button>
+</nav>
+@if (auth.error()) {
+  <p class="error" role="alert">{{ auth.error() }}</p>
+}
