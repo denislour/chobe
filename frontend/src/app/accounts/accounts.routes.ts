@@ -7,4 +7,9 @@ export const accountsRoutes: Routes = [
     canActivate: [authGuard],
     loadComponent: () => import('@app/accounts/profile/profile').then((m) => m.Profile),
   },
+  {
+    path: 'privacy',
+    canActivate: [authGuard],
+    loadComponent: () => import('@app/accounts/privacy/privacy').then((m) => m.Privacy),
+  },
 ];

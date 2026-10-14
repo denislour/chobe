@@ -1,0 +1,67 @@
+<main class="account-page">
+  <h1>Privacy and data</h1>
+  <p class="intro">Choose what you share and manage your account data.</p>
+  <div class="account-layout">
+    <app-account-nav />
+    <div class="account-content">
+      @if (privacy.loading()) {
+        <p role="status">Loading privacy settings…</p>
+      }
+      @if (privacy.privacy()) {
+        <form
+          class="settings-section"
+          [formGroup]="form"
+          (ngSubmit)="save()"
+          [attr.aria-busy]="privacy.pending()"
+          aria-labelledby="contact-title"
+        >
+          <h2 id="contact-title">Contact visibility</h2>
+          <label class="check-row"
+            ><input
+              id="share-phone"
+              type="checkbox"
+              formControlName="share_phone"
+              aria-describedby="consent-help consent-error"
+            />Allow my phone number on my public listings</label
+          >
+          <p id="consent-help" class="hint">
+            Add a phone number in <a routerLink="/account/profile">Profile</a> first. Turning this
+            off stops sharing it. Changing your phone number also turns sharing off.
+          </p>
+          <small id="consent-error" class="error">
+            @if (privacy.fieldErrors()['share_phone']; as errors) {
+              {{ errors.join(' ') }}
+            }
+          </small>
+          <h2>Browsing history</h2>
+          <label class="check-row"
+            ><input id="record-history" type="checkbox" formControlName="record_history" />Save my
+            viewing history</label
+          >
+          <p class="hint">
+            Keep up to 100 viewed listings for 30 days. Turning this off clears your saved history.
+          </p>
+          <button class="btn" type="submit" [disabled]="privacy.pending() || privacy.loading()">
+            {{ privacy.pending() ? 'Saving…' : 'Save privacy settings' }}
+          </button>
+        </form>
+      }
+    </div>
+  </div>
+  <div class="notifications">
+    @if (privacy.error() || privacy.notice()) {
+      <div class="notification" [class.error]="privacy.error()" [class.success]="privacy.notice()">
+        <span [attr.role]="privacy.error() ? 'alert' : 'status'">{{
+          privacy.error() || privacy.notice()
+        }}</span>
+        <button
+          type="button"
+          aria-label="Dismiss privacy notification"
+          (click)="privacy.dismissNotification()"
+        >
+          ×
+        </button>
+      </div>
+    }
+  </div>
+</main>
