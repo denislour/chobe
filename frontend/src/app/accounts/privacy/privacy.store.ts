@@ -7,18 +7,20 @@ import {
   catchError,
   exhaustMap,
   filter,
+  forkJoin,
   Observable,
   pipe,
   switchMap,
   tap,
   throwError,
 } from 'rxjs';
-import { PrivacyApi, PrivacyData } from './privacy-api';
+import { PrivacyApi, HistoryEntry, PrivacyData } from './privacy-api';
 import { FieldErrors } from '@app/accounts/account-errors';
 import { accountError } from '@app/accounts/account-errors';
 
 interface PrivacyState {
   privacy: PrivacyData | null;
+  history: HistoryEntry[];
   loading: boolean;
   pending: boolean;
   notice: string;
@@ -30,6 +32,7 @@ interface PrivacyState {
 export class PrivacyStore {
   private readonly state = signalState<PrivacyState>({
     privacy: null,
+    history: [],
     loading: false,
     pending: false,
     notice: '',
@@ -37,6 +40,7 @@ export class PrivacyStore {
     fieldErrors: {},
   });
   readonly privacy = this.state.privacy;
+  readonly history = this.state.history;
   readonly loading = this.state.loading;
   readonly pending = this.state.pending;
   readonly notice = this.state.notice;
@@ -50,9 +54,9 @@ export class PrivacyStore {
       filter(() => !this.pending()),
       tap(() => patchState(this.state, { loading: true, error: '', notice: '', fieldErrors: {} })),
       switchMap(() =>
-        this.api.privacy().pipe(
+        forkJoin({ privacy: this.api.privacy(), history: this.api.history() }).pipe(
           tapResponse({
-            next: (privacy) => patchState(this.state, { privacy }),
+            next: (values) => patchState(this.state, values),
             error: (error: HttpErrorResponse) => patchState(this.state, accountError(error)),
             finalize: () => patchState(this.state, { loading: false }),
           }),
@@ -72,9 +76,27 @@ export class PrivacyStore {
             next: (privacy) =>
               patchState(this.state, {
                 privacy,
+                history: privacy.record_history ? this.history() : [],
                 notice: 'Privacy settings saved.',
               }),
             error: (error: HttpErrorResponse) => this.restoreSavedSettings(error),
+            finalize: () => patchState(this.state, { pending: false }),
+          }),
+        ),
+      ),
+    ),
+  );
+
+  readonly clearHistory = rxMethod<void>(
+    pipe(
+      filter(() => !this.pending()),
+      tap(() => this.startRequest()),
+      exhaustMap(() =>
+        this.api.clearHistory().pipe(
+          tapResponse({
+            next: () =>
+              patchState(this.state, { history: [], notice: 'Browsing history cleared.' }),
+            error: (error: HttpErrorResponse) => patchState(this.state, accountError(error)),
             finalize: () => patchState(this.state, { pending: false }),
           }),
         ),
@@ -96,8 +118,8 @@ export class PrivacyStore {
 
   private recoverConflict(error: HttpErrorResponse): Observable<never> {
     if (error.status !== 409) return throwError(() => error);
-    return this.api.privacy().pipe(
-      tap((privacy) => patchState(this.state, { privacy })),
+    return forkJoin({ privacy: this.api.privacy(), history: this.api.history() }).pipe(
+      tap((values) => patchState(this.state, values)),
       switchMap(() => throwError(() => error)),
     );
   }

@@ -19,18 +19,24 @@ describe('PrivacyApi', () => {
     http.verify();
   });
 
-  it('reads private privacy settings', () => {
+  it('reads private privacy and history endpoints', () => {
     api.privacy().subscribe();
+    api.history().subscribe();
     http.expectOne('/api/v1/me/privacy-settings/').flush(privacyFixture);
+    http.expectOne('/api/v1/me/viewing-history/').flush([]);
   });
 
-  it('sends versioned privacy settings', () => {
+  it('sends versioned privacy and history clear requests', () => {
     const values = { share_phone: false, record_history: false, version: 1 };
     api.savePrivacy(values).subscribe();
+    api.clearHistory().subscribe();
     const privacy = http.expectOne('/api/v1/me/privacy-settings/');
     expect(privacy.request.method).toBe('PATCH');
     expect(privacy.request.body).toEqual(values);
     privacy.flush({ ...privacyFixture, ...values });
+    const history = http.expectOne('/api/v1/me/viewing-history/');
+    expect(history.request.method).toBe('DELETE');
+    history.flush(null, { status: 204, statusText: 'No Content' });
   });
 
 });

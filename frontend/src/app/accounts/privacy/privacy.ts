@@ -1,3 +1,4 @@
+import { DatePipe } from '@angular/common';
 import { Component, effect, OnInit } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -7,7 +8,7 @@ import { PrivacyStore } from './privacy.store';
 
 @Component({
   selector: 'app-privacy',
-  imports: [ReactiveFormsModule, AccountNav, RouterLink],
+  imports: [ReactiveFormsModule, AccountNav, DatePipe, RouterLink],
   providers: [PrivacyStore],
   templateUrl: './privacy.html',
   styleUrl: '../account.css',

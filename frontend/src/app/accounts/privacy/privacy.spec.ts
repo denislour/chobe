@@ -28,6 +28,7 @@ describe('Privacy', () => {
     fixture = TestBed.createComponent(Privacy);
     fixture.detectChanges();
     http.expectOne('/api/v1/me/privacy-settings/').flush(privacyFixture);
+    http.expectOne('/api/v1/me/viewing-history/').flush([]);
     await fixture.whenStable();
     element = fixture.nativeElement;
   });

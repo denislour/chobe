@@ -45,6 +45,29 @@
             {{ privacy.pending() ? 'Saving…' : 'Save privacy settings' }}
           </button>
         </form>
+        <section class="settings-section" aria-labelledby="history-title">
+          <h2 id="history-title">Your viewing history</h2>
+          @if (privacy.history().length) {
+            <ul>
+              @for (entry of privacy.history(); track entry.listing_id) {
+                <li>
+                  Listing #{{ entry.listing_id }}
+                  <span class="hint"> · {{ entry.viewed_at | date: 'medium' }}</span>
+                </li>
+              }
+            </ul>
+            <button
+              class="btn secondary"
+              type="button"
+              [disabled]="privacy.pending()"
+              (click)="privacy.clearHistory()"
+            >
+              Clear history
+            </button>
+          } @else {
+            <p class="hint">No viewing history saved.</p>
+          }
+        </section>
       }
     </div>
   </div>
