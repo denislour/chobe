@@ -4,7 +4,7 @@ from django.urls import reverse
 from rest_framework import serializers
 
 from accounts.models import Profile
-from accounts.services.profile import clean_avatar, update_profile
+from accounts.services.profile import process_avatar_upload, update_profile
 
 
 class ProfileSerializer(serializers.ModelSerializer):
@@ -43,7 +43,7 @@ class ProfileSerializer(serializers.ModelSerializer):
         return f"{reverse('profile-avatar')}?version={obj.version}"
 
     def validate_avatar(self, value):
-        return clean_avatar(value)
+        return process_avatar_upload(value)
 
     def validate(self, attrs):
         if "version" not in attrs:

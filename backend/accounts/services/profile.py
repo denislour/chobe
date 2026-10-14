@@ -16,7 +16,7 @@ def profile_for(user):
     )[0]
 
 
-def clean_avatar(upload):
+def process_avatar_upload(upload):
     if upload.size > 2 * 1024 * 1024:
         raise ValidationError("Use an image smaller than 2 MiB.")
     try:
