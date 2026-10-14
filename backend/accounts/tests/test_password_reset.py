@@ -21,6 +21,8 @@ from accounts.tasks import send_password_reset_email
 
 
 class PasswordResetTests(APITestCase):
+    databases = frozenset({"default", "cache"})
+
     def setUp(self):
         cache.clear()
         self.addCleanup(cache.clear)

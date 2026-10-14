@@ -13,6 +13,8 @@ from accounts.models import User
 
 
 class RegisterTests(APITestCase):
+    databases = frozenset({"default", "cache"})
+
     def setUp(self):
         cache.clear()
         self.addCleanup(cache.clear)

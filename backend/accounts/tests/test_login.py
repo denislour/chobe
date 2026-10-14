@@ -9,6 +9,8 @@ from accounts.models import User
 
 
 class LoginTests(APITestCase):
+    databases = frozenset({"default", "cache"})
+
     def setUp(self):
         cache.clear()
         self.addCleanup(cache.clear)

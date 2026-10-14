@@ -10,6 +10,8 @@ from accounts.models import User
 
 
 class SessionTests(APITestCase):
+    databases = frozenset({"default", "cache"})
+
     def setUp(self):
         self.user = User.objects.create_user(username="member")
         self.client = APIClient(enforce_csrf_checks=True)

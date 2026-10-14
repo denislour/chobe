@@ -71,9 +71,9 @@ be action="run":
     set -euo pipefail
     cd backend
     case "$1" in
-        run) just emails; uv run python manage.py migrate; uv run python manage.py runserver localhost:8000 ;;
+        run) just emails; uv run python manage.py migrate; uv run python manage.py createcachetable --database cache; uv run python manage.py runserver localhost:8000 ;;
         test) just emails; uv run python manage.py test ;;
-        migrate) uv run python manage.py migrate ;;
+        migrate) uv run python manage.py migrate; uv run python manage.py createcachetable --database cache ;;
         lint) uv run ruff check .; uv run ruff format --check . ;;
         *) echo "Unknown backend command: $1. Use run, test, migrate, or lint." >&2; exit 1 ;;
     esac

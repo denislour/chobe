@@ -56,6 +56,25 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR / "db.sqlite3",
+        "OPTIONS": {"timeout": 10, "transaction_mode": "IMMEDIATE"},
+    },
+    "cache": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": os.environ.get("DJANGO_CACHE_DB_PATH", BASE_DIR / "cache.sqlite3"),
+        "OPTIONS": {
+            "timeout": 10,
+            "transaction_mode": "IMMEDIATE",
+            "init_command": "PRAGMA journal_mode=WAL; PRAGMA synchronous=NORMAL;",
+        },
+        "TEST": {"DEPENDENCIES": []},
+    },
+}
+DATABASE_ROUTERS = ["config.cache.CacheRouter"]
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.db.DatabaseCache",
+        "LOCATION": "cache_entries",
+        "OPTIONS": {"MAX_ENTRIES": 10000},
     }
 }
 

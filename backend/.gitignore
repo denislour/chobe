@@ -7,6 +7,9 @@
 !.env.example
 /docs/
 /db.sqlite3
+/cache.sqlite3
+/cache.sqlite3-wal
+/cache.sqlite3-shm
 /staticfiles/
 __pycache__/
 *.py[cod]
