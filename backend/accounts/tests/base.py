@@ -1,25 +1,30 @@
+from pathlib import Path
+from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
-from django.core.management import call_command
 from django.conf import settings
 from django.core.cache import cache
+from huey.contrib.djhuey import HUEY
+from huey.storage import SqliteStorage
 from rest_framework.test import APIClient, APITestCase
 
 from accounts.constants import DEMO_ADMIN_PASSWORD
 from accounts.models import User
+from tasks.dispatch import dispatch_pending_tasks
 
 
 def run_huey_worker():
-    with patch(
-        "django_tasks_db.management.commands.db_worker.Worker.configure_signals"
-    ):
-        call_command(
-            "db_worker",
-            batch=True,
-            reload=False,
-            startup_delay=False,
-            verbosity=0,
+    with TemporaryDirectory() as directory:
+        storage = SqliteStorage(
+            "chobe-test", filename=str(Path(directory) / "queue.db")
         )
+        try:
+            with patch.object(HUEY, "storage", storage):
+                dispatch_pending_tasks.call_local()
+                while task := HUEY.dequeue():
+                    HUEY.execute(task)
+        finally:
+            storage.close()
 
 
 class AccountAPITestCase(APITestCase):

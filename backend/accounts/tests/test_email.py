@@ -3,7 +3,6 @@ from unittest.mock import patch
 
 from django.conf import settings
 from django.core import mail
-from django.core.management import call_command
 from django.tasks import TaskResultStatus
 from django.test import TestCase
 from django_tasks_db.models import DBTaskResult
@@ -15,6 +14,7 @@ from accounts.tasks.email import (
     send_password_reset_email,
     send_welcome_email,
 )
+from accounts.tests.base import run_huey_worker
 
 
 class WelcomeEmailTests(TestCase):
@@ -24,16 +24,7 @@ class WelcomeEmailTests(TestCase):
         )
 
     def run_worker(self):
-        with patch(
-            "django_tasks_db.management.commands.db_worker.Worker.configure_signals"
-        ):
-            call_command(
-                "db_worker",
-                batch=True,
-                reload=False,
-                startup_delay=False,
-                verbosity=0,
-            )
+        run_huey_worker()
 
     def test_worker_sends_the_queued_email(self):
         result = send_welcome_email.enqueue(self.user.pk)
@@ -102,7 +93,10 @@ class WelcomeEmailTests(TestCase):
 
     def test_smtp_failure_is_recorded_without_deleting_the_account(self):
         result = send_welcome_email.enqueue(self.user.pk)
-        with patch("accounts.emails.EmailMessage.send", side_effect=SMTPException):
+        with (
+            patch("accounts.emails.EmailMessage.send", side_effect=SMTPException),
+            self.assertLogs("huey", level="ERROR"),
+        ):
             self.run_worker()
         self.assertEqual(
             DBTaskResult.objects.get(pk=result.id).status, TaskResultStatus.FAILED

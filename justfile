@@ -43,9 +43,9 @@ mailpit-setup:
 mailpit: mailpit-setup
     backend/.tools/mailpit/v1.31.5/mailpit --listen localhost:8025 --smtp localhost:1025 --database backend/.tools/mailpit/inbox.sqlite3
 
-# Process Django tasks from the local database.
+# Run Huey execution and periodic scheduling in one process.
 worker:
-    cd backend && uv run python manage.py db_worker
+    cd backend && uv run python manage.py run_huey
 
 # Compile MJML to Django HTML templates before starting or packaging the backend.
 emails:

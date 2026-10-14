@@ -10,8 +10,16 @@
 /cache.sqlite3
 /cache.sqlite3-wal
 /cache.sqlite3-shm
+/queue.sqlite3
+/queue.sqlite3-wal
+/queue.sqlite3-shm
 /staticfiles/
 __pycache__/
 *.py[cod]
 .pytest_cache/
 .ruff_cache/
+
+**/dist/
+**/build/
+*.egg-info/
+/accounts/templates/accounts/emails/*.html

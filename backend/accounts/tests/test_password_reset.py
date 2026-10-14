@@ -6,7 +6,6 @@ from django.conf import settings
 from django.contrib.auth.tokens import default_token_generator
 from django.core import mail
 from django.core.cache import cache
-from django.core.management import call_command
 from django.tasks import TaskResultStatus
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
@@ -18,6 +17,7 @@ from accounts.constants import DEMO_ADMIN_PASSWORD
 from accounts.models import User
 from accounts.serializers.password_reset import ResetPasswordSerializer
 from accounts.tasks.email import send_password_reset_email
+from accounts.tests.base import run_huey_worker
 
 
 class PasswordResetTests(APITestCase):
@@ -65,12 +65,7 @@ class PasswordResetTests(APITestCase):
             HTTP_ORIGIN="http://localhost",
         )
         self.assertEqual(response.status_code, 202)
-        with patch(
-            "django_tasks_db.management.commands.db_worker.Worker.configure_signals"
-        ):
-            call_command(
-                "db_worker", batch=True, reload=False, startup_delay=False, verbosity=0
-            )
+        run_huey_worker()
         self.assertEqual(len(mail.outbox), 1)
         message = mail.outbox[0]
         self.assertEqual(message.to, [self.user.email])
@@ -144,12 +139,7 @@ class PasswordResetTests(APITestCase):
         self.assertEqual(mail.outbox, [])
         self.assertEqual(self.post().status_code, 400)
         self.assertEqual(DBTaskResult.objects.count(), 1)
-        with patch(
-            "django_tasks_db.management.commands.db_worker.Worker.configure_signals"
-        ):
-            call_command(
-                "db_worker", batch=True, reload=False, startup_delay=False, verbosity=0
-            )
+        run_huey_worker()
         self.assertEqual(len(mail.outbox), 1)
         message = mail.outbox[0]
         self.assertEqual(message.subject, "Your Chobe password was changed")

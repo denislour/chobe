@@ -24,6 +24,8 @@ INSTALLED_APPS = [
     "rest_framework",
     "drf_spectacular",
     "django_tasks_db",
+    "huey.contrib.djhuey",
+    "tasks",
     "accounts",
 ]
 
@@ -113,11 +115,11 @@ REST_FRAMEWORK = {
         "forgot_password_ip": "5/hour",
         "forgot_password_account": "3/hour",
         "reset_password_ip": "10/min",
-        "account_mutation": "20/min",
         "viewing_history": "60/min",
         "data_export": "2/hour",
         "account_deletion": "3/hour",
         "deletion_receipt": "60/min",
+        "account_mutation": "20/min",
     },
     "NUM_PROXIES": 0,
 }
@@ -140,9 +142,30 @@ CSRF_COOKIE_SAMESITE = "Lax"
 
 TASKS = {
     "default": {
-        "BACKEND": "django_tasks_db.DatabaseBackend",
+        "BACKEND": "tasks.backend.OutboxHueyBackend",
         "QUEUES": ["default"],
     }
+}
+HUEY = {
+    "name": "chobe",
+    "huey_class": "huey.SqliteHuey",
+    "immediate": False,
+    "results": False,
+    "connection": {
+        "filename": str(
+            os.environ.get("DJANGO_QUEUE_DB_PATH", BASE_DIR / "queue.sqlite3")
+        ),
+        "journal_mode": "wal",
+        "timeout": 10,
+        "cache_mb": 2,
+        "fsync": True,
+    },
+    "consumer": {
+        "workers": 2,
+        "worker_type": "thread",
+        "scheduler_interval": 10,
+        "graceful_signal": "TERM",
+    },
 }
 FRONTEND_URL = os.environ.get("DJANGO_FRONTEND_URL", "http://localhost:4200")
 PASSWORD_RESET_TIMEOUT = 30 * 60
