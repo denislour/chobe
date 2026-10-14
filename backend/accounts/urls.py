@@ -3,11 +3,13 @@ from rest_framework.routers import SimpleRouter
 
 from accounts.views.auth import AuthViewSet
 from accounts.views.profile import ProfileViewSet
+from accounts.views.privacy import PrivacyViewSet
 
 router = SimpleRouter()
 router.register("auth", AuthViewSet, basename="auth")
 urlpatterns = [
     path("me/profile/", ProfileViewSet.as_view({"get": "retrieve", "patch": "partial_update"})),
     path("me/profile/avatar/", ProfileViewSet.as_view({"get": "avatar"}), name="profile-avatar"),
+    path("me/privacy-settings/", PrivacyViewSet.as_view({"get": "retrieve", "patch": "partial_update"})),
     path("", include(router.urls)),
 ]

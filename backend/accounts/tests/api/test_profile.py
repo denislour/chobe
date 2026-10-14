@@ -4,7 +4,8 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from PIL import Image
 from rest_framework.test import APIClient
 
-from accounts.models import Profile
+from accounts.models import ConsentEvent, Profile
+from accounts.services.privacy import privacy_for, public_listing_phone
 from accounts.services.profile import profile_for
 from accounts.tests.base import AccountAPITestCase
 
@@ -122,6 +123,28 @@ class ProfileTests(AccountAPITestCase):
                 self.assertEqual(response.status_code, 400)
                 self.assertFalse(profile_for(self.user).avatar)
 
+    def test_phone_change_withdraws_consent_and_public_projection_reads_fresh_values(
+        self,
+    ):
+        profile = profile_for(self.user)
+        profile.phone = "+84912345678"
+        profile.save()
+        privacy = privacy_for(self.user)
+        privacy.share_phone = True
+        privacy.save()
+        self.assertEqual(
+            public_listing_phone(self.user, is_public_listing=True), profile.phone
+        )
+        self.assertIsNone(public_listing_phone(self.user, is_public_listing=False))
+        self.assertEqual(
+            self.request(
+                "patch", "me/profile", {"phone": "+84912345679", "version": 1}
+            ).status_code,
+            200,
+        )
+        self.assertFalse(privacy_for(self.user).share_phone)
+        self.assertFalse(ConsentEvent.objects.get(user=self.user).share_phone)
+        self.assertIsNone(public_listing_phone(self.user, is_public_listing=True))
 
     def test_auth_csrf_and_unsupported_methods(self):
         self.assertEqual(APIClient().get("/api/v1/me/profile/").status_code, 403)

@@ -6,6 +6,7 @@ from PIL import Image, ImageOps, UnidentifiedImageError
 from rest_framework.exceptions import ValidationError
 
 from accounts.models import Profile
+from accounts.services.privacy import withdraw_phone_consent
 from accounts.services.versioning import save_versioned
 
 
@@ -47,7 +48,10 @@ def clean_avatar(upload):
 def update_profile(instance, values):
     values = values.copy()
     with transaction.atomic():
+        changed_phone = "phone" in values and values["phone"] != instance.phone
         if values.pop("remove_avatar", False):
             values["avatar"] = b""
         instance = save_versioned(instance, values)
+        if changed_phone:
+            withdraw_phone_consent(instance.user)
     return instance
