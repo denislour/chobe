@@ -53,7 +53,7 @@ class RegisterTests(APITestCase):
         )
         self.assertIn("no-store", response["Cache-Control"])
         task = DBTaskResult.objects.get()
-        self.assertEqual(task.task_path, "accounts.tasks.send_welcome_email")
+        self.assertEqual(task.task_path, "accounts.tasks.email.send_welcome_email")
         self.assertEqual(task.args_kwargs, {"args": [user.pk], "kwargs": {}})
         self.assertEqual(task.status, TaskResultStatus.READY)
         self.assertEqual(mail.outbox, [])

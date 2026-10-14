@@ -1,5 +1,4 @@
 from django.contrib.auth import login, logout
-from django.db import transaction
 from django.middleware.csrf import get_token
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
@@ -19,11 +18,7 @@ from accounts.serializers.password_reset import (
 )
 from accounts.serializers.register import RegisterSerializer
 from accounts.serializers.session import AuthUserSerializer
-from accounts.tasks import (
-    send_password_changed_email,
-    send_password_reset_email,
-    send_welcome_email,
-)
+from accounts.tasks.email import send_password_reset_email
 from accounts.throttles import (
     ForgotPasswordAccountThrottle,
     ForgotPasswordIPThrottle,
@@ -74,9 +69,7 @@ class AuthViewSet(GenericViewSet):
             )
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        with transaction.atomic():
-            user = serializer.save()
-            send_welcome_email.enqueue(user.pk)
+        user = serializer.save()
         login(request, user, backend="django.contrib.auth.backends.ModelBackend")
         return Response(AuthUserSerializer(user).data, status=201)
 
@@ -123,8 +116,6 @@ class AuthViewSet(GenericViewSet):
     def reset_password(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        with transaction.atomic():
-            user = serializer.save()
-            send_password_changed_email.enqueue(user.pk)
+        serializer.save()
         logout(request)
         return Response(status=204)

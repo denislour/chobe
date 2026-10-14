@@ -10,7 +10,7 @@ from django_tasks_db.models import DBTaskResult
 
 from accounts.constants import DEMO_ADMIN_PASSWORD
 from accounts.models import User
-from accounts.tasks import (
+from accounts.tasks.email import (
     send_password_changed_email,
     send_password_reset_email,
     send_welcome_email,

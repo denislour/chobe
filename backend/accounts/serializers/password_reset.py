@@ -1,10 +1,10 @@
 from django.contrib.auth.forms import SetPasswordForm
-from django.contrib.auth.password_validation import password_changed
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_decode
 from rest_framework import serializers
 
 from accounts.models import User
+from accounts.services.auth import reset_password
 
 
 class ForgotPasswordSerializer(serializers.Serializer):
@@ -23,8 +23,10 @@ class ResetPasswordSerializer(serializers.Serializer):
 
     def validate(self, attrs):
         try:
-            user = User.objects.get(pk=urlsafe_base64_decode(attrs["uid"]).decode())
-        except ValueError, TypeError, OverflowError, User.DoesNotExist:
+            user = User.objects.filter(
+                pk=urlsafe_base64_decode(attrs["uid"]).decode()
+            ).first()
+        except ValueError, TypeError, OverflowError:
             user = None
         if (
             user is None
@@ -50,18 +52,4 @@ class ResetPasswordSerializer(serializers.Serializer):
         return attrs
 
     def create(self, validated_data):
-        form = validated_data["form"]
-        old_password = form.user.password
-        user = form.save(commit=False)
-        if not User.objects.filter(
-            pk=user.pk,
-            password=old_password,
-            email=user.email,
-            last_login=user.last_login,
-            is_active=True,
-        ).update(password=user.password):
-            raise serializers.ValidationError(
-                "This password reset link has already been used. Request a new link."
-            )
-        password_changed(validated_data["password"], user)
-        return user
+        return reset_password(validated_data["form"].user, validated_data["password"])

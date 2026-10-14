@@ -2,6 +2,8 @@
 
 The backend is the Django REST API for the Chobe marketplace. It owns marketplace data and uses SQLite for local development.
 
+The `accounts` Django app contains authentication, profiles and privacy features. Views, serializers and schemas handle the API; services handle multi-step changes and transactions. Background jobs live in `accounts/tasks/`. Dependencies are managed in one `pyproject.toml` and `uv.lock`.
+
 ## Cache storage
 
 Django uses `DatabaseCache` in a separate `cache.sqlite3` file. The cache connection enables WAL with `synchronous=NORMAL`; business data, sessions and task records stay in `db.sqlite3`. All web processes must share the same local cache file. Set `DJANGO_CACHE_DB_PATH` to change its path; its parent directory must exist. Do not use a network filesystem or point the cache path at the business database.

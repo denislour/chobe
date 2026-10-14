@@ -17,7 +17,7 @@ from rest_framework.test import APIClient, APITestCase
 from accounts.constants import DEMO_ADMIN_PASSWORD
 from accounts.models import User
 from accounts.serializers.password_reset import ResetPasswordSerializer
-from accounts.tasks import send_password_reset_email
+from accounts.tasks.email import send_password_reset_email
 
 
 class PasswordResetTests(APITestCase):
@@ -168,7 +168,7 @@ class PasswordResetTests(APITestCase):
     def test_notification_queue_failure_rolls_back_password_reset(self):
         with (
             patch(
-                "accounts.views.send_password_changed_email",
+                "accounts.services.auth.send_password_changed_email",
                 **{"enqueue.side_effect": RuntimeError("Queue unavailable")},
             ),
             self.assertRaises(RuntimeError),
@@ -187,6 +187,7 @@ class PasswordResetTests(APITestCase):
             {"uid": "bad-uid"},
             {"uid": "!"},
             {"uid": "MA"},
+            {"uid": urlsafe_base64_encode(force_bytes(2**63))},
             {"token": "wrong"},
         ]:
             with self.subTest(changes=changes):

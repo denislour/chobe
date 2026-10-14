@@ -1,7 +1,6 @@
+from django.contrib.auth.models import AbstractUser
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
-
-from accounts.models import User
 
 EMAIL_SUBJECTS = {
     "welcome": "Welcome to Chobe",
@@ -10,7 +9,9 @@ EMAIL_SUBJECTS = {
 }
 
 
-def send_account_email(template: str, user: User, context: dict | None = None) -> int:
+def send_account_email(
+    template: str, user: AbstractUser, context: dict | None = None
+) -> int:
     subject = EMAIL_SUBJECTS[template]
     context = {"user": user, **(context or {}), "subject": subject}
     email = EmailMessage(

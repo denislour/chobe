@@ -1,27 +1,17 @@
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.core.exceptions import ValidationError
-from django.db import IntegrityError, transaction
 from rest_framework import serializers
-from rest_framework.validators import UniqueValidator
 
 from accounts.models import User
+from accounts.services.auth import register_account
 
 
 class RegisterSerializer(serializers.ModelSerializer):
     username = serializers.CharField(
         max_length=150, validators=[UnicodeUsernameValidator()]
     )
-    email = serializers.EmailField(
-        max_length=254,
-        validators=[
-            UniqueValidator(
-                User.objects.all(),
-                lookup="iexact",
-                message="A user with this email already exists.",
-            )
-        ],
-    )
+    email = serializers.EmailField(max_length=254)
     password = serializers.CharField(
         max_length=128, trim_whitespace=False, write_only=True
     )
@@ -46,6 +36,8 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     def validate_email(self, value):
         value = value.lower()
+        if User.objects.filter(email__iexact=value).exists():
+            raise serializers.ValidationError("A user with this email already exists.")
         if User.objects.filter(username__iexact=value).exists():
             raise serializers.ValidationError(
                 "This email is already used as a username."
@@ -71,11 +63,4 @@ class RegisterSerializer(serializers.ModelSerializer):
         return attrs
 
     def create(self, validated_data):
-        validated_data.pop("accept_terms")
-        try:
-            with transaction.atomic():
-                return User.objects.create_user(**validated_data)
-        except IntegrityError as error:
-            raise serializers.ValidationError(
-                {"non_field_errors": ["Username or email is already in use."]}
-            ) from error
+        return register_account(validated_data)
