@@ -1,10 +1,11 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 import { vi } from 'vitest';
 import { privacyFixture } from '@app/accounts/account-fixtures';
 import { AuthStore } from '@app/auth/auth.store';
+import { DeletionReceipt } from '@app/accounts/privacy/deletion-receipt/deletion-receipt';
 import { Privacy } from './privacy';
 
 describe('Privacy', () => {
@@ -18,7 +19,7 @@ describe('Privacy', () => {
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
-        provideRouter([]),
+        provideRouter([{ path: 'account/deletion/:receipt', component: DeletionReceipt }]),
       ],
     });
     http = TestBed.inject(HttpTestingController);
@@ -114,4 +115,25 @@ describe('Privacy', () => {
     );
   });
 
+  it('requires DELETE confirmation and navigates to a receipt after acceptance', async () => {
+    const forms = element.querySelectorAll('form');
+    const deletion = forms[forms.length - 1];
+    deletion.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    http.expectNone('/api/v1/me/deletion-requests/');
+    for (const [id, value] of [
+      ['deletion-password', 'current-password'],
+      ['deletion-confirm', 'DELETE'],
+    ]) {
+      const input = element.querySelector<HTMLInputElement>(`#${id}`)!;
+      input.value = value;
+      input.dispatchEvent(new Event('input'));
+    }
+    deletion.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    const request = http.expectOne('/api/v1/me/deletion-requests/');
+    expect(request.request.body).toEqual({ password: 'current-password', confirmation: 'DELETE' });
+    request.flush({ job_id: 'job', status: 'requested', receipt: 'receipt' });
+    await fixture.whenStable();
+    expect(TestBed.inject(AuthStore).user()).toBeNull();
+    expect(TestBed.inject(Router).url).toBe('/account/deletion/receipt');
+  });
 });

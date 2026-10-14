@@ -41,6 +41,26 @@ describe('AccountDataStore', () => {
     http.expectNone('/api/v1/me/data-exports/');
   });
 
+  it('keeps authentication after a deletion validation failure and can retry', () => {
+    const auth = TestBed.inject(AuthStore);
+    const values = { password: 'wrong', confirmation: 'DELETE' };
+    store.deleteAccount(values);
+    store.deleteAccount(values);
+    http
+      .expectOne('/api/v1/me/deletion-requests/')
+      .flush({ password: ['Incorrect.'] }, { status: 400, statusText: 'Invalid' });
+    expect(auth.user()).not.toBeNull();
+    expect(store.fieldErrors()['password']).toEqual(['Incorrect.']);
+    expect(store.deleting()).toBe(false);
+    store.deleteAccount({ ...values, password: 'correct' });
+    http
+      .expectOne('/api/v1/me/deletion-requests/')
+      .flush({ job_id: 'job', status: 'requested', receipt: 'receipt' });
+    expect(auth.user()).toBeNull();
+    expect(store.receipt()).toBe('receipt');
+    expect(store.deleting()).toBe(false);
+  });
+
   it('shows the throttle wait and permits status refresh without creating another export', () => {
     store.createExport();
     http

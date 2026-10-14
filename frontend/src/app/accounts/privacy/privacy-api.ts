@@ -29,6 +29,11 @@ export interface DeletionJob {
   completed_at: string | null;
 }
 
+export interface DeletionCredentials {
+  password: string;
+  confirmation: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class PrivacyApi {
   constructor(private readonly http: HttpClient) {}
@@ -57,6 +62,13 @@ export class PrivacyApi {
 
   createAccountDataExport(): Observable<AccountDataExportJob> {
     return this.http.post<AccountDataExportJob>('/api/v1/me/data-exports/', {});
+  }
+
+  deleteAccount(values: DeletionCredentials): Observable<DeletionJob & { receipt: string }> {
+    return this.http.post<DeletionJob & { receipt: string }>(
+      '/api/v1/me/deletion-requests/',
+      values,
+    );
   }
 
   deletionStatus(receipt: string): Observable<DeletionJob> {

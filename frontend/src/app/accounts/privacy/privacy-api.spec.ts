@@ -46,4 +46,18 @@ describe('PrivacyApi', () => {
     );
   });
 
+  it('posts deletion credentials and reads a URL-encoded receipt separately', () => {
+    const values = { password: 'current-password', confirmation: 'DELETE' };
+    api.deleteAccount(values).subscribe();
+    const request = http.expectOne('/api/v1/me/deletion-requests/');
+    expect(request.request.body).toEqual(values);
+    request.flush(
+      { job_id: 'job', status: 'requested', receipt: 'receipt:token' },
+      { status: 202, statusText: 'Accepted' },
+    );
+    api.deletionStatus('receipt:token').subscribe();
+    const status = http.expectOne('/api/v1/account-deletion-status/receipt%3Atoken/');
+    expect(status.request.method).toBe('GET');
+    status.flush({ job_id: 'job', status: 'completed' });
+  });
 });

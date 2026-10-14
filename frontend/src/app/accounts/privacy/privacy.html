@@ -81,7 +81,7 @@
             class="btn secondary"
             type="button"
             [disabled]="
-              accountData.pending() || accountData.activeExport()
+              accountData.pending() || accountData.deleting() || accountData.activeExport()
             "
             (click)="accountData.createExport()"
           >
@@ -89,7 +89,7 @@
           ><button
             class="btn secondary"
             type="button"
-            [disabled]="accountData.loading()"
+            [disabled]="accountData.loading() || accountData.deleting()"
             (click)="accountData.load()"
           >
             Check export status
@@ -116,6 +116,65 @@
             </li>
           }
         </ul>
+      </section>
+      <section class="danger-zone" aria-labelledby="deletion-title">
+        <h2 id="deletion-title">Delete your account</h2>
+        <p>
+          Your account will be disabled immediately. Your profile, history, exports, and avatar will
+          be removed. This cannot be undone.
+        </p>
+        <form
+          [formGroup]="deletionForm"
+          (ngSubmit)="deleteAccount()"
+          [attr.aria-busy]="accountData.deleting()"
+        >
+          <div class="field">
+            <label for="deletion-password">Current password</label
+            ><input
+              id="deletion-password"
+              type="password"
+              formControlName="password"
+              autocomplete="current-password"
+              required
+              maxlength="128"
+              aria-describedby="deletion-password-error"
+            /><small id="deletion-password-error" class="error">
+              @if (accountData.fieldErrors()['password']; as errors) {
+                {{ errors.join(' ') }}
+              } @else if (
+                deletionForm.controls.password.touched && deletionForm.controls.password.invalid
+              ) {
+                Enter your current password.
+              }
+            </small>
+          </div>
+          <div class="field">
+            <label for="deletion-confirm">Type DELETE to confirm</label
+            ><input
+              id="deletion-confirm"
+              formControlName="confirmation"
+              autocomplete="off"
+              required
+              aria-describedby="deletion-confirm-error"
+            /><small id="deletion-confirm-error" class="error">
+              @if (accountData.fieldErrors()['confirmation']; as errors) {
+                {{ errors.join(' ') }}
+              } @else if (
+                deletionForm.controls.confirmation.touched &&
+                deletionForm.controls.confirmation.invalid
+              ) {
+                Type DELETE exactly.
+              }
+            </small>
+          </div>
+          <button
+            class="btn danger"
+            type="submit"
+            [disabled]="accountData.deleting() || accountData.pending()"
+          >
+            {{ accountData.deleting() ? 'Requesting deletion…' : 'Delete my account' }}
+          </button>
+        </form>
       </section>
     </div>
   </div>
