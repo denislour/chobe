@@ -105,6 +105,8 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.SessionAuthentication"
     ],
     "DEFAULT_THROTTLE_RATES": {
+        "admin_login_ip": "20/min",
+        "admin_login_account": "5/min",
         "login_ip": "20/min",
         "login_account": "5/min",
         "register_ip": "5/min",

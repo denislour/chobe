@@ -3,14 +3,16 @@ from hashlib import sha256
 from rest_framework.throttling import SimpleRateThrottle
 
 
-class LoginIPThrottle(SimpleRateThrottle):
-    scope = "login_ip"
-
+class IPThrottle(SimpleRateThrottle):
     def get_cache_key(self, request, view):
         return self.cache_format % {
             "scope": self.scope,
             "ident": self.get_ident(request),
         }
+
+
+class LoginIPThrottle(IPThrottle):
+    scope = "login_ip"
 
 
 class LoginAccountThrottle(SimpleRateThrottle):
@@ -20,7 +22,9 @@ class LoginAccountThrottle(SimpleRateThrottle):
     def get_cache_key(self, request, view):
         if not isinstance(request.data, dict):
             return None
-        identifier = request.data.get(self.identifier_field, "")
+        return self.key_for_identifier(request.data.get(self.identifier_field, ""))
+
+    def key_for_identifier(self, identifier):
         if not isinstance(identifier, str) or not identifier.strip():
             return None
         ident = sha256(identifier.strip().casefold().encode()).hexdigest()

@@ -48,3 +48,39 @@ class AdminTests(TestCase):
         self.assertContains(response, f'placeholder="{DEMO_ADMIN_USERNAME}"')
         self.assertContains(response, f'placeholder="{DEMO_ADMIN_PASSWORD}"')
         self.assertContains(response, "unfold/css/styles.css")
+
+    def test_account_limit_is_shared_across_clients_and_ips(self):
+        for index in range(5):
+            self.client.post(
+                "/admin/login/",
+                {"username": DEMO_ADMIN_USERNAME, "password": "incorrect"},
+                REMOTE_ADDR=f"192.0.2.{index + 1}",
+            )
+        client = self.client_class()
+        response = client.post(
+            "/admin/login/",
+            {"username": DEMO_ADMIN_USERNAME, "password": DEMO_ADMIN_PASSWORD},
+            REMOTE_ADDR="192.0.2.100",
+        )
+        self.assertContains(response, "Too many login attempts.")
+        self.assertNotIn("_auth_user_id", client.session)
+
+    def test_ip_limit_cannot_be_bypassed_by_changing_username(self):
+        for index in range(20):
+            self.client.post(
+                "/admin/login/", {"username": f"missing-{index}", "password": "wrong"}
+            )
+        response = self.client.post(
+            "/admin/login/",
+            {"username": DEMO_ADMIN_USERNAME, "password": DEMO_ADMIN_PASSWORD},
+        )
+        self.assertContains(response, "Too many login attempts.")
+        self.assertNotIn("_auth_user_id", self.client.session)
+
+    def test_valid_admin_login_succeeds_below_limit(self):
+        response = self.client.post(
+            "/admin/login/",
+            {"username": DEMO_ADMIN_USERNAME, "password": DEMO_ADMIN_PASSWORD},
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("_auth_user_id", self.client.session)
