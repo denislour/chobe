@@ -12,4 +12,11 @@ export const accountsRoutes: Routes = [
     canActivate: [authGuard],
     loadComponent: () => import('@app/accounts/privacy/privacy').then((m) => m.Privacy),
   },
+  {
+    path: 'deletion/:receipt',
+    loadComponent: () =>
+      import('@app/accounts/privacy/deletion-receipt/deletion-receipt').then(
+        (m) => m.DeletionReceipt,
+      ),
+  },
 ];

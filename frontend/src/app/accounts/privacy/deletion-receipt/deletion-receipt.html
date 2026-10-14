@@ -1,0 +1,38 @@
+<main class="account-page">
+  <h1>Account deletion</h1>
+  @if (status.loading()) {
+    <p role="status">Checking your request…</p>
+  }
+  @if (status.error()) {
+    <p class="error" role="alert">{{ status.error() }}</p>
+  }
+  @if (status.job(); as job) {
+    @switch (job.status) {
+      @case ('completed') {
+        <p class="success" role="status">Your account and account data have been removed.</p>
+      }
+      @case ('failed') {
+        <p class="error" role="alert">
+          Your account is disabled, but data removal needs attention. Please contact the
+          administrator.
+        </p>
+      }
+      @default {
+        <p role="status">Your account is disabled. Your data removal request is being processed.</p>
+      }
+    }
+  }
+  <p class="hint">
+    Keep this page link to check your request for up to seven days. It only shows deletion status.
+  </p>
+  <div class="toolbar">
+    <button
+      class="btn secondary"
+      type="button"
+      [disabled]="status.loading()"
+      (click)="status.load(receipt)"
+    >
+      Refresh status</button
+    ><a class="btn" routerLink="/login">Back to log in</a>
+  </div>
+</main>
