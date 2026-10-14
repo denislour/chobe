@@ -2,7 +2,12 @@ from django.urls import include, path
 from rest_framework.routers import SimpleRouter
 
 from accounts.views.auth import AuthViewSet
+from accounts.views.profile import ProfileViewSet
 
 router = SimpleRouter()
 router.register("auth", AuthViewSet, basename="auth")
-urlpatterns = [path("", include(router.urls))]
+urlpatterns = [
+    path("me/profile/", ProfileViewSet.as_view({"get": "retrieve", "patch": "partial_update"})),
+    path("me/profile/avatar/", ProfileViewSet.as_view({"get": "avatar"}), name="profile-avatar"),
+    path("", include(router.urls)),
+]

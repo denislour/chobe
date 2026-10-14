@@ -8,6 +8,7 @@ dependencies = [
     "django-unfold>=0.108.0",
     "djangorestframework>=3.18.3",
     "drf-spectacular>=0.30.0",
+    "pillow>=12.3.0",
 ]
 
 [dependency-groups]

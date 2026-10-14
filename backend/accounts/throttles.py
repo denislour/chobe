@@ -1,6 +1,6 @@
 from hashlib import sha256
 
-from rest_framework.throttling import SimpleRateThrottle
+from rest_framework.throttling import SimpleRateThrottle, UserRateThrottle
 
 
 class IPThrottle(SimpleRateThrottle):
@@ -46,3 +46,12 @@ class ForgotPasswordAccountThrottle(LoginAccountThrottle):
 
 class ResetPasswordIPThrottle(LoginIPThrottle):
     scope = "reset_password_ip"
+
+
+class AccountMutationThrottle(UserRateThrottle):
+    scope = "account_mutation"
+
+    def allow_request(self, request, view):
+        return request.method in ("GET", "HEAD", "OPTIONS") or super().allow_request(
+            request, view
+        )

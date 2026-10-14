@@ -113,6 +113,7 @@ REST_FRAMEWORK = {
         "forgot_password_ip": "5/hour",
         "forgot_password_account": "3/hour",
         "reset_password_ip": "10/min",
+        "account_mutation": "20/min",
     },
     "NUM_PROXIES": 0,
 }
