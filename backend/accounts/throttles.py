@@ -48,14 +48,6 @@ class ResetPasswordIPThrottle(LoginIPThrottle):
     scope = "reset_password_ip"
 
 
-class AccountMutationThrottle(UserRateThrottle):
-    scope = "account_mutation"
-
-    def allow_request(self, request, view):
-        return request.method in ("GET", "HEAD", "OPTIONS") or super().allow_request(
-            request, view
-        )
-
 class HistoryThrottle(UserRateThrottle):
     scope = "viewing_history"
 
@@ -65,3 +57,20 @@ class AccountDataExportThrottle(UserRateThrottle):
 
     def allow_request(self, request, view):
         return request.method != "POST" or super().allow_request(request, view)
+
+
+class DeletionThrottle(UserRateThrottle):
+    scope = "account_deletion"
+
+
+class DeletionReceiptThrottle(IPThrottle):
+    scope = "deletion_receipt"
+
+
+class AccountMutationThrottle(UserRateThrottle):
+    scope = "account_mutation"
+
+    def allow_request(self, request, view):
+        return request.method in ("GET", "HEAD", "OPTIONS") or super().allow_request(
+            request, view
+        )

@@ -3,7 +3,12 @@ from typing import ClassVar
 from django.utils import timezone
 from rest_framework import serializers
 
-from accounts.models import AccountDataExport, PrivacySettings, ViewingHistory
+from accounts.models import (
+    AccountDataExport,
+    DeletionRequest,
+    PrivacySettings,
+    ViewingHistory,
+)
 from accounts.services.privacy import update_privacy
 
 
@@ -52,3 +57,37 @@ class AccountDataExportSerializer(serializers.ModelSerializer):
         if obj.expires_at and obj.expires_at <= timezone.now():
             return AccountDataExport.Status.EXPIRED
         return obj.status
+
+
+class DeletionSerializer(serializers.Serializer):
+    password = serializers.CharField(
+        max_length=128, trim_whitespace=False, write_only=True
+    )
+    confirmation = serializers.CharField(write_only=True)
+
+    def validate(self, attrs):
+        user = self.context["request"].user
+        if not user.check_password(attrs["password"]):
+            raise serializers.ValidationError(
+                {"password": ["Your current password is incorrect."]}
+            )
+        if attrs["confirmation"] != "DELETE":
+            raise serializers.ValidationError(
+                {"confirmation": ["Type DELETE to confirm."]}
+            )
+        return attrs
+
+
+class DeletionStatusSerializer(serializers.ModelSerializer):
+    job_id = serializers.UUIDField(source="pk", read_only=True)
+
+    class Meta:
+        model = DeletionRequest
+        fields = ("job_id", "status", "created_at", "completed_at")
+
+
+class DeletionReceiptSerializer(DeletionStatusSerializer):
+    receipt = serializers.CharField(read_only=True)
+
+    class Meta(DeletionStatusSerializer.Meta):
+        fields = (*DeletionStatusSerializer.Meta.fields, "receipt")

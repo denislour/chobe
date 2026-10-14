@@ -116,6 +116,8 @@ REST_FRAMEWORK = {
         "account_mutation": "20/min",
         "viewing_history": "60/min",
         "data_export": "2/hour",
+        "account_deletion": "3/hour",
+        "deletion_receipt": "60/min",
     },
     "NUM_PROXIES": 0,
 }

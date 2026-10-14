@@ -1,22 +1,49 @@
 import json
 
+from django.contrib.auth import logout
+from django.core import signing
 from django.http import HttpResponse
-from rest_framework.decorators import action
-from rest_framework.exceptions import Throttled
-from accounts.models import AccountDataExport
-from accounts.services.account_data import downloadable_account_data, request_account_data_export
-
+from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import action
+from rest_framework.exceptions import Throttled
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.viewsets import GenericViewSet, ModelViewSet
 
+from accounts.models import AccountDataExport, DeletionRequest
 from accounts.schemas.base import CSRFSchema
-from accounts.schemas.privacy import AccountDataExportSchema, ViewingHistorySchema
-from accounts.serializers.privacy import AccountDataExportSerializer, PrivacySerializer, ViewingHistorySerializer
-from accounts.services.privacy import clear_viewing_history, privacy_for, record_viewing_history, viewing_history_for
-from accounts.throttles import AccountDataExportThrottle, AccountMutationThrottle, HistoryThrottle
+from accounts.schemas.privacy import (
+    AccountDataExportSchema,
+    DeletionSchema,
+    ViewingHistorySchema,
+)
+from accounts.serializers.privacy import (
+    AccountDataExportSerializer,
+    DeletionSerializer,
+    DeletionStatusSerializer,
+    PrivacySerializer,
+    ViewingHistorySerializer,
+)
+from accounts.services.account_data import (
+    downloadable_account_data,
+    request_account_data_export,
+    request_account_deletion,
+)
+from accounts.services.privacy import (
+    clear_viewing_history,
+    privacy_for,
+    record_viewing_history,
+    viewing_history_for,
+)
+from accounts.throttles import (
+    AccountDataExportThrottle,
+    AccountMutationThrottle,
+    DeletionReceiptThrottle,
+    DeletionThrottle,
+    HistoryThrottle,
+)
 
 
 @method_decorator(never_cache, name="dispatch")
@@ -90,3 +117,42 @@ class AccountDataExportViewSet(ModelViewSet):
         )
         response["X-Content-Type-Options"] = "nosniff"
         return response
+
+
+@method_decorator(never_cache, name="dispatch")
+class DeletionViewSet(GenericViewSet):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = DeletionSerializer
+    schema = DeletionSchema()
+    throttle_classes = (DeletionThrottle,)
+
+    def create(self, request):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        job = request_account_deletion(request.user)
+        receipt = signing.dumps(str(job.pk), salt="account-deletion", compress=True)
+        logout(request)
+        return Response(
+            DeletionStatusSerializer(job).data | {"receipt": receipt}, status=202
+        )
+
+
+@method_decorator(never_cache, name="dispatch")
+class DeletionStatusViewSet(GenericViewSet):
+    throttle_classes = (DeletionReceiptThrottle,)
+    permission_classes = (AllowAny,)
+    authentication_classes = ()
+    serializer_class = DeletionStatusSerializer
+    schema = CSRFSchema()
+
+    def retrieve(self, request, receipt=None):
+        try:
+            job_id = signing.loads(
+                receipt, salt="account-deletion", max_age=7 * 24 * 60 * 60
+            )
+        except signing.BadSignature:
+            return Response(
+                {"detail": "This receipt is invalid or has expired."}, status=404
+            )
+        job = get_object_or_404(DeletionRequest, pk=job_id)
+        return Response(self.get_serializer(job).data)

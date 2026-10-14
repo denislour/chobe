@@ -3,7 +3,11 @@ from typing import ClassVar
 from drf_spectacular.types import OpenApiTypes
 
 from accounts.schemas.base import CSRFSchema
-from accounts.serializers.privacy import AccountDataExportSerializer, ViewingHistorySerializer
+from accounts.serializers.privacy import (
+    AccountDataExportSerializer,
+    DeletionReceiptSerializer,
+    ViewingHistorySerializer,
+)
 
 
 class AccountDataExportSchema(CSRFSchema):
@@ -19,6 +23,11 @@ class AccountDataExportSchema(CSRFSchema):
 
     def get_response_serializers(self):
         return self.responses[self.view.action]
+
+
+class DeletionSchema(CSRFSchema):
+    def get_response_serializers(self):
+        return {202: DeletionReceiptSerializer}
 
 
 class ViewingHistorySchema(CSRFSchema):
