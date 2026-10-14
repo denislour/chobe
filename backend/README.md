@@ -4,6 +4,8 @@ The backend is the Django REST API for the Chobe marketplace. It owns marketplac
 
 The `accounts` Django app contains authentication, profiles and privacy features. Views, serializers and schemas handle the API; services handle multi-step changes and transactions. Background jobs live in `accounts/tasks/`. Dependencies are managed in one `pyproject.toml` and `uv.lock`.
 
+The `backoffice` app owns Unfold configuration, the admin login form , themed User/Group admin classes and admin UI tests. Put future admin template overrides in `backoffice/templates/admin/` and theme assets in `backoffice/static/backoffice/`. It is installed before `unfold` so its templates take priority. Account model registration and account data permissions stay in `accounts/admin.py`; import themed admin classes from `backoffice.admin` there.
+
 ## Cache storage
 
 Django uses `DatabaseCache` in a separate `cache.sqlite3` file. The cache connection enables WAL with `synchronous=NORMAL`; business data, sessions and task records stay in `db.sqlite3`. All web processes must share the same local cache file. Set `DJANGO_CACHE_DB_PATH` to change its path; its parent directory must exist. Do not use a network filesystem or point the cache path at the business database.

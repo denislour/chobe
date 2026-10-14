@@ -1,6 +1,8 @@
 import os
 from pathlib import Path
 
+from backoffice import settings as backoffice_settings
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get(
@@ -10,6 +12,7 @@ DEBUG = os.environ.get("DJANGO_DEBUG", "true").lower() == "true"
 ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost").split(",")
 
 INSTALLED_APPS = [
+    "backoffice",
     "unfold",
     "django.contrib.admin",
     "django.contrib.auth",
@@ -116,7 +119,7 @@ SPECTACULAR_SETTINGS = {
     "VERSION": "1.0.0",
 }
 
-UNFOLD = {"LOGIN": {"form": "accounts.forms.AdminLoginForm"}}
+UNFOLD = backoffice_settings.UNFOLD
 
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SECURE = not DEBUG
