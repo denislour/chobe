@@ -22,6 +22,13 @@ export interface AccountDataExportJob {
   expires_at: string | null;
 }
 
+export interface DeletionJob {
+  job_id: string;
+  status: 'requested' | 'processing' | 'completed' | 'failed';
+  created_at: string;
+  completed_at: string | null;
+}
+
 @Injectable({ providedIn: 'root' })
 export class PrivacyApi {
   constructor(private readonly http: HttpClient) {}
@@ -50,5 +57,11 @@ export class PrivacyApi {
 
   createAccountDataExport(): Observable<AccountDataExportJob> {
     return this.http.post<AccountDataExportJob>('/api/v1/me/data-exports/', {});
+  }
+
+  deletionStatus(receipt: string): Observable<DeletionJob> {
+    return this.http.get<DeletionJob>(
+      `/api/v1/account-deletion-status/${encodeURIComponent(receipt)}/`,
+    );
   }
 }
