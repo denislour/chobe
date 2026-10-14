@@ -22,10 +22,11 @@ Requirements: Python 3.14 and uv.
 uv sync
 uv run python manage.py migrate
 uv run python manage.py createcachetable --database cache
+export DJANGO_DEMO_MODE=true
 uv run python manage.py seed_demo_admin
 uv run python manage.py runserver localhost:8000
 ```
 
 The API documentation is available at `http://localhost:8000/api/v1/docs/`.
 
-The Django Unfold admin is available at `http://localhost:8000/admin/`. The demo account is `admin` with password `abc123ABC!!!`.
+The Django Unfold admin is available at `http://localhost:8000/admin/`. With `DJANGO_DEMO_MODE=true`, the demo account is `admin` with password `abc123ABC!!!`, and the login page shows demo placeholders. Demo mode is disabled by default. Disabling it hides the placeholders and blocks seeding; it does not remove an existing demo account.

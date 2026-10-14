@@ -1,15 +1,28 @@
 from io import StringIO
 
 from django.core.management import call_command
-from django.test import TestCase
+from django.core.management.base import CommandError
+from django.test import TestCase, override_settings
 
 from accounts.constants import DEMO_ADMIN_PASSWORD, DEMO_ADMIN_USERNAME
 from accounts.models import User
 
 
+@override_settings(DEMO_MODE=True)
 class DemoAdminTests(TestCase):
     def setUp(self):
         call_command("seed_demo_admin", stdout=StringIO())
+
+    @override_settings(DEMO_MODE=False)
+    def test_seed_is_blocked_without_changing_existing_admin(self):
+        user = User.objects.get(username=DEMO_ADMIN_USERNAME)
+        password_hash = user.password
+        User.objects.filter(pk=user.pk).update(is_staff=False, is_superuser=False)
+        with self.assertRaisesMessage(CommandError, "Demo mode is disabled."):
+            call_command("seed_demo_admin", stdout=StringIO())
+        user.refresh_from_db()
+        self.assertEqual(user.password, password_hash)
+        self.assertFalse(user.is_staff or user.is_superuser)
 
     def test_seed_can_run_again_without_creating_another_user(self):
         user = User.objects.get(username=DEMO_ADMIN_USERNAME)

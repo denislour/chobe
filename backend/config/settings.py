@@ -9,6 +9,7 @@ SECRET_KEY = os.environ.get(
     "DJANGO_SECRET_KEY", "django-insecure-local-development-only"
 )
 DEBUG = os.environ.get("DJANGO_DEBUG", "true").lower() == "true"
+DEMO_MODE = os.environ.get("DJANGO_DEMO_MODE", "false").lower() == "true"
 ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost").split(",")
 
 INSTALLED_APPS = [

@@ -1,11 +1,16 @@
-from django.test import TestCase
+from django.core.cache import cache
+from django.test import TestCase, override_settings
 
 from accounts.constants import DEMO_ADMIN_PASSWORD, DEMO_ADMIN_USERNAME
 from accounts.models import User
 
 
 class AdminTests(TestCase):
+    databases = frozenset({"default", "cache"})
+
     def setUp(self):
+        cache.clear()
+        self.addCleanup(cache.clear)
         User.objects.create_superuser(
             username=DEMO_ADMIN_USERNAME, password=DEMO_ADMIN_PASSWORD
         )
@@ -30,6 +35,13 @@ class AdminTests(TestCase):
             self.client.get("/"), "/admin/", fetch_redirect_response=False
         )
 
+    @override_settings(DEMO_MODE=False)
+    def test_login_hides_demo_credentials_when_disabled(self):
+        response = self.client.get("/admin/login/")
+        self.assertNotContains(response, f'placeholder="{DEMO_ADMIN_USERNAME}"')
+        self.assertNotContains(response, DEMO_ADMIN_PASSWORD)
+
+    @override_settings(DEMO_MODE=True)
     def test_login_fields_have_placeholders(self):
         response = self.client.get("/admin/login/")
 
