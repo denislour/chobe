@@ -58,3 +58,10 @@ class AccountMutationThrottle(UserRateThrottle):
 
 class HistoryThrottle(UserRateThrottle):
     scope = "viewing_history"
+
+
+class AccountDataExportThrottle(UserRateThrottle):
+    scope = "data_export"
+
+    def allow_request(self, request, view):
+        return request.method != "POST" or super().allow_request(request, view)

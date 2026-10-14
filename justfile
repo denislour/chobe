@@ -65,7 +65,7 @@ service action="run":
         *) echo "Unknown service command: $1. Use run, test, migrate, or lint." >&2; exit 1 ;;
     esac
 
-# Run, test, migrate, or lint the Django backend.
+# Run, test, migrate, lint, or clean up expired Django account data.
 be action="run":
     #!/usr/bin/env bash
     set -euo pipefail
@@ -74,8 +74,9 @@ be action="run":
         run) just emails; uv run python manage.py migrate; uv run python manage.py createcachetable --database cache; uv run python manage.py runserver localhost:8000 ;;
         test) just emails; uv run python manage.py test ;;
         migrate) uv run python manage.py migrate; uv run python manage.py createcachetable --database cache ;;
+        cleanup) uv run python manage.py cleanup_account_data ;;
         lint) uv run ruff check .; uv run ruff format --check . ;;
-        *) echo "Unknown backend command: $1. Use run, test, migrate, or lint." >&2; exit 1 ;;
+        *) echo "Unknown backend command: $1. Use run, test, migrate, cleanup, or lint." >&2; exit 1 ;;
     esac
 
 # Run, test, or lint Angular; migrate reports that no database migration is needed.

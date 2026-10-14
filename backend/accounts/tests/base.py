@@ -1,9 +1,25 @@
+from unittest.mock import patch
+
+from django.core.management import call_command
 from django.conf import settings
 from django.core.cache import cache
 from rest_framework.test import APIClient, APITestCase
 
 from accounts.constants import DEMO_ADMIN_PASSWORD
 from accounts.models import User
+
+
+def run_huey_worker():
+    with patch(
+        "django_tasks_db.management.commands.db_worker.Worker.configure_signals"
+    ):
+        call_command(
+            "db_worker",
+            batch=True,
+            reload=False,
+            startup_delay=False,
+            verbosity=0,
+        )
 
 
 class AccountAPITestCase(APITestCase):
@@ -29,3 +45,6 @@ class AccountAPITestCase(APITestCase):
             format="json",
             HTTP_X_XSRF_TOKEN=self.client.cookies[settings.CSRF_COOKIE_NAME].value,
         )
+
+    def run_worker(self):
+        run_huey_worker()

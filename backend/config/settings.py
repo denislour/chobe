@@ -115,6 +115,7 @@ REST_FRAMEWORK = {
         "reset_password_ip": "10/min",
         "account_mutation": "20/min",
         "viewing_history": "60/min",
+        "data_export": "2/hour",
     },
     "NUM_PROXIES": 0,
 }

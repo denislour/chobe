@@ -1,7 +1,24 @@
 from typing import ClassVar
 
+from drf_spectacular.types import OpenApiTypes
+
 from accounts.schemas.base import CSRFSchema
-from accounts.serializers.privacy import ViewingHistorySerializer
+from accounts.serializers.privacy import AccountDataExportSerializer, ViewingHistorySerializer
+
+
+class AccountDataExportSchema(CSRFSchema):
+    responses: ClassVar[dict] = {
+        "list": AccountDataExportSerializer,
+        "retrieve": AccountDataExportSerializer,
+        "create": {202: AccountDataExportSerializer},
+        "download": OpenApiTypes.BINARY,
+    }
+
+    def get_request_serializer(self):
+        return None
+
+    def get_response_serializers(self):
+        return self.responses[self.view.action]
 
 
 class ViewingHistorySchema(CSRFSchema):

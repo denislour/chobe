@@ -1,0 +1,81 @@
+import base64
+from datetime import timedelta
+
+from django.utils import timezone
+from rest_framework import serializers
+
+from accounts.models import ConsentEvent, PrivacySettings, Profile, User, ViewingHistory
+
+
+class AccountSnapshotSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ("id", "username", "email", "date_joined")
+        read_only_fields = fields
+
+
+class ProfileSnapshotSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(source="user.email", read_only=True)
+    username = serializers.CharField(source="user.username", read_only=True)
+
+    class Meta:
+        model = Profile
+        fields = (
+            "display_name",
+            "area",
+            "bio",
+            "phone",
+            "email",
+            "username",
+            "version",
+            "updated_at",
+        )
+        read_only_fields = fields
+
+
+class PrivacySnapshotSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PrivacySettings
+        fields = (
+            "share_phone",
+            "record_history",
+            "consent_at",
+            "version",
+            "updated_at",
+        )
+        read_only_fields = fields
+
+
+class ConsentSnapshotSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ConsentEvent
+        fields = ("share_phone", "policy_version", "created_at")
+        read_only_fields = fields
+
+
+class HistorySnapshotSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ViewingHistory
+        fields = ("listing_id", "viewed_at")
+        read_only_fields = fields
+
+
+class AccountDataSnapshotSerializer(serializers.Serializer):
+    generated_at = serializers.DateTimeField(default=timezone.now, read_only=True)
+    account = AccountSnapshotSerializer(source="*", read_only=True)
+    profile = ProfileSnapshotSerializer(read_only=True)
+    avatar_jpeg_base64 = serializers.SerializerMethodField()
+    privacy = PrivacySnapshotSerializer(read_only=True)
+    consent = ConsentSnapshotSerializer(
+        source="consentevent_set", many=True, read_only=True
+    )
+    viewing_history = serializers.SerializerMethodField()
+
+    def get_avatar_jpeg_base64(self, user) -> str | None:
+        return base64.b64encode(bytes(user.profile.avatar)).decode() or None
+
+    def get_viewing_history(self, user) -> list:
+        history = user.viewinghistory_set.filter(
+            viewed_at__gte=timezone.now() - timedelta(days=30)
+        )[:100]
+        return HistorySnapshotSerializer(history, many=True).data

@@ -1,8 +1,9 @@
 from typing import ClassVar
 
+from django.utils import timezone
 from rest_framework import serializers
 
-from accounts.models import PrivacySettings, ViewingHistory
+from accounts.models import AccountDataExport, PrivacySettings, ViewingHistory
 from accounts.services.privacy import update_privacy
 
 
@@ -37,3 +38,17 @@ class ViewingHistorySerializer(serializers.ModelSerializer):
         read_only_fields = ("viewed_at",)
         validators = ()
         extra_kwargs: ClassVar[dict] = {"listing_id": {"min_value": 1}}
+
+
+class AccountDataExportSerializer(serializers.ModelSerializer):
+    job_id = serializers.UUIDField(source="pk", read_only=True)
+    status = serializers.SerializerMethodField()
+
+    class Meta:
+        model = AccountDataExport
+        fields = ("job_id", "status", "created_at", "expires_at")
+
+    def get_status(self, obj) -> str:
+        if obj.expires_at and obj.expires_at <= timezone.now():
+            return AccountDataExport.Status.EXPIRED
+        return obj.status

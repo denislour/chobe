@@ -40,7 +40,7 @@ from rest_framework.parsers import JSONParser
 from rest_framework.request import Request
 from rest_framework.test import APIRequestFactory
 from accounts.throttles import (
-    LoginAccountThrottle, LoginIPThrottle,
+    AccountDataExportThrottle, LoginAccountThrottle, LoginIPThrottle,
 )
 request = Request(
     APIRequestFactory().post(
@@ -50,7 +50,7 @@ request = Request(
     parsers=[JSONParser()],
 )
 request.user = SimpleNamespace(is_authenticated=True, pk=42)
-throttle_types = (LoginIPThrottle, LoginAccountThrottle)
+throttle_types = (LoginIPThrottle, LoginAccountThrottle, AccountDataExportThrottle)
 """
             setup = (
                 bootstrap
@@ -110,6 +110,7 @@ print(json.dumps({
                     "throttles": {
                         "login_ip": False,
                         "login_account": False,
+                        "data_export": False,
                     },
                 },
             )
