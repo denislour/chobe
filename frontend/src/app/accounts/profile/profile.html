@@ -1,0 +1,106 @@
+<main class="account-page">
+  <h1>Your account</h1>
+  <p class="intro">Your profile, contact details, and privacy choices.</p>
+  <div class="account-layout">
+    <app-account-nav />
+    <div class="account-content">
+      @if (profile.error()) {
+        <p class="error" role="alert">{{ profile.error() }}</p>
+        <button
+          class="btn secondary"
+          type="button"
+          [disabled]="profile.pending() || profile.loading()"
+          (click)="profile.load()"
+        >
+          Reload latest values
+        </button>
+      }
+      @if (profile.loading()) {
+        <p role="status">Loading your profile…</p>
+      }
+      @if (profile.saved()) {
+        <p class="success" role="status">Profile saved.</p>
+      }
+      @if (profile.profile(); as current) {
+        <form [formGroup]="form" (ngSubmit)="submit()" [attr.aria-busy]="profile.pending()">
+          <section class="settings-section" aria-labelledby="profile-title">
+            <h2 id="profile-title">Your profile</h2>
+            <div class="form-grid">
+              <div class="field">
+                <label for="profile-name">Display name</label
+                ><input
+                  id="profile-name"
+                  formControlName="display_name"
+                  required
+                  maxlength="80"
+                  aria-describedby="profile-name-error"
+                  [attr.aria-invalid]="
+                    form.controls.display_name.touched && form.controls.display_name.invalid
+                  "
+                />
+                <small id="profile-name-error" class="error">
+                  @if (form.controls.display_name.touched && form.controls.display_name.invalid) {
+                    Enter a name with up to 80 characters.
+                  }
+                  @if (profile.fieldErrors()['display_name']; as errors) {
+                    {{ errors.join(' ') }}
+                  }
+                </small>
+              </div>
+              <div class="field">
+                <label for="profile-email">Email</label
+                ><input
+                  id="profile-email"
+                  [value]="current.email"
+                  readonly
+                  autocomplete="email"
+                /><small class="hint">Your sign-in email is read-only here.</small>
+              </div>
+              <div class="field">
+                <label for="profile-area">Area</label
+                ><input
+                  id="profile-area"
+                  formControlName="area"
+                  maxlength="120"
+                  autocomplete="address-level1"
+                />
+              </div>
+              <div class="field">
+                <label for="profile-phone">Phone number</label
+                ><input
+                  id="profile-phone"
+                  formControlName="phone"
+                  maxlength="16"
+                  type="tel"
+                  autocomplete="tel"
+                  placeholder="+84912345678"
+                  aria-describedby="profile-phone-error phone-help"
+                  [attr.aria-invalid]="form.controls.phone.touched && form.controls.phone.invalid"
+                />
+                <small id="phone-help" class="hint"
+                  >Optional. Include the country code. Not publicly shown unless you allow it in
+                  Privacy.</small
+                >
+                <small id="profile-phone-error" class="error">
+                  @if (form.controls.phone.touched && form.controls.phone.invalid) {
+                    Use + and 8 to 15 digits.
+                  }
+                  @if (profile.fieldErrors()['phone']; as errors) {
+                    {{ errors.join(' ') }}
+                  }
+                </small>
+              </div>
+            </div>
+            <div class="field">
+              <label for="profile-bio">About you</label
+              ><textarea id="profile-bio" formControlName="bio" maxlength="200" rows="3"></textarea>
+            </div>
+            <button class="btn" type="submit" [disabled]="profile.pending() || profile.loading()">
+              {{ profile.pending() ? 'Saving…' : 'Save profile' }}
+            </button>
+          </section>
+        </form>
+      }
+    </div>
+  </div>
+</main>

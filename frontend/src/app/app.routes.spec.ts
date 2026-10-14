@@ -22,4 +22,10 @@ describe('Module routes', () => {
     expect(harness.routeNativeElement?.querySelector('form')).not.toBeNull();
   });
 
+  it('redirects anonymous users from account pages through the auth guard', async () => {
+    await RouterTestingHarness.create('/account/profile');
+    const router = TestBed.inject(Router);
+    expect(router.url).toContain('/login?');
+    expect(router.parseUrl(router.url).queryParams['returnUrl']).toBe('/account/profile');
+  });
 });
