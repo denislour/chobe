@@ -6,6 +6,14 @@ from accounts.services.versioning import VersionConflict, save_versioned
 from shops.models import Shop, ShopSlug
 from shops.services.audit import audit_change
 
+OWNER_TRANSITIONS = {
+    Shop.Status.ACTIVE: {Shop.Status.PAUSED, Shop.Status.CLOSED},
+    Shop.Status.PAUSED: {Shop.Status.ACTIVE, Shop.Status.CLOSED},
+    Shop.Status.SUSPENDED: set(),
+    Shop.Status.CLOSED: set(),
+}
+
+
 def require_active_owner(user):
     if not get_user_model().objects.filter(pk=user.pk, is_active=True).exists():
         raise PermissionDenied("Log in again before changing your shop.")
@@ -61,3 +69,18 @@ def update_shop(instance, user, values):
         raise ValidationError(
             {"slug": ["This shop address is already in use."]}
         ) from error
+
+
+def change_shop_status(instance, user, values):
+    with transaction.atomic():
+        require_active_owner(user)
+        shop = Shop.objects.select_for_update().get(pk=instance.pk, owner=user)
+        status = values["status"]
+        if shop.version != values["version"]:
+            raise VersionConflict()
+        if status not in OWNER_TRANSITIONS[shop.status]:
+            raise ValidationError({"status": ["This status change is not allowed."]})
+        previous = shop.status
+        shop = save_versioned(shop, values.copy())
+        audit_change(shop, user, "status_changed", {"from": previous, "to": status})
+        return shop

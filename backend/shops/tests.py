@@ -57,6 +57,10 @@ class ShopTests(AccountAPITestCase):
         self.assertEqual(
             self.request("get", f"shops/{shop.pk}/images/logo").status_code, 404
         )
+        status = self.request(
+            "post", f"shops/{shop.pk}/status", {"status": "closed", "version": 1}
+        )
+        self.assertEqual(status.status_code, 404)
 
     def test_slug_changes_reserve_old_addresses_and_do_not_allow_takeover(self):
         shop = self.create_shop()
@@ -80,11 +84,37 @@ class ShopTests(AccountAPITestCase):
         stale = self.request(
             "patch", f"shops/{shop.pk}", {"name": "Stale", "version": 1}
         )
+        status = self.request(
+            "post", f"shops/{shop.pk}/status", {"status": "paused", "version": 1}
+        )
         self.assertEqual(saved.status_code, 200)
         self.assertEqual(stale.status_code, 409)
+        self.assertEqual(status.status_code, 409)
         shop.refresh_from_db()
         self.assertEqual(shop.name, "Moc Living")
         self.assertEqual(shop.status, "active")
+
+    def test_pause_can_be_reopened_and_closure_is_permanent(self):
+        shop = self.create_shop()
+        for version, status in [(1, "paused"), (2, "active"), (3, "closed")]:
+            response = self.request(
+                "post",
+                f"shops/{shop.pk}/status",
+                {"status": status, "version": version},
+            )
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.data["version"], version + 1)
+        reopen = self.request(
+            "post", f"shops/{shop.pk}/status", {"status": "active", "version": 4}
+        )
+        update = self.request(
+            "patch", f"shops/{shop.pk}", {"name": "Changed", "version": 4}
+        )
+        self.assertEqual(reopen.status_code, 400)
+        self.assertEqual(update.status_code, 400)
+        self.assertEqual(
+            ShopAuditEvent.objects.filter(shop=shop, action="status_changed").count(), 3
+        )
 
     def test_images_are_reencoded_private_and_can_be_removed(self):
         shop = self.create_shop()

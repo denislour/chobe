@@ -16,7 +16,9 @@ from shops.schemas import ShopSchema
 from shops.serializers import (
     ShopPreviewSerializer,
     ShopSerializer,
+    ShopStatusSerializer,
 )
+from shops.services.management import change_shop_status
 from shops.upload_handlers import ShopImageUploadHandler
 
 
@@ -26,6 +28,7 @@ class ShopViewSet(ModelViewSet):
     throttle_classes = (AccountMutationThrottle,)
     serializer_class = ShopSerializer
     serializers_by_action: ClassVar[dict] = {
+        "status": ShopStatusSerializer,
         "preview": ShopPreviewSerializer,
     }
     schema = ShopSchema()
@@ -54,6 +57,13 @@ class ShopViewSet(ModelViewSet):
     def mine(self, request):
         shop = get_object_or_404(self.get_queryset())
         return Response(self.get_serializer(shop).data)
+
+    def status(self, request, pk=None):
+        shop = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        shop = change_shop_status(shop, request.user, serializer.validated_data)
+        return Response(ShopSerializer(shop).data)
 
     def preview(self, request, slug=None):
         alias = get_object_or_404(

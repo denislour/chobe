@@ -118,3 +118,8 @@ class ShopSerializer(ShopPreviewSerializer):
 
     def update(self, instance, validated_data):
         return update_shop(instance, self.context["request"].user, validated_data)
+
+
+class ShopStatusSerializer(serializers.Serializer):
+    status = serializers.ChoiceField(choices=("active", "paused", "closed"))
+    version = serializers.IntegerField(min_value=1, max_value=2**63 - 1)

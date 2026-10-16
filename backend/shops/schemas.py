@@ -11,6 +11,7 @@ class ShopSchema(CSRFSchema):
         "mine": ShopSerializer,
         "create": {201: ShopSerializer},
         "partial_update": ShopSerializer,
+        "status": ShopSerializer,
         "preview": ShopPreviewSerializer,
         "image": {(200, "image/jpeg"): OpenApiTypes.BINARY},
     }
