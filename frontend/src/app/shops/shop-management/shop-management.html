@@ -1,0 +1,100 @@
+<main class="account-page">
+  <h1>{{ shop.shop() ? 'My shop' : 'Create your shop' }}</h1>
+  <p class="intro">One shop, your own way. Manage its details, images, and availability.</p>
+  <div class="account-layout">
+    <app-account-nav />
+    <div class="account-content">
+      @if (shop.loading()) { <p role="status">Loading your shop…</p> }
+      @if (shop.error()) {
+        <div class="feedback error" role="alert">
+          <p>{{ shop.error() }}</p>
+          <button class="btn secondary" type="button" [disabled]="shop.pending() || shop.loading()" (click)="shop.load()">
+            Reload latest values (discard edits)
+          </button>
+        </div>
+      }
+      @if (shop.notice()) { <p class="feedback success" role="status">{{ shop.notice() }}</p> }
+      @if (shop.loaded()) {
+        @if (shop.shop(); as current) {
+          <div class="shop-summary">
+            <div><h2>{{ current.name }}</h2><span class="status-chip">{{ statusLabels[current.status] }}</span></div>
+          </div>
+          @if (current.status === 'suspended') {
+            <p class="feedback error">An administrator suspended your shop. You can update its details, but only an administrator can restore it.</p>
+          }
+          @if (current.status === 'closed') {
+            <p class="feedback">This shop is permanently closed. Its details remain available to you.</p>
+          }
+        } @else {
+          <p class="feedback">You do not have a shop yet. Add its details below to create your one shop.</p>
+        }
+        <form (ngSubmit)="submit()" [formGroup]="form" [attr.aria-busy]="shop.pending()">
+          <fieldset [disabled]="shop.pending() || shop.loading() || shop.shop()?.status === 'closed'">
+            <legend>Shop details</legend>
+            <div class="form-grid">
+              <div class="field">
+                <label for="shop-name">Shop name</label>
+                <input id="shop-name" formControlName="name" required maxlength="80" aria-describedby="shop-name-error" />
+                <small id="shop-name-error" class="error">
+                  @if (form.controls.name.touched && form.controls.name.invalid) { Enter a name up to 80 characters. }
+                  {{ shop.fieldErrors()['name']?.join(' ') }}
+                </small>
+              </div>
+              <div class="field">
+                <label for="shop-area">Area</label>
+                <input id="shop-area" formControlName="area" required maxlength="120" autocomplete="address-level1" aria-describedby="shop-area-error" />
+                <small id="shop-area-error" class="error">
+                  @if (form.controls.area.touched && form.controls.area.invalid) { Enter your shop area, up to 120 characters. }
+                  {{ shop.fieldErrors()['area']?.join(' ') }}
+                </small>
+              </div>
+              <div class="field">
+                <label for="shop-slug">Shop address</label>
+                <input id="shop-slug" formControlName="slug" required maxlength="80" autocapitalize="none" spellcheck="false" aria-describedby="shop-slug-help shop-slug-error" />
+                <small id="shop-slug-help" class="hint">Use lowercase letters, numbers, and hyphens. Previous addresses stay reserved for your shop.</small>
+                <button class="text-link" type="button" (click)="suggestSlug()">Suggest from shop name</button>
+                <small id="shop-slug-error" class="error">
+                  @if (form.controls.slug.touched && form.controls.slug.invalid) { Use an address up to 80 characters, such as moc-home. }
+                  {{ shop.fieldErrors()['slug']?.join(' ') }}
+                </small>
+              </div>
+              <div class="field">
+                <label for="shop-hours">Contact hours</label>
+                <input id="shop-hours" formControlName="contact_hours" maxlength="120" placeholder="For example, 09:00–18:00" aria-describedby="shop-hours-error" />
+                <small id="shop-hours-error" class="error">{{ shop.fieldErrors()['contact_hours']?.join(' ') }}</small>
+              </div>
+              <div class="field full-span">
+                <label for="shop-description">About your shop</label>
+                <textarea id="shop-description" formControlName="description" required maxlength="1000" rows="5" aria-describedby="shop-description-error"></textarea>
+                <small id="shop-description-error" class="error">
+                  @if (form.controls.description.touched && form.controls.description.invalid) { Add a description up to 1,000 characters. }
+                  {{ shop.fieldErrors()['description']?.join(' ') }}
+                </small>
+              </div>
+              <div class="field">
+                <label for="shop-website">Website link</label>
+                <input id="shop-website" type="url" formControlName="website_url" maxlength="400" placeholder="https://example.com" aria-describedby="shop-website-error" />
+                <small id="shop-website-error" class="error">
+                  @if (form.controls.website_url.touched && form.controls.website_url.invalid) { Enter an HTTP or HTTPS link up to 400 characters. }
+                  {{ shop.fieldErrors()['website_url']?.join(' ') }}
+                </small>
+              </div>
+              <div class="field">
+                <label for="shop-social">Social link</label>
+                <input id="shop-social" type="url" formControlName="social_url" maxlength="400" placeholder="https://example.com/your-shop" aria-describedby="shop-social-error" />
+                <small id="shop-social-error" class="error">
+                  @if (form.controls.social_url.touched && form.controls.social_url.invalid) { Enter an HTTP or HTTPS link up to 400 characters. }
+                  {{ shop.fieldErrors()['social_url']?.join(' ') }}
+                </small>
+              </div>
+            </div>
+            <p class="hint">Manage your phone number and sharing consent in <a routerLink="/account/profile">Profile</a> and <a routerLink="/account/privacy">Privacy</a>.</p>
+            <div class="toolbar">
+              <button class="btn" type="submit">{{ shop.pending() ? 'Saving…' : shop.shop() ? 'Save shop' : 'Create shop' }}</button>
+            </div>
+          </fieldset>
+        </form>
+      }
+    </div>
+  </div>
+</main>

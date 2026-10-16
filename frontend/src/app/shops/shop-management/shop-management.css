@@ -1,0 +1,11 @@
+fieldset { border: 0; padding: 0; margin: 24px 0 0; min-width: 0; }
+legend { font-size: 20px; font-weight: 600; margin-bottom: 20px; }
+.full-span { grid-column: 1 / -1; }
+.shop-summary { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin: 24px 0; }
+.shop-summary h2 { margin-bottom: 8px; overflow-wrap: anywhere; }
+.status-chip { display: inline-block; background: #fff8db; padding: 4px 12px; border-radius: 999px; font-weight: 600; }
+.feedback { background: #f5f6f2; padding: 16px; border-radius: 8px; margin: 16px 0; overflow-wrap: anywhere; }
+.text-link { color: var(--ink); text-decoration: underline; text-underline-offset: 4px; padding: 8px 0; min-height: 44px; text-align: left; }
+.btn:hover:not(:disabled) { background: var(--yellow-hover); }
+.btn.secondary:hover:not(:disabled) { background: #f5f6f2; }
+@media (max-width: 600px) { .toolbar .text-link { flex: 1; } }
