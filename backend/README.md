@@ -4,13 +4,45 @@ The backend is the Django REST API for the Chobe marketplace. It owns marketplac
 
 The `accounts` Django app contains authentication, profiles and privacy features. Views, serializers and schemas handle the API; services handle multi-step changes and transactions. Background jobs live in `accounts/tasks/`. Dependencies are managed in one `pyproject.toml` and `uv.lock`.
 
+All business API views inherit directly from `ModelViewSet` and use DRF's
+`SimpleRouter`. Standard operations use DRF actions; additional operations use
+`@action`. Each view blocks inherited operations outside its API contract.
+There are no custom routers or routing attributes. Django admin, schema/docs
+and the root redirect use normal Django URL patterns.
+
+The current user's profile uses `GET/PATCH /api/v1/profiles/me/`, with its avatar
+at `GET /api/v1/profiles/me/avatar/`. Privacy settings use
+`GET/PATCH /api/v1/privacy-settings/me/`. The current shop uses
+`GET /api/v1/shops/mine/`. Viewing history uses
+`GET/POST /api/v1/me/viewing-history/` and
+`DELETE /api/v1/me/viewing-history/clear/`.
+
 The `backoffice` app owns Unfold configuration, the admin login form and throttles, themed User/Group admin classes and admin UI tests. Put future admin template overrides in `backoffice/templates/admin/` and theme assets in `backoffice/static/backoffice/`. It is installed before `unfold` so its templates take priority. Account model registration and account data permissions stay in `accounts/admin.py`; import themed admin classes from `backoffice.admin` there.
 
 ## Shop management
 
 The `shops` app provides owner-only creation, editing, status changes, image uploads and previews. Each user can own one shop. Updates require the current `version`; stale updates return 409. Closed shops cannot be reopened. Admins can suspend and restore shops through audited admin actions.
 
-Apply the `shops/0001_initial` migration before using these endpoints. Shop images are private JPEG bytes in SQLite; uploads allow JPEG, PNG and WebP up to 2 MiB per image. Configure an overall request body limit in the production proxy as well. Account exports include shop data, and account deletion removes the shop and its images.
+Apply the `shops/0001_initial` migration before using these endpoints. Shop images are stored as JPEG bytes in SQLite; uploads allow JPEG, PNG and WebP up to 2 MiB per image. Configure an overall request body limit in the production proxy as well. Account exports include shop data, and account deletion removes the shop and its images.
+
+## Public storefronts and following
+
+Apply `shops/0002_shopfollow` before using following. Public storefronts use
+`GET /api/v1/shop-storefronts/{slug}/`; public images use
+`GET /api/v1/shop-storefronts/{slug}/images/{logo|banner}/`. Only active shops with
+active owners are public. Old slugs redirect to the current storefront API.
+Storefronts have a separate prefix from owner operations, so UUID-shaped slugs do not conflict with shop IDs.
+
+Authenticated users can `PUT` or `DELETE /api/v1/me/followed-shops/{uuid}/`
+with CSRF protection. Both operations are idempotent and return 204.
+`GET /api/v1/me/followed-shops/` is private and paginated (20 per page, up to 50
+with `page_size`). Hidden shops stay followed but do not appear in this list.
+Account exports include follow records; account or shop deletion removes related follows.
+
+Public responses and images are not cached. Public reads share a limit of 120
+requests per minute per IP; follow changes use the account mutation limit.
+There is no listing model yet. Storefront listing data, filters and sorting will
+be connected in F-011. No listing API is exposed by this feature.
 
 ## Cache storage
 
