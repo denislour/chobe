@@ -5,6 +5,8 @@ from django.utils import timezone
 from rest_framework import serializers
 
 from accounts.models import ConsentEvent, PrivacySettings, Profile, User, ViewingHistory
+from shops.models import Shop
+from shops.serializers import ShopSnapshotSerializer
 
 
 class AccountSnapshotSerializer(serializers.ModelSerializer):
@@ -70,6 +72,7 @@ class AccountDataSnapshotSerializer(serializers.Serializer):
         source="consentevent_set", many=True, read_only=True
     )
     viewing_history = serializers.SerializerMethodField()
+    shop = serializers.SerializerMethodField()
 
     def get_avatar_jpeg_base64(self, user) -> str | None:
         return base64.b64encode(bytes(user.profile.avatar)).decode() or None
@@ -79,3 +82,7 @@ class AccountDataSnapshotSerializer(serializers.Serializer):
             viewed_at__gte=timezone.now() - timedelta(days=30)
         )[:100]
         return HistorySnapshotSerializer(history, many=True).data
+
+    def get_shop(self, user) -> dict | None:
+        shop = Shop.objects.filter(owner=user).first()
+        return ShopSnapshotSerializer(shop).data if shop is not None else None

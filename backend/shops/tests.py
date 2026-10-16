@@ -207,3 +207,23 @@ class ShopTests(AccountAPITestCase):
                     400,
                 )
         self.assertFalse(Shop.objects.exists())
+
+    def test_export_includes_shop_and_account_deletion_removes_its_data(self):
+        shop = self.create_shop()
+        response = self.request("post", "me/data-exports", {})
+        self.run_worker()
+        payload = self.request(
+            "get", f"me/data-exports/{response.data['job_id']}/download"
+        ).json()
+        self.assertEqual(payload["shop"]["slug"], shop.slug)
+        self.assertNotIn("owner", payload["shop"])
+        response = self.request(
+            "post",
+            "me/deletion-requests",
+            {"password": DEMO_ADMIN_PASSWORD, "confirmation": "DELETE"},
+        )
+        self.assertEqual(response.status_code, 202)
+        self.run_worker()
+        self.assertFalse(Shop.objects.filter(pk=shop.pk).exists())
+        self.assertFalse(ShopSlug.objects.filter(shop_id=shop.pk).exists())
+        self.assertFalse(ShopAuditEvent.objects.filter(shop_id=shop.pk).exists())
