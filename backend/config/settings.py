@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     "huey.contrib.djhuey",
     "tasks",
     "accounts",
+    "shops",
 ]
 
 MIDDLEWARE = [
