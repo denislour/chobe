@@ -41,7 +41,7 @@ export class ShopApi {
   constructor(private readonly http: HttpClient) {}
 
   mine(): Observable<ShopData> {
-    return this.http.get<ShopData>('/api/v1/me/shop/');
+    return this.http.get<ShopData>('/api/v1/shops/mine/');
   }
 
   save({ id, body }: ShopSaveRequest): Observable<ShopData> {

@@ -23,7 +23,7 @@ describe('ShopManagement', () => {
     await restoration;
     fixture = TestBed.createComponent(ShopManagement);
     fixture.detectChanges();
-    http.expectOne('/api/v1/me/shop/').flush(shopFixture);
+    http.expectOne('/api/v1/shops/mine/').flush(shopFixture);
     await fixture.whenStable();
     element = fixture.nativeElement;
   });
@@ -45,7 +45,7 @@ describe('ShopManagement', () => {
 
   it('creates a first shop after the owner endpoint reports no shop', async () => {
     fixture.debugElement.injector.get(ShopStore).load();
-    http.expectOne('/api/v1/me/shop/').flush({}, { status: 404, statusText: 'Not Found' });
+    http.expectOne('/api/v1/shops/mine/').flush({}, { status: 404, statusText: 'Not Found' });
     await fixture.whenStable();
     expect(element.textContent).toContain('Create your shop');
     enter('shop-name', shopFixture.name);

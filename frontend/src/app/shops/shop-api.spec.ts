@@ -37,7 +37,7 @@ describe('ShopApi', () => {
 
   it('reads owner data and sends versioned status changes', () => {
     api.mine().subscribe();
-    http.expectOne('/api/v1/me/shop/').flush(shopFixture);
+    http.expectOne('/api/v1/shops/mine/').flush(shopFixture);
     api.preview('moc-home').subscribe();
     http.expectOne('/api/v1/shops/moc-home/preview/').flush(shopFixture);
     api.changeStatus({ id: shopFixture.id, status: 'paused', version: 1 }).subscribe();

@@ -16,17 +16,17 @@ describe('ShopStore', () => {
 
   it('keeps loading while a newer query replaces a cancelled request', () => {
     store.load();
-    const first = http.expectOne('/api/v1/me/shop/');
+    const first = http.expectOne('/api/v1/shops/mine/');
     store.load();
     expect(first.cancelled).toBe(true);
     expect(store.loading()).toBe(true);
-    http.expectOne('/api/v1/me/shop/').flush(shopFixture);
+    http.expectOne('/api/v1/shops/mine/').flush(shopFixture);
     expect(store.loading()).toBe(false);
   });
 
   it('treats no shop as a create state and prevents duplicate submission', () => {
     store.load();
-    http.expectOne('/api/v1/me/shop/').flush({}, { status: 404, statusText: 'Not Found' });
+    http.expectOne('/api/v1/shops/mine/').flush({}, { status: 404, statusText: 'Not Found' });
     expect(store.loaded()).toBe(true);
     expect(store.error()).toBe('');
     const request = { id: null, body: new FormData() };
@@ -40,20 +40,20 @@ describe('ShopStore', () => {
 
   it('preserves saved data after a conflict and permits an explicit reload', () => {
     store.load();
-    http.expectOne('/api/v1/me/shop/').flush(shopFixture);
+    http.expectOne('/api/v1/shops/mine/').flush(shopFixture);
     store.save({ id: shopFixture.id, body: new FormData() });
     http.expectOne(`/api/v1/shops/${shopFixture.id}/`).flush({}, { status: 409, statusText: 'Conflict' });
     expect(store.shop()).toEqual(shopFixture);
     expect(store.error()).toContain('changed');
     expect(store.pending()).toBe(false);
     store.load();
-    http.expectOne('/api/v1/me/shop/').flush({ ...shopFixture, version: 2 });
+    http.expectOne('/api/v1/shops/mine/').flush({ ...shopFixture, version: 2 });
     expect(store.shop()?.version).toBe(2);
   });
 
   it('allows retry after a status error and removes private data on forbidden reload', () => {
     store.load();
-    http.expectOne('/api/v1/me/shop/').flush(shopFixture);
+    http.expectOne('/api/v1/shops/mine/').flush(shopFixture);
     const change = { id: shopFixture.id, status: 'paused' as const, version: 1 };
     store.changeStatus(change);
     http.expectOne(`/api/v1/shops/${shopFixture.id}/status/`).flush({}, { status: 503, statusText: 'Unavailable' });
@@ -62,7 +62,7 @@ describe('ShopStore', () => {
     http.expectOne(`/api/v1/shops/${shopFixture.id}/status/`).flush({ ...shopFixture, status: 'paused', version: 2 });
     expect(store.shop()?.status).toBe('paused');
     store.load();
-    http.expectOne('/api/v1/me/shop/').flush({}, { status: 403, statusText: 'Forbidden' });
+    http.expectOne('/api/v1/shops/mine/').flush({}, { status: 403, statusText: 'Forbidden' });
     expect(store.shop()).toBeNull();
     expect(store.loaded()).toBe(false);
   });
