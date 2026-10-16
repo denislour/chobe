@@ -9,6 +9,7 @@ from accounts.constants import DEMO_ADMIN_PASSWORD
 from accounts.models import User
 from accounts.tests.base import AccountAPITestCase
 from shops.models import Shop, ShopAuditEvent, ShopSlug
+from shops.services.moderation import moderate_shop
 
 
 class ShopTests(AccountAPITestCase):
@@ -115,6 +116,29 @@ class ShopTests(AccountAPITestCase):
         self.assertEqual(
             ShopAuditEvent.objects.filter(shop=shop, action="status_changed").count(), 3
         )
+
+    def test_only_admin_can_suspend_and_restore_a_shop(self):
+        shop = self.create_shop()
+        with self.assertRaises(PermissionDenied):
+            moderate_shop(shop.pk, self.user, suspend=True)
+        admin = User.objects.create_superuser(
+            "moderator", "moderator@example.com", "a-safe-password"
+        )
+        moderate_shop(shop.pk, admin, suspend=True)
+        reopen = self.request(
+            "post", f"shops/{shop.pk}/status", {"status": "active", "version": 2}
+        )
+        update = self.request(
+            "patch",
+            f"shops/{shop.pk}",
+            {"description": "Corrected details", "version": 2},
+        )
+        self.assertEqual(reopen.status_code, 400)
+        self.assertEqual(update.status_code, 200)
+        moderate_shop(shop.pk, admin, suspend=False)
+        shop.refresh_from_db()
+        self.assertEqual(shop.status, "active")
+        self.assertEqual(shop.version, 4)
 
     def test_images_are_reencoded_private_and_can_be_removed(self):
         shop = self.create_shop()
