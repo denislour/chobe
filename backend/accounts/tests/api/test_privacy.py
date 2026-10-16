@@ -56,7 +56,9 @@ class PrivacyTests(AccountAPITestCase):
             )
         response = self.request("get", "me/viewing-history")
         self.assertEqual([entry["listing_id"] for entry in response.data], [12])
-        self.assertEqual(self.request("delete", "me/viewing-history/clear").status_code, 204)
+        self.assertEqual(
+            self.request("delete", "me/viewing-history/clear").status_code, 204
+        )
         self.assertTrue(ViewingHistory.objects.filter(user=self.other).exists())
         self.assertFalse(ViewingHistory.objects.filter(user=self.user).exists())
 

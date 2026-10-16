@@ -31,7 +31,9 @@ class FollowedShopsViewSet(ModelViewSet):
     schema = FollowingSchema()
 
     def get_permissions(self):
-        actions = self.action_map.values() if self.action == "metadata" else (self.action,)
+        actions = (
+            self.action_map.values() if self.action == "metadata" else (self.action,)
+        )
         if not any(action in ("list", "update", "destroy") for action in actions):
             raise MethodNotAllowed(self.request.method)
         return super().get_permissions()

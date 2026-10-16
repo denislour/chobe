@@ -13,7 +13,12 @@ class FollowingTests(AccountAPITestCase):
         super().setUp()
         self.shop = create_shop(
             self.other,
-            {"name": "Moc Home", "slug": "moc-home", "area": "Ha Noi", "description": "Furniture."},
+            {
+                "name": "Moc Home",
+                "slug": "moc-home",
+                "area": "Ha Noi",
+                "description": "Furniture.",
+            },
         )
         self.path = f"me/followed-shops/{self.shop.pk}"
 
@@ -56,7 +61,9 @@ class FollowingTests(AccountAPITestCase):
                 Shop.objects.filter(pk=self.shop.pk).update(status=status)
                 self.assertEqual(self.request("put", self.path, {}).status_code, 404)
                 ShopFollow.objects.get_or_create(user=self.user, shop=self.shop)
-                self.assertEqual(self.request("get", "me/followed-shops").data["count"], 0)
+                self.assertEqual(
+                    self.request("get", "me/followed-shops").data["count"], 0
+                )
                 self.assertEqual(self.request("delete", self.path).status_code, 204)
         Shop.objects.filter(pk=self.shop.pk).update(status=Shop.Status.ACTIVE)
         self.other.is_active = False
@@ -69,12 +76,24 @@ class FollowingTests(AccountAPITestCase):
             ShopFollow.objects.create(user=self.user, shop=self.shop)
 
     def test_followed_shops_are_paginated_without_other_users_follows(self):
-        owners = User.objects.bulk_create([User(username=f"seller-{i}") for i in range(21)])
-        shops = Shop.objects.bulk_create([
-            Shop(owner=owner, name=owner.username, slug=owner.username, area="Ha Noi", description="Shop.")
-            for owner in owners
-        ])
-        ShopFollow.objects.bulk_create([ShopFollow(user=self.user, shop=shop) for shop in shops])
+        owners = User.objects.bulk_create(
+            [User(username=f"seller-{i}") for i in range(21)]
+        )
+        shops = Shop.objects.bulk_create(
+            [
+                Shop(
+                    owner=owner,
+                    name=owner.username,
+                    slug=owner.username,
+                    area="Ha Noi",
+                    description="Shop.",
+                )
+                for owner in owners
+            ]
+        )
+        ShopFollow.objects.bulk_create(
+            [ShopFollow(user=self.user, shop=shop) for shop in shops]
+        )
         ShopFollow.objects.create(user=self.other, shop=self.shop)
         response = self.request("get", "me/followed-shops")
         self.assertEqual(response.data["count"], 21)
@@ -98,7 +117,8 @@ class FollowingTests(AccountAPITestCase):
         self.assertEqual(payload["followed_shops"][0]["shop_id"], str(self.shop.pk))
         self.assertEqual(set(payload["followed_shops"][0]), {"shop_id", "created_at"})
         deleted = self.request(
-            "post", "me/deletion-requests",
+            "post",
+            "me/deletion-requests",
             {"password": DEMO_ADMIN_PASSWORD, "confirmation": "DELETE"},
         )
         self.assertEqual(deleted.status_code, 202)

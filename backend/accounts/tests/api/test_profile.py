@@ -101,7 +101,9 @@ class ProfileTests(AccountAPITestCase):
         self.assertNotIn(b"<script>", body)
         with Image.open(io.BytesIO(body)) as image:
             self.assertEqual(image.size, (512, 256))
-        self.assertEqual(APIClient().get("/api/v1/profiles/me/avatar/").status_code, 403)
+        self.assertEqual(
+            APIClient().get("/api/v1/profiles/me/avatar/").status_code, 403
+        )
         self.assertEqual(
             self.request(
                 "patch", "profiles/me", {"remove_avatar": True, "version": 2}

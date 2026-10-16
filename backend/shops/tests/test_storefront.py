@@ -30,8 +30,17 @@ class StorefrontTests(AccountAPITestCase):
         self.assertEqual(
             set(response.data),
             {
-                "id", "name", "slug", "description", "area", "contact_hours",
-                "website_url", "social_url", "logo_url", "banner_url", "created_at",
+                "id",
+                "name",
+                "slug",
+                "description",
+                "area",
+                "contact_hours",
+                "website_url",
+                "social_url",
+                "logo_url",
+                "banner_url",
+                "created_at",
                 "is_following",
             },
         )
@@ -92,7 +101,9 @@ class StorefrontTests(AccountAPITestCase):
     def test_unknown_and_missing_images_return_not_found(self):
         self.assertEqual(self.public.get(self.image_url).status_code, 404)
         self.assertEqual(
-            self.public.get("/api/v1/shop-storefronts/moc-home/images/password/").status_code,
+            self.public.get(
+                "/api/v1/shop-storefronts/moc-home/images/password/"
+            ).status_code,
             404,
         )
         self.assertEqual(

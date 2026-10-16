@@ -42,7 +42,10 @@ class DeletionStatusSchema(CSRFSchema):
 
 
 class PrivacySchema(CSRFSchema):
-    responses: ClassVar[dict] = {"me": PrivacySerializer, "update_me": PrivacySerializer}
+    responses: ClassVar[dict] = {
+        "me": PrivacySerializer,
+        "update_me": PrivacySerializer,
+    }
 
     def get_response_serializers(self):
         return self.responses[self.view.action]

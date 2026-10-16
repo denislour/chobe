@@ -36,9 +36,12 @@ class ShopViewSet(ModelViewSet):
     lookup_value_converter = "uuid"
 
     def get_permissions(self):
-        actions = self.action_map.values() if self.action == "metadata" else (self.action,)
+        actions = (
+            self.action_map.values() if self.action == "metadata" else (self.action,)
+        )
         if not any(
-            action in (
+            action
+            in (
                 "create",
                 "partial_update",
                 "mine",

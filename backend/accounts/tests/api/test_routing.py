@@ -35,9 +35,13 @@ class AccountRoutingTests(AccountAPITestCase):
         response = self.request("get", "me/viewing-history")
         self.assertEqual(response.status_code, 200)
         self.assertIsInstance(response.data, list)
-        self.assertEqual(self.request("delete", "me/viewing-history/clear").status_code, 204)
+        self.assertEqual(
+            self.request("delete", "me/viewing-history/clear").status_code, 204
+        )
         self.assertEqual(self.request("delete", "me/viewing-history").status_code, 405)
-        self.assertEqual(self.request("patch", "me/viewing-history", {}).status_code, 405)
+        self.assertEqual(
+            self.request("patch", "me/viewing-history", {}).status_code, 405
+        )
         self.assertEqual(self.request("get", "me/viewing-history/1").status_code, 405)
 
     def test_receipt_route_accepts_signed_string_characters(self):
@@ -45,4 +49,6 @@ class AccountRoutingTests(AccountAPITestCase):
             "/api/v1/account-deletion-status/.invalid:receipt.with.dots/"
         )
         self.assertEqual(response.status_code, 404)
-        self.assertEqual(response.data["detail"], "This receipt is invalid or has expired.")
+        self.assertEqual(
+            response.data["detail"], "This receipt is invalid or has expired."
+        )

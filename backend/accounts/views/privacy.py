@@ -55,7 +55,9 @@ class PrivacyViewSet(ModelViewSet):
     schema = PrivacySchema()
 
     def get_permissions(self):
-        actions = self.action_map.values() if self.action == "metadata" else (self.action,)
+        actions = (
+            self.action_map.values() if self.action == "metadata" else (self.action,)
+        )
         if not any(action in ("me", "update_me") for action in actions):
             raise MethodNotAllowed(self.request.method)
         return super().get_permissions()
@@ -80,7 +82,9 @@ class ViewingHistoryViewSet(ModelViewSet):
     throttle_classes = (HistoryThrottle,)
 
     def get_permissions(self):
-        actions = self.action_map.values() if self.action == "metadata" else (self.action,)
+        actions = (
+            self.action_map.values() if self.action == "metadata" else (self.action,)
+        )
         if not any(action in ("list", "create", "clear") for action in actions):
             raise MethodNotAllowed(self.request.method)
         return super().get_permissions()
@@ -113,7 +117,9 @@ class AccountDataExportViewSet(ModelViewSet):
     lookup_value_converter = "uuid"
 
     def get_permissions(self):
-        actions = self.action_map.values() if self.action == "metadata" else (self.action,)
+        actions = (
+            self.action_map.values() if self.action == "metadata" else (self.action,)
+        )
         if not any(
             action in ("list", "retrieve", "create", "download") for action in actions
         ):
@@ -157,7 +163,9 @@ class DeletionViewSet(ModelViewSet):
     throttle_classes = (DeletionThrottle,)
 
     def get_permissions(self):
-        actions = self.action_map.values() if self.action == "metadata" else (self.action,)
+        actions = (
+            self.action_map.values() if self.action == "metadata" else (self.action,)
+        )
         if not any(action in ("create",) for action in actions):
             raise MethodNotAllowed(self.request.method)
         return super().get_permissions()
@@ -184,7 +192,9 @@ class DeletionStatusViewSet(ModelViewSet):
     lookup_value_converter = "str"
 
     def get_permissions(self):
-        actions = self.action_map.values() if self.action == "metadata" else (self.action,)
+        actions = (
+            self.action_map.values() if self.action == "metadata" else (self.action,)
+        )
         if not any(action in ("retrieve",) for action in actions):
             raise MethodNotAllowed(self.request.method)
         return super().get_permissions()

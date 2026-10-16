@@ -61,15 +61,11 @@ class ShopFollow(models.Model):
         on_delete=models.CASCADE,
         related_name="shop_follows",
     )
-    shop = models.ForeignKey(
-        Shop, on_delete=models.CASCADE, related_name="followers"
-    )
+    shop = models.ForeignKey(Shop, on_delete=models.CASCADE, related_name="followers")
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ("-created_at", "-pk")
-        constraints = [
-            models.UniqueConstraint(
-                fields=("user", "shop"), name="shop_follow_unique"
-            )
-        ]
+        constraints = (
+            models.UniqueConstraint(fields=("user", "shop"), name="shop_follow_unique"),
+        )
