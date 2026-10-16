@@ -2,7 +2,7 @@ import base64
 
 from rest_framework import serializers
 
-from shops.models import ShopAuditEvent
+from shops.models import ShopAuditEvent, ShopFollow
 from shops.serializers.management import ShopPreviewSerializer
 
 
@@ -37,3 +37,12 @@ class ShopSnapshotSerializer(ShopPreviewSerializer):
 
     def get_previous_slugs(self, obj) -> list[str]:
         return list(obj.slugs.exclude(slug=obj.slug).values_list("slug", flat=True))
+
+
+class ShopFollowSnapshotSerializer(serializers.ModelSerializer):
+    shop_id = serializers.UUIDField(read_only=True)
+
+    class Meta:
+        model = ShopFollow
+        fields = ("shop_id", "created_at")
+        read_only_fields = fields

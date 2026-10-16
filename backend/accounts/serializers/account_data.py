@@ -6,7 +6,10 @@ from rest_framework import serializers
 
 from accounts.models import ConsentEvent, PrivacySettings, Profile, User, ViewingHistory
 from shops.models import Shop
-from shops.serializers.account_data import ShopSnapshotSerializer
+from shops.serializers.account_data import (
+    ShopFollowSnapshotSerializer,
+    ShopSnapshotSerializer,
+)
 
 
 class AccountSnapshotSerializer(serializers.ModelSerializer):
@@ -73,6 +76,9 @@ class AccountDataSnapshotSerializer(serializers.Serializer):
     )
     viewing_history = serializers.SerializerMethodField()
     shop = serializers.SerializerMethodField()
+    followed_shops = ShopFollowSnapshotSerializer(
+        source="shop_follows", many=True, read_only=True
+    )
 
     def get_avatar_jpeg_base64(self, user) -> str | None:
         return base64.b64encode(bytes(user.profile.avatar)).decode() or None

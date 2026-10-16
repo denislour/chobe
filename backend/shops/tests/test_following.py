@@ -1,6 +1,7 @@
 from django.db import IntegrityError, transaction
 from rest_framework.test import APIClient
 
+from accounts.constants import DEMO_ADMIN_PASSWORD
 from accounts.models import User
 from accounts.tests.base import AccountAPITestCase
 from shops.models import Shop, ShopFollow
@@ -85,6 +86,25 @@ class FollowingTests(AccountAPITestCase):
         self.assertEqual(
             self.client.get("/api/v1/me/followed-shops/?page=0").status_code, 404
         )
+
+    def test_export_and_account_deletion_include_follows(self):
+        self.request("put", self.path, {})
+        response = self.request("post", "me/data-exports", {})
+        self.run_worker()
+        payload = self.request(
+            "get", f"me/data-exports/{response.data['job_id']}/download"
+        ).json()
+        self.assertEqual(len(payload["followed_shops"]), 1)
+        self.assertEqual(payload["followed_shops"][0]["shop_id"], str(self.shop.pk))
+        self.assertEqual(set(payload["followed_shops"][0]), {"shop_id", "created_at"})
+        deleted = self.request(
+            "post", "me/deletion-requests",
+            {"password": DEMO_ADMIN_PASSWORD, "confirmation": "DELETE"},
+        )
+        self.assertEqual(deleted.status_code, 202)
+        self.run_worker()
+        self.assertFalse(ShopFollow.objects.filter(user_id=self.user.pk).exists())
+        self.assertTrue(Shop.objects.filter(pk=self.shop.pk).exists())
 
     def test_deleting_a_shop_owner_removes_incoming_follows(self):
         follow = ShopFollow.objects.create(user=self.user, shop=self.shop)
