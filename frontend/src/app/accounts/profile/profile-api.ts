@@ -19,10 +19,10 @@ export class ProfileApi {
   constructor(private readonly http: HttpClient) {}
 
   profile(): Observable<ProfileData> {
-    return this.http.get<ProfileData>('/api/v1/me/profile/');
+    return this.http.get<ProfileData>('/api/v1/profiles/me/');
   }
 
   saveProfile(values: FormData): Observable<ProfileData> {
-    return this.http.patch<ProfileData>('/api/v1/me/profile/', values);
+    return this.http.patch<ProfileData>('/api/v1/profiles/me/', values);
   }
 }

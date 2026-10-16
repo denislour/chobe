@@ -21,7 +21,7 @@ describe('ProfileApi', () => {
 
   it('reads the private profile endpoint', () => {
     api.profile().subscribe();
-    http.expectOne('/api/v1/me/profile/').flush(profileFixture);
+    http.expectOne('/api/v1/profiles/me/').flush(profileFixture);
   });
 
   it('patches multipart profile with CSRF and lets the browser set the content type', () => {
@@ -30,7 +30,7 @@ describe('ProfileApi', () => {
     body.set('version', '1');
     body.set('display_name', 'Member');
     api.saveProfile(body).subscribe();
-    const request = http.expectOne('/api/v1/me/profile/');
+    const request = http.expectOne('/api/v1/profiles/me/');
     expect(request.request.method).toBe('PATCH');
     expect(request.request.body).toBe(body);
     expect(request.request.headers.has('Content-Type')).toBe(false);

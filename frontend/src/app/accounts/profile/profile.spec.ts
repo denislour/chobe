@@ -21,7 +21,7 @@ describe('Profile', () => {
     await restoration;
     fixture = TestBed.createComponent(Profile);
     fixture.detectChanges();
-    http.expectOne('/api/v1/me/profile/').flush(profileFixture);
+    http.expectOne('/api/v1/profiles/me/').flush(profileFixture);
     await fixture.whenStable();
     element = fixture.nativeElement;
   });
@@ -40,7 +40,7 @@ describe('Profile', () => {
     input.dispatchEvent(new Event('input'));
     expect(element.querySelector<HTMLInputElement>('#profile-email')!.readOnly).toBe(true);
     submit();
-    const request = http.expectOne('/api/v1/me/profile/');
+    const request = http.expectOne('/api/v1/profiles/me/');
     const body = request.request.body as FormData;
     expect(body.get('display_name')).toBe('Updated member');
     expect(body.get('version')).toBe('1');
@@ -54,7 +54,7 @@ describe('Profile', () => {
     input.value = 'Unsaved name';
     input.dispatchEvent(new Event('input'));
     submit();
-    http.expectOne('/api/v1/me/profile/').flush({}, { status: 409, statusText: 'Conflict' });
+    http.expectOne('/api/v1/profiles/me/').flush({}, { status: 409, statusText: 'Conflict' });
     await fixture.whenStable();
     expect(input.value).toBe('Unsaved name');
     expect(element.textContent).toContain('changed');
@@ -62,7 +62,7 @@ describe('Profile', () => {
       button.textContent?.includes('Reload latest'),
     )!;
     reload.click();
-    http.expectOne('/api/v1/me/profile/').flush({ ...profileFixture, version: 3 });
+    http.expectOne('/api/v1/profiles/me/').flush({ ...profileFixture, version: 3 });
     await fixture.whenStable();
     expect(input.value).toBe('Member');
   });
@@ -72,7 +72,7 @@ describe('Profile', () => {
     input.value = '0912345678';
     input.dispatchEvent(new Event('input'));
     submit();
-    http.expectNone('/api/v1/me/profile/');
+    http.expectNone('/api/v1/profiles/me/');
     await fixture.whenStable();
     expect(element.textContent).toContain('8 to 15 digits');
   });
@@ -83,12 +83,12 @@ describe('Profile', () => {
     Object.defineProperty(input, 'files', { configurable: true, value: [file] });
     input.dispatchEvent(new Event('change'));
     submit();
-    const request = http.expectOne('/api/v1/me/profile/');
+    const request = http.expectOne('/api/v1/profiles/me/');
     expect((request.request.body as FormData).get('avatar')).toBe(file);
     request.flush({
       ...profileFixture,
       version: 2,
-      avatar_url: '/api/v1/me/profile/avatar/?version=2',
+      avatar_url: '/api/v1/profiles/me/avatar/?version=2',
     });
     await fixture.whenStable();
     expect(element.querySelector('img')?.getAttribute('src')).toContain('version=2');

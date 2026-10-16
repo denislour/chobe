@@ -19,12 +19,12 @@ describe('ProfileStore', () => {
   it('loads and saves once while exposing the updated version', () => {
     store.load();
     expect(store.loading()).toBe(true);
-    http.expectOne('/api/v1/me/profile/').flush(profileFixture);
+    http.expectOne('/api/v1/profiles/me/').flush(profileFixture);
     const body = new FormData();
     body.set('version', '1');
     store.save(body);
     store.save(body);
-    const request = http.expectOne('/api/v1/me/profile/');
+    const request = http.expectOne('/api/v1/profiles/me/');
     expect(store.pending()).toBe(true);
     request.flush({ ...profileFixture, version: 2 });
     expect(store.profile()?.version).toBe(2);
@@ -40,16 +40,16 @@ describe('ProfileStore', () => {
   ] as const) {
     it(`preserves data and supports retry after ${status}`, () => {
       store.load();
-      http.expectOne('/api/v1/me/profile/').flush(profileFixture);
+      http.expectOne('/api/v1/profiles/me/').flush(profileFixture);
       store.save(new FormData());
       http
-        .expectOne('/api/v1/me/profile/')
+        .expectOne('/api/v1/profiles/me/')
         .flush({ phone: ['Invalid phone.'] }, { status, statusText: 'Error' });
       expect(store.error()).toContain(message);
       expect(store.pending()).toBe(false);
       expect(store.profile()).toEqual(profileFixture);
       store.save(new FormData());
-      http.expectOne('/api/v1/me/profile/').flush({ ...profileFixture, version: 2 });
+      http.expectOne('/api/v1/profiles/me/').flush({ ...profileFixture, version: 2 });
       expect(store.error()).toBe('');
     });
   }
