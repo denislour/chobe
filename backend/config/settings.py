@@ -121,6 +121,7 @@ REST_FRAMEWORK = {
         "account_deletion": "3/hour",
         "deletion_receipt": "60/min",
         "account_mutation": "20/min",
+        "shop_read": "120/min",
     },
     "NUM_PROXIES": 0,
 }
