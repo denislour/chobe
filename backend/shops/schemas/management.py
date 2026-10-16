@@ -3,7 +3,7 @@ from typing import ClassVar
 from drf_spectacular.types import OpenApiTypes
 
 from accounts.schemas.base import CSRFSchema
-from shops.serializers import ShopPreviewSerializer, ShopSerializer
+from shops.serializers.management import ShopPreviewSerializer, ShopSerializer
 
 
 class ShopSchema(CSRFSchema):

@@ -12,8 +12,8 @@ from rest_framework.viewsets import ModelViewSet
 
 from accounts.throttles import AccountMutationThrottle
 from shops.models import Shop, ShopSlug
-from shops.schemas import ShopSchema
-from shops.serializers import (
+from shops.schemas.management import ShopSchema
+from shops.serializers.management import (
     ShopPreviewSerializer,
     ShopSerializer,
     ShopStatusSerializer,

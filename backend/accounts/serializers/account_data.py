@@ -6,7 +6,7 @@ from rest_framework import serializers
 
 from accounts.models import ConsentEvent, PrivacySettings, Profile, User, ViewingHistory
 from shops.models import Shop
-from shops.serializers import ShopSnapshotSerializer
+from shops.serializers.account_data import ShopSnapshotSerializer
 
 
 class AccountSnapshotSerializer(serializers.ModelSerializer):

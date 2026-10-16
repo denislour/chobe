@@ -1,6 +1,6 @@
 from django.urls import path
 
-from shops.views import ShopViewSet
+from shops.views.management import ShopViewSet
 
 urlpatterns = [
     path("me/shop/", ShopViewSet.as_view({"get": "mine"})),
