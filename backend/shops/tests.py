@@ -52,6 +52,9 @@ class ShopTests(AccountAPITestCase):
         )
         self.assertEqual(update.status_code, 404)
         self.assertEqual(
+            self.request("get", f"shops/{shop.slug}/preview").status_code, 404
+        )
+        self.assertEqual(
             self.request("get", f"shops/{shop.pk}/images/logo").status_code, 404
         )
 
@@ -62,6 +65,9 @@ class ShopTests(AccountAPITestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data["version"], 2)
+        self.assertEqual(
+            self.request("get", "shops/moc-home/preview").data["slug"], "moc-living"
+        )
         self.client.force_login(self.other)
         self.assertEqual(self.request("post", "shops", self.values).status_code, 400)
         self.assertEqual(ShopSlug.objects.filter(shop=shop).count(), 2)

@@ -26,6 +26,7 @@ class ShopViewSet(ModelViewSet):
     throttle_classes = (AccountMutationThrottle,)
     serializer_class = ShopSerializer
     serializers_by_action: ClassVar[dict] = {
+        "preview": ShopPreviewSerializer,
     }
     schema = ShopSchema()
 
@@ -53,6 +54,15 @@ class ShopViewSet(ModelViewSet):
     def mine(self, request):
         shop = get_object_or_404(self.get_queryset())
         return Response(self.get_serializer(shop).data)
+
+    def preview(self, request, slug=None):
+        alias = get_object_or_404(
+            ShopSlug.objects.select_related("shop"),
+            slug=slug,
+            shop__owner=request.user,
+            shop__owner__is_active=True,
+        )
+        return Response(self.get_serializer(alias.shop).data)
 
     def image(self, request, pk=None, kind=None):
         if kind not in {"logo", "banner"}:
