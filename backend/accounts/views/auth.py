@@ -10,6 +10,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from accounts.schemas.auth import AuthSchema
+from accounts.schemas.base import CSRFSchema
 from accounts.schemas.password_reset import PasswordResetSchema
 from accounts.serializers.login import LoginSerializer
 from accounts.serializers.password_reset import (
@@ -33,12 +34,16 @@ from accounts.throttles import (
 class AuthViewSet(ModelViewSet):
     permission_classes = (AllowAny,)
     serializer_class = AuthUserSerializer
-    schema = AuthSchema()
+    schema = CSRFSchema()
+    lookup_value_converter = "int"
 
     def get_permissions(self):
-        actions = self.action_map.values() if self.action == "metadata" else (self.action,)
+        actions = (
+            self.action_map.values() if self.action == "metadata" else (self.action,)
+        )
         if not any(
-            action in (
+            action
+            in (
                 "login",
                 "register",
                 "session",

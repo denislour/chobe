@@ -1,10 +1,14 @@
+from typing import ClassVar
+
 from drf_spectacular.openapi import AutoSchema
 from drf_spectacular.utils import OpenApiParameter
 
 
 class CSRFSchema(AutoSchema):
+    responses: ClassVar[dict] = {}
+
     def get_operation(self, *args, **kwargs):
-        if hasattr(self, "responses") and self.view.action not in self.responses:
+        if self.view.action not in self.responses:
             return None
         return super().get_operation(*args, **kwargs)
 

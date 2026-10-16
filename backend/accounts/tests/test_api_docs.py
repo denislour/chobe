@@ -34,6 +34,15 @@ class ApiDocsTests(TestCase):
         ]:
             with self.subTest(path=path, method=method):
                 self.assertEqual(set(paths[path][method]["responses"]), set(statuses))
+        for path in (
+            "/api/v1/auth/",
+            "/api/v1/profiles/",
+            "/api/v1/privacy-settings/",
+            "/api/v1/shop-storefronts/",
+        ):
+            with self.subTest(path=path):
+                self.assertNotIn(path, paths)
+        self.assertNotIn("get", paths["/api/v1/shops/"])
 
     def test_resource_schema_preserves_arrays_binary_and_request_bodies(self):
         response = self.client.get("/api/v1/schema/", HTTP_ACCEPT="application/json")
@@ -47,7 +56,9 @@ class ApiDocsTests(TestCase):
         avatar = paths["/api/v1/profiles/me/avatar/"]["get"]["responses"]["200"]
         self.assertEqual(avatar["content"]["image/jpeg"]["schema"]["format"], "binary")
         self.assertNotIn("requestBody", paths["/api/v1/me/data-exports/"]["post"])
-        self.assertNotIn("requestBody", paths["/api/v1/me/viewing-history/clear/"]["delete"])
+        self.assertNotIn(
+            "requestBody", paths["/api/v1/me/viewing-history/clear/"]["delete"]
+        )
         self.assertIn("requestBody", paths["/api/v1/me/viewing-history/"]["post"])
         self.assertIn("requestBody", paths["/api/v1/profiles/me/"]["patch"])
 
@@ -66,6 +77,9 @@ class ApiDocsTests(TestCase):
                 self.assertEqual(resolve(path).func.cls.__module__, module)
         self.assertEqual(reverse("auth-login"), "/api/v1/auth/login/")
         self.assertEqual(
-            reverse("data-export-download", kwargs={"pk": "00000000-0000-0000-0000-000000000001"}),
+            reverse(
+                "data-export-download",
+                kwargs={"pk": "00000000-0000-0000-0000-000000000001"},
+            ),
             "/api/v1/me/data-exports/00000000-0000-0000-0000-000000000001/download/",
         )
