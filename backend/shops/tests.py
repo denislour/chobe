@@ -51,6 +51,9 @@ class ShopTests(AccountAPITestCase):
             "patch", f"shops/{shop.pk}", {"name": "Stolen", "version": 1}
         )
         self.assertEqual(update.status_code, 404)
+        self.assertEqual(
+            self.request("get", f"shops/{shop.pk}/images/logo").status_code, 404
+        )
 
     def test_slug_changes_reserve_old_addresses_and_do_not_allow_takeover(self):
         shop = self.create_shop()
@@ -76,6 +79,53 @@ class ShopTests(AccountAPITestCase):
         shop.refresh_from_db()
         self.assertEqual(shop.name, "Moc Living")
         self.assertEqual(shop.status, "active")
+
+    def test_images_are_reencoded_private_and_can_be_removed(self):
+        shop = self.create_shop()
+        data = io.BytesIO()
+        Image.new("RGB", (1024, 1024), "red").save(data, format="PNG")
+        response = self.client.patch(
+            f"/api/v1/shops/{shop.pk}/",
+            {
+                "logo": SimpleUploadedFile(
+                    "logo.png", data.getvalue(), content_type="image/png"
+                ),
+                "version": 1,
+            },
+            format="multipart",
+            HTTP_X_XSRF_TOKEN=self.client.cookies["XSRF-TOKEN"].value,
+        )
+        self.assertEqual(response.status_code, 200)
+        image = self.request("get", f"shops/{shop.pk}/images/logo")
+        body = b"".join(image.streaming_content)
+        with Image.open(io.BytesIO(body)) as decoded:
+            self.assertEqual(decoded.format, "JPEG")
+            self.assertEqual(decoded.size, (512, 512))
+        self.assertIn("no-store", image["Cache-Control"])
+        self.assertEqual(APIClient().get(response.data["logo_url"]).status_code, 403)
+        removed = self.request(
+            "patch", f"shops/{shop.pk}", {"remove_logo": True, "version": 2}
+        )
+        self.assertEqual(removed.status_code, 200)
+        self.assertEqual(
+            self.request("get", f"shops/{shop.pk}/images/logo").status_code, 404
+        )
+
+    def test_oversized_uploads_are_rejected_without_modifying_shop(self):
+        shop = self.create_shop()
+        response = self.client.patch(
+            f"/api/v1/shops/{shop.pk}/",
+            {
+                "logo": SimpleUploadedFile("large.png", b"x" * (2 * 1024 * 1024 + 1)),
+                "version": 1,
+            },
+            format="multipart",
+            HTTP_X_XSRF_TOKEN=self.client.cookies["XSRF-TOKEN"].value,
+        )
+        self.assertEqual(response.status_code, 400)
+        shop.refresh_from_db()
+        self.assertFalse(shop.logo)
+        self.assertEqual(shop.version, 1)
 
     def test_validation_and_authentication_reject_invalid_changes(self):
         self.assertEqual(

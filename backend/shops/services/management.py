@@ -46,6 +46,9 @@ def update_shop(instance, user, values):
             if shop.status == Shop.Status.CLOSED:
                 raise ValidationError("A closed shop cannot be edited.")
             old_slug = shop.slug
+            for field in ("logo", "banner"):
+                if values.pop(f"remove_{field}", False):
+                    values[field] = b""
             fields = sorted(set(values) - {"version"})
             shop = save_versioned(shop, values)
             reserve_slug(shop, shop.slug)

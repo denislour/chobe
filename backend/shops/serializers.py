@@ -1,13 +1,18 @@
 from typing import ClassVar
 from urllib.parse import urlsplit
 
+from django.urls import reverse
 from rest_framework import serializers
 
 from shops.models import Shop, ShopAuditEvent, ShopSlug
+from shops.services.images import process_shop_image_upload
 from shops.services.management import create_shop, update_shop
 
 
 class ShopPreviewSerializer(serializers.ModelSerializer):
+    logo_url = serializers.SerializerMethodField()
+    banner_url = serializers.SerializerMethodField()
+
     class Meta:
         model = Shop
         fields = (
@@ -19,6 +24,8 @@ class ShopPreviewSerializer(serializers.ModelSerializer):
             "contact_hours",
             "website_url",
             "social_url",
+            "logo_url",
+            "banner_url",
             "status",
             "version",
             "created_at",
@@ -26,11 +33,34 @@ class ShopPreviewSerializer(serializers.ModelSerializer):
         )
         read_only_fields = fields
 
+    def get_logo_url(self, obj) -> str | None:
+        return self.image_url(obj, "logo")
+
+    def get_banner_url(self, obj) -> str | None:
+        return self.image_url(obj, "banner")
+
+    def image_url(self, obj, kind):
+        if not getattr(obj, kind):
+            return None
+        path = reverse("shop-image", kwargs={"pk": obj.pk, "kind": kind})
+        return f"{path}?version={obj.version}"
 
 
 class ShopSerializer(ShopPreviewSerializer):
     slug = serializers.RegexField(r"^[a-z0-9]+(?:-[a-z0-9]+)*$", max_length=80)
+    logo = serializers.FileField(write_only=True, required=False)
+    banner = serializers.FileField(write_only=True, required=False)
+    remove_logo = serializers.BooleanField(write_only=True, required=False)
+    remove_banner = serializers.BooleanField(write_only=True, required=False)
+
     class Meta(ShopPreviewSerializer.Meta):
+        fields = (
+            *ShopPreviewSerializer.Meta.fields,
+            "logo",
+            "banner",
+            "remove_logo",
+            "remove_banner",
+        )
         read_only_fields = ("id", "status", "created_at", "updated_at")
         extra_kwargs: ClassVar[dict] = {"version": {"min_value": 1, "required": False}}
 
@@ -63,14 +93,27 @@ class ShopSerializer(ShopPreviewSerializer):
                 )
         return value
 
+    def validate_logo(self, value):
+        return process_shop_image_upload(value, bounds=(512, 512))
+
+    def validate_banner(self, value):
+        return process_shop_image_upload(value, bounds=(1600, 900))
+
     def validate(self, attrs):
         if self.instance is not None and "version" not in attrs:
             raise serializers.ValidationError({"version": ["This field is required."]})
+        for field in ("logo", "banner"):
+            if attrs.get(f"remove_{field}") and field in attrs:
+                raise serializers.ValidationError(
+                    {field: ["Choose upload or removal, not both."]}
+                )
         return attrs
 
     def create(self, validated_data):
         values = validated_data.copy()
         values.pop("version", None)
+        values.pop("remove_logo", None)
+        values.pop("remove_banner", None)
         return create_shop(self.context["request"].user, values)
 
     def update(self, instance, validated_data):

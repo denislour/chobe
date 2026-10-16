@@ -17,6 +17,7 @@ from shops.serializers import (
     ShopPreviewSerializer,
     ShopSerializer,
 )
+from shops.upload_handlers import ShopImageUploadHandler
 
 
 @method_decorator(never_cache, name="dispatch")
@@ -27,6 +28,10 @@ class ShopViewSet(ModelViewSet):
     serializers_by_action: ClassVar[dict] = {
     }
     schema = ShopSchema()
+
+    def initialize_request(self, request, *args, **kwargs):
+        request.upload_handlers.insert(0, ShopImageUploadHandler(request))
+        return super().initialize_request(request, *args, **kwargs)
 
     def get_queryset(self):
         if (
@@ -39,6 +44,23 @@ class ShopViewSet(ModelViewSet):
     def get_serializer_class(self):
         return self.serializers_by_action.get(self.action, self.serializer_class)
 
+    def get_serializer(self, *args, **kwargs):
+        error = getattr(self.request._request, "shop_upload_error", None)
+        if error:
+            raise ValidationError(error)
+        return super().get_serializer(*args, **kwargs)
+
     def mine(self, request):
         shop = get_object_or_404(self.get_queryset())
         return Response(self.get_serializer(shop).data)
+
+    def image(self, request, pk=None, kind=None):
+        if kind not in {"logo", "banner"}:
+            raise Http404
+        content = getattr(self.get_object(), kind)
+        if not content:
+            raise Http404
+        response = FileResponse(io.BytesIO(bytes(content)), content_type="image/jpeg")
+        response["X-Content-Type-Options"] = "nosniff"
+        response["Content-Security-Policy"] = "default-src 'none'; sandbox"
+        return response

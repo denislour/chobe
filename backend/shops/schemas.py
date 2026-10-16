@@ -11,6 +11,7 @@ class ShopSchema(CSRFSchema):
         "mine": ShopSerializer,
         "create": {201: ShopSerializer},
         "partial_update": ShopSerializer,
+        "image": {(200, "image/jpeg"): OpenApiTypes.BINARY},
     }
 
     def get_request_serializer(self):
