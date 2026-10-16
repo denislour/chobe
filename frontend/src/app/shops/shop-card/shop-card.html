@@ -1,0 +1,17 @@
+<article class="shop-preview-card" aria-label="Shop preview">
+  @if (shop().banner_url; as banner) { <img class="cover" [src]="banner" alt="Shop cover" /> }
+  @else { <div class="cover-placeholder" aria-hidden="true"></div> }
+  <div class="shop-heading">
+    @if (shop().logo_url; as logo) { <img class="shop-logo" [src]="logo" alt="Shop logo" width="88" height="88" /> }
+    @else { <span class="shop-logo logo-placeholder" aria-hidden="true">{{ shop().name.slice(0, 1).toUpperCase() }}</span> }
+    <div><h2>{{ shop().name }}</h2><p>{{ shop().area }}</p></div>
+  </div>
+  <div class="shop-body">
+    <p class="description">{{ shop().description }}</p>
+    @if (shop().contact_hours) { <p><strong>Contact hours:</strong> {{ shop().contact_hours }}</p> }
+    <div class="links">
+      @if (shop().website_url) { <a [href]="shop().website_url" target="_blank" rel="noopener noreferrer">Website (opens in a new tab)</a> }
+      @if (shop().social_url) { <a [href]="shop().social_url" target="_blank" rel="noopener noreferrer">Social page (opens in a new tab)</a> }
+    </div>
+  </div>
+</article>

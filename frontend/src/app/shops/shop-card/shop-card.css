@@ -1,0 +1,21 @@
+:host { display: block; }
+.shop-preview-card { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.cover, .cover-placeholder { display: block; width: 100%; height: 220px; object-fit: cover; }
+.cover-placeholder { background: #fff8db; }
+.shop-heading { display: flex; gap: 20px; align-items: center; padding: 24px; }
+.shop-logo { width: 88px; height: 88px; border-radius: 12px; object-fit: cover; flex-shrink: 0; }
+.logo-placeholder { display: grid; place-items: center; background: var(--yellow); font-size: 36px; font-weight: 600; }
+h2 { margin: 0 0 8px; font-size: 24px; letter-spacing: -0.025em; overflow-wrap: anywhere; }
+p { margin: 0 0 16px; overflow-wrap: anywhere; }
+.shop-heading p { margin: 0; color: var(--muted); }
+.shop-body { padding: 0 24px 24px; }
+.description { white-space: pre-wrap; }
+.links { display: flex; flex-wrap: wrap; gap: 16px; }
+a { color: var(--ink); text-underline-offset: 4px; min-height: 44px; display: inline-flex; align-items: center; }
+@media (max-width: 600px) {
+  .cover, .cover-placeholder { height: 160px; }
+  .shop-heading { padding: 16px; gap: 12px; }
+  .shop-logo { width: 64px; height: 64px; }
+  .shop-body { padding: 0 16px 16px; }
+  h2 { font-size: 20px; }
+}
