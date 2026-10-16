@@ -1,3 +1,4 @@
+import { StorefrontData } from '@app/shops/shop-storefront/storefront-api';
 import { ShopData } from './shop-api';
 
 export const shopFixture: ShopData = {
@@ -15,4 +16,19 @@ export const shopFixture: ShopData = {
   version: 1,
   created_at: '2026-10-15T00:00:00Z',
   updated_at: '2026-10-15T00:00:00Z',
+};
+
+export const storefrontFixture: StorefrontData = {
+  id: shopFixture.id,
+  name: shopFixture.name,
+  slug: shopFixture.slug,
+  description: shopFixture.description,
+  area: shopFixture.area,
+  contact_hours: shopFixture.contact_hours,
+  website_url: '',
+  social_url: '',
+  logo_url: null,
+  banner_url: null,
+  created_at: shopFixture.created_at,
+  is_following: false,
 };
