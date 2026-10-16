@@ -3,6 +3,12 @@ import { authGuard } from '@app/auth/auth-guard';
 
 export const accountsRoutes: Routes = [
   {
+    path: 'followed-shops',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('@app/shops/followed-shops/followed-shops').then((m) => m.FollowedShops),
+  },
+  {
     path: 'profile',
     canActivate: [authGuard],
     loadComponent: () => import('@app/accounts/profile/profile').then((m) => m.Profile),

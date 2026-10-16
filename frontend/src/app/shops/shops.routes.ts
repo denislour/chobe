@@ -1,7 +1,7 @@
 import { Routes } from '@angular/router';
 import { authGuard } from '@app/auth/auth-guard';
 
-export const shopsRoutes: Routes = [
+export const sellerShopRoutes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'shop' },
   {
     path: 'shop',
@@ -14,5 +14,14 @@ export const shopsRoutes: Routes = [
     canActivate: [authGuard],
     loadComponent: () =>
       import('@app/shops/shop-preview/shop-preview').then((m) => m.ShopPreview),
+  },
+];
+
+export const shopsRoutes: Routes = [
+  { path: '', pathMatch: 'full', redirectTo: '/account/followed-shops' },
+  {
+    path: ':slug',
+    loadComponent: () =>
+      import('@app/shops/shop-storefront/shop-storefront').then((m) => m.ShopStorefront),
   },
 ];

@@ -3,6 +3,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
+import { storefrontFixture } from '@app/shops/shop-fixtures';
 import { routes } from './app.routes';
 
 describe('Module routes', () => {
@@ -35,5 +36,17 @@ describe('Module routes', () => {
     expect(router.parseUrl(router.url).queryParams['returnUrl']).toBe('/seller/shop');
     await harness.navigateByUrl('/seller/shop/preview/moc-home');
     expect(router.parseUrl(router.url).queryParams['returnUrl']).toBe('/seller/shop/preview/moc-home');
+  });
+
+  it('allows public storefronts while guarding the followed shops page', async () => {
+    const harness = await RouterTestingHarness.create('/shops/moc-home');
+    TestBed.inject(HttpTestingController)
+      .expectOne('/api/v1/shop-storefronts/moc-home/')
+      .flush(storefrontFixture);
+    harness.detectChanges();
+    const router = TestBed.inject(Router);
+    expect(router.url).toBe('/shops/moc-home');
+    await harness.navigateByUrl('/account/followed-shops');
+    expect(router.parseUrl(router.url).queryParams['returnUrl']).toBe('/account/followed-shops');
   });
 });

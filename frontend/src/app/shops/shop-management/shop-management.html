@@ -1,6 +1,7 @@
 <main class="account-page">
   <h1>{{ shop.shop() ? 'My shop' : 'Create your shop' }}</h1>
   <p class="intro">One shop, your own way. Manage its details, images, and availability.</p>
+  <p class="hint">While active, your shop details, images, and links are public.</p>
   <div class="account-layout">
     <app-account-nav />
     <div class="account-content">
@@ -19,6 +20,9 @@
           <div class="shop-summary">
             <div><h2>{{ current.name }}</h2><span class="status-chip">{{ statusLabels[current.status] }}</span></div>
             <a class="text-link" [routerLink]="['/seller/shop/preview', current.slug]">Preview saved shop</a>
+            @if (current.status === 'active') {
+              <a class="text-link" [routerLink]="['/shops', current.slug]">Open public shop</a>
+            }
           </div>
           @if (current.status === 'suspended') {
             <p class="feedback error">An administrator suspended your shop. You can update its details, but only an administrator can restore it.</p>
@@ -43,7 +47,8 @@
               </div>
               <div class="field">
                 <label for="shop-area">Area</label>
-                <input id="shop-area" formControlName="area" required maxlength="120" autocomplete="address-level1" aria-describedby="shop-area-error" />
+                <input id="shop-area" formControlName="area" required maxlength="120" autocomplete="address-level1" aria-describedby="shop-area-help shop-area-error" />
+                <small id="shop-area-help" class="hint">Use your city or district, rather than an exact home address.</small>
                 <small id="shop-area-error" class="error">
                   @if (form.controls.area.touched && form.controls.area.invalid) { Enter your shop area, up to 120 characters. }
                   {{ shop.fieldErrors()['area']?.join(' ') }}
