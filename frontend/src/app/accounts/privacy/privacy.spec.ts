@@ -28,7 +28,7 @@ describe('Privacy', () => {
     await restoration;
     fixture = TestBed.createComponent(Privacy);
     fixture.detectChanges();
-    http.expectOne('/api/v1/me/privacy-settings/').flush(privacyFixture);
+    http.expectOne('/api/v1/privacy-settings/me/').flush(privacyFixture);
     http.expectOne('/api/v1/me/viewing-history/').flush([]);
     vi.advanceTimersByTime(0);
     http.expectOne('/api/v1/me/data-exports/').flush([]);
@@ -48,7 +48,7 @@ describe('Privacy', () => {
     element
       .querySelector('form')!
       .dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
-    const request = http.expectOne('/api/v1/me/privacy-settings/');
+    const request = http.expectOne('/api/v1/privacy-settings/me/');
     expect(request.request.body).toEqual({ share_phone: true, record_history: true, version: 1 });
     request.flush({ ...privacyFixture, share_phone: true, version: 2 });
     await fixture.whenStable();
@@ -66,7 +66,7 @@ describe('Privacy', () => {
       .querySelector('form')!
       .dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
     http
-      .expectOne('/api/v1/me/privacy-settings/')
+      .expectOne('/api/v1/privacy-settings/me/')
       .flush(
         { share_phone: ['Add a phone number first.'] },
         { status: 400, statusText: 'Bad Request' },

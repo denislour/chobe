@@ -39,13 +39,13 @@ export class PrivacyApi {
   constructor(private readonly http: HttpClient) {}
 
   privacy(): Observable<PrivacyData> {
-    return this.http.get<PrivacyData>('/api/v1/me/privacy-settings/');
+    return this.http.get<PrivacyData>('/api/v1/privacy-settings/me/');
   }
 
   savePrivacy(
     values: Pick<PrivacyData, 'share_phone' | 'record_history' | 'version'>,
   ): Observable<PrivacyData> {
-    return this.http.patch<PrivacyData>('/api/v1/me/privacy-settings/', values);
+    return this.http.patch<PrivacyData>('/api/v1/privacy-settings/me/', values);
   }
 
   history(): Observable<HistoryEntry[]> {
@@ -53,7 +53,7 @@ export class PrivacyApi {
   }
 
   clearHistory(): Observable<void> {
-    return this.http.delete<void>('/api/v1/me/viewing-history/');
+    return this.http.delete<void>('/api/v1/me/viewing-history/clear/');
   }
 
   accountDataExports(): Observable<AccountDataExportJob[]> {

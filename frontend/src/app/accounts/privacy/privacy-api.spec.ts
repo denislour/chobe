@@ -22,7 +22,7 @@ describe('PrivacyApi', () => {
   it('reads private privacy and history endpoints', () => {
     api.privacy().subscribe();
     api.history().subscribe();
-    http.expectOne('/api/v1/me/privacy-settings/').flush(privacyFixture);
+    http.expectOne('/api/v1/privacy-settings/me/').flush(privacyFixture);
     http.expectOne('/api/v1/me/viewing-history/').flush([]);
   });
 
@@ -31,11 +31,11 @@ describe('PrivacyApi', () => {
     api.savePrivacy(values).subscribe();
     api.clearHistory().subscribe();
     api.createAccountDataExport().subscribe();
-    const privacy = http.expectOne('/api/v1/me/privacy-settings/');
+    const privacy = http.expectOne('/api/v1/privacy-settings/me/');
     expect(privacy.request.method).toBe('PATCH');
     expect(privacy.request.body).toEqual(values);
     privacy.flush({ ...privacyFixture, ...values });
-    const history = http.expectOne('/api/v1/me/viewing-history/');
+    const history = http.expectOne('/api/v1/me/viewing-history/clear/');
     expect(history.request.method).toBe('DELETE');
     history.flush(null, { status: 204, statusText: 'No Content' });
     const exportRequest = http.expectOne('/api/v1/me/data-exports/');
