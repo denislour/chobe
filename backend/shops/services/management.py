@@ -11,6 +11,14 @@ def require_active_owner(user):
         raise PermissionDenied("Log in again before changing your shop.")
 
 
+def reserve_slug(shop, slug):
+    existing = ShopSlug.objects.filter(slug=slug).first()
+    if existing is not None and existing.shop_id != shop.pk:
+        raise ValidationError({"slug": ["This shop address is already in use."]})
+    if existing is None:
+        ShopSlug.objects.create(shop=shop, slug=slug)
+
+
 def create_shop(user, values):
     try:
         with transaction.atomic():
@@ -18,6 +26,7 @@ def create_shop(user, values):
             if Shop.objects.filter(owner=user).exists():
                 raise ValidationError("You already have a shop.")
             shop = Shop.objects.create(owner=user, **values)
+            reserve_slug(shop, shop.slug)
             audit_change(shop, user, "created", {"slug": shop.slug})
             return shop
     except IntegrityError as error:
@@ -39,6 +48,7 @@ def update_shop(instance, user, values):
             old_slug = shop.slug
             fields = sorted(set(values) - {"version"})
             shop = save_versioned(shop, values)
+            reserve_slug(shop, shop.slug)
             changes = {"fields": fields}
             if old_slug != shop.slug:
                 changes["slug"] = {"from": old_slug, "to": shop.slug}

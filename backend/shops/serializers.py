@@ -37,6 +37,11 @@ class ShopSerializer(ShopPreviewSerializer):
     def validate_slug(self, value):
         if value in {"admin", "api", "me", "new", "preview", "status"}:
             raise serializers.ValidationError("Choose a different shop address.")
+        aliases = ShopSlug.objects.filter(slug=value)
+        if self.instance is not None:
+            aliases = aliases.exclude(shop=self.instance)
+        if aliases.exists():
+            raise serializers.ValidationError("This shop address is already in use.")
         return value
 
     def validate_website_url(self, value):

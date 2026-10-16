@@ -52,6 +52,17 @@ class ShopTests(AccountAPITestCase):
         )
         self.assertEqual(update.status_code, 404)
 
+    def test_slug_changes_reserve_old_addresses_and_do_not_allow_takeover(self):
+        shop = self.create_shop()
+        response = self.request(
+            "patch", f"shops/{shop.pk}", {"slug": "moc-living", "version": 1}
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["version"], 2)
+        self.client.force_login(self.other)
+        self.assertEqual(self.request("post", "shops", self.values).status_code, 400)
+        self.assertEqual(ShopSlug.objects.filter(shop=shop).count(), 2)
+
     def test_stale_versions_do_not_overwrite_shop_or_change_status(self):
         shop = self.create_shop()
         saved = self.request(
