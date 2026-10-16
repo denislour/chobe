@@ -189,7 +189,7 @@ class AccountDataTests(AccountAPITestCase):
         self.assertFalse(self.user.is_active)
         self.assertFalse(privacy_for(self.user).share_phone)
         self.assertNotIn("_auth_user_id", self.client.session)
-        self.assertEqual(self.client.get("/api/v1/me/profile/").status_code, 403)
+        self.assertEqual(self.client.get("/api/v1/profiles/me/").status_code, 403)
         self.run_worker()
         self.assertFalse(User.objects.filter(pk=self.user.pk).exists())
         self.assertFalse(Profile.objects.filter(user_id=self.user.pk).exists())
@@ -236,7 +236,7 @@ class AccountDataTests(AccountAPITestCase):
                 404,
             )
         self.assertEqual(
-            client.get(f"/api/v1/me/profile/?receipt={receipt}").status_code, 403
+            client.get(f"/api/v1/profiles/me/?receipt={receipt}").status_code, 403
         )
         self.assertEqual(
             client.post(f"/api/v1/account-deletion-status/{receipt}/", {}).status_code,

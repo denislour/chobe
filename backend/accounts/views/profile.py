@@ -3,6 +3,8 @@ import io
 from django.http import FileResponse, Http404
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
+from rest_framework.decorators import action
+from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
 
@@ -19,9 +21,24 @@ class ProfileViewSet(ModelViewSet):
     serializer_class = ProfileSerializer
     schema = ProfileSchema()
 
+    def get_permissions(self):
+        actions = self.action_map.values() if self.action == "metadata" else (self.action,)
+        if not any(action in ("me", "update_me", "avatar") for action in actions):
+            raise MethodNotAllowed(self.request.method)
+        return super().get_permissions()
+
+    @action(detail=False, methods=["get"])
+    def me(self, request):
+        return self.retrieve(request)
+
+    @me.mapping.patch
+    def update_me(self, request):
+        return self.partial_update(request)
+
     def get_object(self):
         return profile_for(self.request.user)
 
+    @action(detail=False, methods=["get"], url_path="me/avatar")
     def avatar(self, request):
         profile = self.get_object()
         if not profile.avatar:

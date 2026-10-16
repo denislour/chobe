@@ -7,16 +7,17 @@ from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
 from rest_framework.decorators import action
-from rest_framework.exceptions import Throttled
+from rest_framework.exceptions import MethodNotAllowed, Throttled
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.viewsets import GenericViewSet, ModelViewSet
+from rest_framework.viewsets import ModelViewSet
 
 from accounts.models import AccountDataExport, DeletionRequest
-from accounts.schemas.base import CSRFSchema
 from accounts.schemas.privacy import (
     AccountDataExportSchema,
     DeletionSchema,
+    DeletionStatusSchema,
+    PrivacySchema,
     ViewingHistorySchema,
 )
 from accounts.serializers.privacy import (
@@ -51,7 +52,21 @@ class PrivacyViewSet(ModelViewSet):
     permission_classes = (IsAuthenticated,)
     throttle_classes = (AccountMutationThrottle,)
     serializer_class = PrivacySerializer
-    schema = CSRFSchema()
+    schema = PrivacySchema()
+
+    def get_permissions(self):
+        actions = self.action_map.values() if self.action == "metadata" else (self.action,)
+        if not any(action in ("me", "update_me") for action in actions):
+            raise MethodNotAllowed(self.request.method)
+        return super().get_permissions()
+
+    @action(detail=False, methods=["get"])
+    def me(self, request):
+        return self.retrieve(request)
+
+    @me.mapping.patch
+    def update_me(self, request):
+        return self.partial_update(request)
 
     def get_object(self):
         return privacy_for(self.request.user)
@@ -63,6 +78,12 @@ class ViewingHistoryViewSet(ModelViewSet):
     serializer_class = ViewingHistorySerializer
     schema = ViewingHistorySchema()
     throttle_classes = (HistoryThrottle,)
+
+    def get_permissions(self):
+        actions = self.action_map.values() if self.action == "metadata" else (self.action,)
+        if not any(action in ("list", "create", "clear") for action in actions):
+            raise MethodNotAllowed(self.request.method)
+        return super().get_permissions()
 
     def get_queryset(self):
         return viewing_history_for(self.request.user)
@@ -77,6 +98,7 @@ class ViewingHistoryViewSet(ModelViewSet):
             return Response(status=204)
         return Response(self.get_serializer(entry).data, status=201)
 
+    @action(detail=False, methods=["delete"])
     def clear(self, request):
         clear_viewing_history(request.user)
         return Response(status=204)
@@ -87,8 +109,16 @@ class AccountDataExportViewSet(ModelViewSet):
     permission_classes = (IsAuthenticated,)
     serializer_class = AccountDataExportSerializer
     schema = AccountDataExportSchema()
-    http_method_names = ("get", "post", "head", "options")
     throttle_classes = (AccountDataExportThrottle,)
+    lookup_value_converter = "uuid"
+
+    def get_permissions(self):
+        actions = self.action_map.values() if self.action == "metadata" else (self.action,)
+        if not any(
+            action in ("list", "retrieve", "create", "download") for action in actions
+        ):
+            raise MethodNotAllowed(self.request.method)
+        return super().get_permissions()
 
     def throttled(self, request, wait):
         raise Throttled(
@@ -120,11 +150,17 @@ class AccountDataExportViewSet(ModelViewSet):
 
 
 @method_decorator(never_cache, name="dispatch")
-class DeletionViewSet(GenericViewSet):
+class DeletionViewSet(ModelViewSet):
     permission_classes = (IsAuthenticated,)
     serializer_class = DeletionSerializer
     schema = DeletionSchema()
     throttle_classes = (DeletionThrottle,)
+
+    def get_permissions(self):
+        actions = self.action_map.values() if self.action == "metadata" else (self.action,)
+        if not any(action in ("create",) for action in actions):
+            raise MethodNotAllowed(self.request.method)
+        return super().get_permissions()
 
     def create(self, request):
         serializer = self.get_serializer(data=request.data)
@@ -138,12 +174,20 @@ class DeletionViewSet(GenericViewSet):
 
 
 @method_decorator(never_cache, name="dispatch")
-class DeletionStatusViewSet(GenericViewSet):
+class DeletionStatusViewSet(ModelViewSet):
     throttle_classes = (DeletionReceiptThrottle,)
     permission_classes = (AllowAny,)
     authentication_classes = ()
     serializer_class = DeletionStatusSerializer
-    schema = CSRFSchema()
+    schema = DeletionStatusSchema()
+    lookup_field = "receipt"
+    lookup_value_converter = "str"
+
+    def get_permissions(self):
+        actions = self.action_map.values() if self.action == "metadata" else (self.action,)
+        if not any(action in ("retrieve",) for action in actions):
+            raise MethodNotAllowed(self.request.method)
+        return super().get_permissions()
 
     def retrieve(self, request, receipt=None):
         try:

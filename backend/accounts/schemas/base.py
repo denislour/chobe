@@ -3,6 +3,11 @@ from drf_spectacular.utils import OpenApiParameter
 
 
 class CSRFSchema(AutoSchema):
+    def get_operation(self, *args, **kwargs):
+        if hasattr(self, "responses") and self.view.action not in self.responses:
+            return None
+        return super().get_operation(*args, **kwargs)
+
     def get_override_parameters(self):
         if self.method in ("GET", "HEAD", "OPTIONS"):
             return []

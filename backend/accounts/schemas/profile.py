@@ -8,8 +8,8 @@ from accounts.serializers.profile import ProfileSerializer
 
 class ProfileSchema(CSRFSchema):
     responses: ClassVar[dict] = {
-        "retrieve": ProfileSerializer,
-        "partial_update": ProfileSerializer,
+        "me": ProfileSerializer,
+        "update_me": ProfileSerializer,
         "avatar": {(200, "image/jpeg"): OpenApiTypes.BINARY},
     }
 

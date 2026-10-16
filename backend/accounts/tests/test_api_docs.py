@@ -24,12 +24,12 @@ class ApiDocsTests(TestCase):
             ("/api/v1/auth/register/", "post", ("201",)),
             ("/api/v1/auth/session/", "get", ("200",)),
             ("/api/v1/auth/logout/", "post", ("204",)),
-            ("/api/v1/me/profile/", "get", ("200",)),
-            ("/api/v1/me/profile/", "patch", ("200",)),
+            ("/api/v1/profiles/me/", "get", ("200",)),
+            ("/api/v1/profiles/me/", "patch", ("200",)),
             ("/api/v1/me/data-exports/", "get", ("200",)),
             ("/api/v1/me/data-exports/", "post", ("202",)),
             ("/api/v1/me/viewing-history/", "post", ("201", "204")),
-            ("/api/v1/me/viewing-history/", "delete", ("204",)),
+            ("/api/v1/me/viewing-history/clear/", "delete", ("204",)),
             ("/api/v1/me/deletion-requests/", "post", ("202",)),
         ]:
             with self.subTest(path=path, method=method):
@@ -44,18 +44,18 @@ class ApiDocsTests(TestCase):
                     "application/json"
                 ]["schema"]
                 self.assertEqual(schema["type"], "array")
-        avatar = paths["/api/v1/me/profile/avatar/"]["get"]["responses"]["200"]
+        avatar = paths["/api/v1/profiles/me/avatar/"]["get"]["responses"]["200"]
         self.assertEqual(avatar["content"]["image/jpeg"]["schema"]["format"], "binary")
         self.assertNotIn("requestBody", paths["/api/v1/me/data-exports/"]["post"])
-        self.assertNotIn("requestBody", paths["/api/v1/me/viewing-history/"]["delete"])
+        self.assertNotIn("requestBody", paths["/api/v1/me/viewing-history/clear/"]["delete"])
         self.assertIn("requestBody", paths["/api/v1/me/viewing-history/"]["post"])
-        self.assertIn("requestBody", paths["/api/v1/me/profile/"]["patch"])
+        self.assertIn("requestBody", paths["/api/v1/profiles/me/"]["patch"])
 
     def test_urlconf_preserves_account_routes(self):
         for path, module in [
             ("/api/v1/auth/login/", "accounts.views.auth"),
-            ("/api/v1/me/profile/", "accounts.views.profile"),
-            ("/api/v1/me/privacy-settings/", "accounts.views.privacy"),
+            ("/api/v1/profiles/me/", "accounts.views.profile"),
+            ("/api/v1/privacy-settings/me/", "accounts.views.privacy"),
             ("/api/v1/me/data-exports/", "accounts.views.privacy"),
             (
                 "/api/v1/account-deletion-status/receipt/",
@@ -66,6 +66,6 @@ class ApiDocsTests(TestCase):
                 self.assertEqual(resolve(path).func.cls.__module__, module)
         self.assertEqual(reverse("auth-login"), "/api/v1/auth/login/")
         self.assertEqual(
-            reverse("data-export-download", kwargs={"pk": "job"}),
-            "/api/v1/me/data-exports/job/download/",
+            reverse("data-export-download", kwargs={"pk": "00000000-0000-0000-0000-000000000001"}),
+            "/api/v1/me/data-exports/00000000-0000-0000-0000-000000000001/download/",
         )

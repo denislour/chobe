@@ -11,12 +11,12 @@ from accounts.tests.base import AccountAPITestCase
 
 class PrivacyTests(AccountAPITestCase):
     def test_defaults_and_phone_required_before_sharing(self):
-        response = self.request("get", "me/privacy-settings")
+        response = self.request("get", "privacy-settings/me")
         self.assertFalse(response.data["share_phone"])
         self.assertTrue(response.data["record_history"])
         self.assertEqual(
             self.request(
-                "patch", "me/privacy-settings", {"share_phone": True, "version": 1}
+                "patch", "privacy-settings/me", {"share_phone": True, "version": 1}
             ).status_code,
             400,
         )
@@ -28,7 +28,7 @@ class PrivacyTests(AccountAPITestCase):
         for value, version in [(True, 1), (False, 2)]:
             response = self.request(
                 "patch",
-                "me/privacy-settings",
+                "privacy-settings/me",
                 {"share_phone": value, "version": version},
             )
             self.assertEqual(response.status_code, 200)
@@ -40,7 +40,7 @@ class PrivacyTests(AccountAPITestCase):
         self.assertIsNone(public_listing_phone(self.user, is_public_listing=True))
         self.assertEqual(
             self.request(
-                "patch", "me/privacy-settings", {"share_phone": True, "version": 1}
+                "patch", "privacy-settings/me", {"share_phone": True, "version": 1}
             ).status_code,
             409,
         )
@@ -56,14 +56,14 @@ class PrivacyTests(AccountAPITestCase):
             )
         response = self.request("get", "me/viewing-history")
         self.assertEqual([entry["listing_id"] for entry in response.data], [12])
-        self.assertEqual(self.request("delete", "me/viewing-history").status_code, 204)
+        self.assertEqual(self.request("delete", "me/viewing-history/clear").status_code, 204)
         self.assertTrue(ViewingHistory.objects.filter(user=self.other).exists())
         self.assertFalse(ViewingHistory.objects.filter(user=self.user).exists())
 
     def test_opt_out_removes_history_and_prevents_new_records(self):
         self.request("post", "me/viewing-history", {"listing_id": 1})
         response = self.request(
-            "patch", "me/privacy-settings", {"record_history": False, "version": 1}
+            "patch", "privacy-settings/me", {"record_history": False, "version": 1}
         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
@@ -103,7 +103,7 @@ class PrivacyTests(AccountAPITestCase):
             with self.subTest(version=version):
                 response = self.request(
                     "patch",
-                    "me/privacy-settings",
+                    "privacy-settings/me",
                     {"record_history": False, "version": version},
                 )
                 self.assertEqual(response.status_code, 400)
@@ -112,15 +112,15 @@ class PrivacyTests(AccountAPITestCase):
 
     def test_private_endpoints_require_session_csrf_and_version(self):
         self.assertEqual(
-            APIClient().get("/api/v1/me/privacy-settings/").status_code, 403
+            APIClient().get("/api/v1/privacy-settings/me/").status_code, 403
         )
         self.assertEqual(
             self.request(
-                "patch", "me/privacy-settings", {"record_history": False}
+                "patch", "privacy-settings/me", {"record_history": False}
             ).status_code,
             400,
         )
         self.assertEqual(
-            self.client.delete("/api/v1/me/viewing-history/").status_code, 403
+            self.client.delete("/api/v1/me/viewing-history/clear/").status_code, 403
         )
         self.assertTrue(privacy_for(self.user).record_history)

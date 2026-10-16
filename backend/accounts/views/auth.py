@@ -4,12 +4,12 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.decorators import action
+from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from rest_framework.viewsets import GenericViewSet
+from rest_framework.viewsets import ModelViewSet
 
 from accounts.schemas.auth import AuthSchema
-from accounts.schemas.base import CSRFSchema
 from accounts.schemas.password_reset import PasswordResetSchema
 from accounts.serializers.login import LoginSerializer
 from accounts.serializers.password_reset import (
@@ -30,9 +30,26 @@ from accounts.throttles import (
 
 
 @method_decorator(never_cache, name="dispatch")
-class AuthViewSet(GenericViewSet):
+class AuthViewSet(ModelViewSet):
     permission_classes = (AllowAny,)
-    schema = CSRFSchema()
+    serializer_class = AuthUserSerializer
+    schema = AuthSchema()
+
+    def get_permissions(self):
+        actions = self.action_map.values() if self.action == "metadata" else (self.action,)
+        if not any(
+            action in (
+                "login",
+                "register",
+                "session",
+                "logout",
+                "forgot_password",
+                "reset_password",
+            )
+            for action in actions
+        ):
+            raise MethodNotAllowed(self.request.method)
+        return super().get_permissions()
 
     def initial(self, request, *args, **kwargs):
         if request.method not in ("GET", "HEAD", "OPTIONS"):

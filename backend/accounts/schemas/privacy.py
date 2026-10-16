@@ -6,6 +6,8 @@ from accounts.schemas.base import CSRFSchema
 from accounts.serializers.privacy import (
     AccountDataExportSerializer,
     DeletionReceiptSerializer,
+    DeletionStatusSerializer,
+    PrivacySerializer,
     ViewingHistorySerializer,
 )
 
@@ -26,8 +28,24 @@ class AccountDataExportSchema(CSRFSchema):
 
 
 class DeletionSchema(CSRFSchema):
+    responses: ClassVar[dict] = {"create": {202: DeletionReceiptSerializer}}
+
     def get_response_serializers(self):
-        return {202: DeletionReceiptSerializer}
+        return self.responses[self.view.action]
+
+
+class DeletionStatusSchema(CSRFSchema):
+    responses: ClassVar[dict] = {"retrieve": DeletionStatusSerializer}
+
+    def get_response_serializers(self):
+        return self.responses[self.view.action]
+
+
+class PrivacySchema(CSRFSchema):
+    responses: ClassVar[dict] = {"me": PrivacySerializer, "update_me": PrivacySerializer}
+
+    def get_response_serializers(self):
+        return self.responses[self.view.action]
 
 
 class ViewingHistorySchema(CSRFSchema):

@@ -12,13 +12,13 @@ from accounts.tests.base import AccountAPITestCase
 
 class ProfileTests(AccountAPITestCase):
     def test_current_profile_defaults_and_owner_cannot_be_changed(self):
-        response = self.request("get", "me/profile")
+        response = self.request("get", "profiles/me")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data["display_name"], self.user.username)
         self.assertEqual(response.data["email"], self.user.email)
         response = self.request(
             "patch",
-            "me/profile",
+            "profiles/me",
             {
                 "display_name": "A member",
                 "phone": "+84912345678",
@@ -45,19 +45,19 @@ class ProfileTests(AccountAPITestCase):
             with self.subTest(payload=payload):
                 self.assertEqual(
                     self.request(
-                        "patch", "me/profile", payload | {"version": 1}
+                        "patch", "profiles/me", payload | {"version": 1}
                     ).status_code,
                     400,
                 )
         self.assertEqual(
-            self.request("patch", "me/profile", {"bio": "hello"}).status_code, 400
+            self.request("patch", "profiles/me", {"bio": "hello"}).status_code, 400
         )
 
     def test_out_of_range_version_does_not_modify_profile(self):
         for version in (0, 2**63):
             with self.subTest(version=version):
                 response = self.request(
-                    "patch", "me/profile", {"bio": "not saved", "version": version}
+                    "patch", "profiles/me", {"bio": "not saved", "version": version}
                 )
                 self.assertEqual(response.status_code, 400)
                 self.assertIn("version", response.data)
@@ -66,13 +66,13 @@ class ProfileTests(AccountAPITestCase):
     def test_stale_version_does_not_overwrite_saved_profile(self):
         self.assertEqual(
             self.request(
-                "patch", "me/profile", {"bio": "first", "version": 1}
+                "patch", "profiles/me", {"bio": "first", "version": 1}
             ).status_code,
             200,
         )
         self.assertEqual(
             self.request(
-                "patch", "me/profile", {"bio": "stale", "version": 1}
+                "patch", "profiles/me", {"bio": "stale", "version": 1}
             ).status_code,
             409,
         )
@@ -87,35 +87,35 @@ class ProfileTests(AccountAPITestCase):
             content_type="image/png",
         )
         response = self.client.patch(
-            "/api/v1/me/profile/",
+            "/api/v1/profiles/me/",
             {"avatar": upload, "version": 1},
             format="multipart",
             HTTP_X_XSRF_TOKEN=self.client.cookies["XSRF-TOKEN"].value,
         )
         self.assertEqual(response.status_code, 200)
         self.assertIn("version=2", response.data["avatar_url"])
-        response = self.request("get", "me/profile/avatar")
+        response = self.request("get", "profiles/me/avatar")
         body = b"".join(response.streaming_content)
         self.assertEqual(response["Content-Type"], "image/jpeg")
         self.assertIn("no-store", response["Cache-Control"])
         self.assertNotIn(b"<script>", body)
         with Image.open(io.BytesIO(body)) as image:
             self.assertEqual(image.size, (512, 256))
-        self.assertEqual(APIClient().get("/api/v1/me/profile/avatar/").status_code, 403)
+        self.assertEqual(APIClient().get("/api/v1/profiles/me/avatar/").status_code, 403)
         self.assertEqual(
             self.request(
-                "patch", "me/profile", {"remove_avatar": True, "version": 2}
+                "patch", "profiles/me", {"remove_avatar": True, "version": 2}
             ).status_code,
             200,
         )
-        self.assertEqual(self.request("get", "me/profile/avatar").status_code, 404)
+        self.assertEqual(self.request("get", "profiles/me/avatar").status_code, 404)
 
     def test_fake_and_oversized_avatar_are_rejected(self):
         for body in [b"<html>fake</html>", b"x" * (2 * 1024 * 1024 + 1)]:
             with self.subTest(size=len(body)):
                 upload = SimpleUploadedFile("fake.png", body, content_type="image/png")
                 response = self.client.patch(
-                    "/api/v1/me/profile/",
+                    "/api/v1/profiles/me/",
                     {"avatar": upload, "version": 1},
                     format="multipart",
                     HTTP_X_XSRF_TOKEN=self.client.cookies["XSRF-TOKEN"].value,
@@ -138,7 +138,7 @@ class ProfileTests(AccountAPITestCase):
         self.assertIsNone(public_listing_phone(self.user, is_public_listing=False))
         self.assertEqual(
             self.request(
-                "patch", "me/profile", {"phone": "+84912345679", "version": 1}
+                "patch", "profiles/me", {"phone": "+84912345679", "version": 1}
             ).status_code,
             200,
         )
@@ -147,11 +147,11 @@ class ProfileTests(AccountAPITestCase):
         self.assertIsNone(public_listing_phone(self.user, is_public_listing=True))
 
     def test_auth_csrf_and_unsupported_methods(self):
-        self.assertEqual(APIClient().get("/api/v1/me/profile/").status_code, 403)
+        self.assertEqual(APIClient().get("/api/v1/profiles/me/").status_code, 403)
         self.assertEqual(
             self.client.patch(
-                "/api/v1/me/profile/", {"version": 1}, format="json"
+                "/api/v1/profiles/me/", {"version": 1}, format="json"
             ).status_code,
             403,
         )
-        self.assertEqual(self.request("delete", "me/profile").status_code, 405)
+        self.assertEqual(self.request("delete", "profiles/me").status_code, 405)
