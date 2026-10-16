@@ -1,0 +1,39 @@
+<app-shop-nav />
+<main class="shops-page">
+  <h1>Shops you follow</h1>
+  <p class="hint">Keep your favourite shops close. Only shops currently available to the public appear here.</p>
+  @if (following.loading()) { <p class="feedback" role="status">Loading your followed shops…</p> }
+  @if (following.error()) {
+    <div class="feedback error" role="alert">
+      <p>{{ following.error() }}</p>
+      <button class="btn secondary" type="button" [disabled]="following.pending() || following.loading()" (click)="loadPage(1)">Reload shops</button>
+    </div>
+  }
+  @if (following.notice()) { <p class="feedback success" role="status">{{ following.notice() }}</p> }
+  @if (!following.loading()) {
+    @if (following.shops().length) {
+      <p class="hint" role="status">{{ following.count() }} shop{{ following.count() === 1 ? '' : 's' }} · Page {{ following.page() }}</p>
+      <ul class="followed-list" aria-label="Followed shops" [attr.aria-busy]="following.pending()">
+        @for (shop of following.shops(); track shop.id) {
+          <li>
+            <a class="shop-link" [routerLink]="['/shops', shop.slug]">
+              @if (shop.logo_url; as logo) { <img class="shop-mark" [src]="logo" alt="" width="64" height="64" /> }
+              @else { <span class="shop-mark mark-placeholder" aria-hidden="true">{{ shop.name.slice(0, 1).toUpperCase() }}</span> }
+              <span><strong>{{ shop.name }}</strong><span class="hint area">{{ shop.area }}</span></span>
+            </a>
+            <button class="btn secondary" type="button" [disabled]="following.pending() || following.loading()" [attr.aria-label]="'Unfollow ' + shop.name" (click)="following.unfollow(shop.id)">Unfollow</button>
+          </li>
+        }
+      </ul>
+      <nav class="pagination" aria-label="Followed shop pages">
+        <button class="btn secondary" type="button" [disabled]="!following.hasPrevious() || following.loading() || following.pending()" (click)="loadPage(following.page() - 1)">Previous</button>
+        <button class="btn secondary" type="button" [disabled]="!following.hasNext() || following.loading() || following.pending()" (click)="loadPage(following.page() + 1)">Next</button>
+      </nav>
+    } @else if (!following.error()) {
+      <section class="empty-state" aria-labelledby="following-empty-title">
+        <h2 id="following-empty-title">No shops to show yet</h2>
+        <p>Follow a shop from its public page to find it here. Paused, closed, and suspended shops stay hidden until they are available again.</p>
+      </section>
+    }
+  }
+</main>

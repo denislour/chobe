@@ -1,0 +1,15 @@
+.followed-list { list-style: none; padding: 0; margin: 24px 0; }
+li { display: flex; justify-content: space-between; align-items: center; gap: 20px; padding: 24px 0; border-bottom: 1px solid var(--line); }
+.shop-link { display: flex; align-items: center; gap: 20px; min-width: 0; text-decoration: none; }
+.shop-link > span { min-width: 0; overflow-wrap: anywhere; }
+.shop-link:hover strong { text-decoration: underline; text-underline-offset: 4px; }
+.shop-link strong { font-size: 18px; }
+.shop-mark { width: 64px; height: 64px; border-radius: 9px; object-fit: cover; flex-shrink: 0; }
+.mark-placeholder { display: grid; place-items: center; background: #fff8db; font-size: 28px; font-weight: 600; }
+.area { display: block; margin-top: 4px; }
+.pagination { display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px; }
+@media (max-width: 560px) {
+  li { flex-wrap: wrap; gap: 16px; }
+  .shop-link { width: 100%; gap: 16px; }
+  .pagination { justify-content: space-between; }
+}
