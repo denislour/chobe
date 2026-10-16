@@ -18,6 +18,7 @@
         @if (shop.shop(); as current) {
           <div class="shop-summary">
             <div><h2>{{ current.name }}</h2><span class="status-chip">{{ statusLabels[current.status] }}</span></div>
+            <a class="text-link" [routerLink]="['/seller/shop/preview', current.slug]">Preview saved shop</a>
           </div>
           @if (current.status === 'suspended') {
             <p class="feedback error">An administrator suspended your shop. You can update its details, but only an administrator can restore it.</p>

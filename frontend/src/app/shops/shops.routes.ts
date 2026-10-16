@@ -9,4 +9,10 @@ export const shopsRoutes: Routes = [
     loadComponent: () =>
       import('@app/shops/shop-management/shop-management').then((m) => m.ShopManagement),
   },
+  {
+    path: 'shop/preview/:slug',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('@app/shops/shop-preview/shop-preview').then((m) => m.ShopPreview),
+  },
 ];

@@ -1,0 +1,13 @@
+<main class="account-page">
+  <div class="toolbar"><h1>Shop preview</h1><a class="btn secondary" routerLink="/seller/shop">Back to my shop</a></div>
+  <p class="intro">Only you can see this preview.</p>
+  @if (preview.loading()) { <p role="status">Loading shop preview…</p> }
+  @if (preview.error()) {
+    <p class="error" role="alert">{{ preview.error() }}</p>
+    <button class="btn" type="button" [disabled]="preview.loading()" (click)="preview.load(slug())">Try again</button>
+  }
+  @if (preview.shop(); as shop) {
+    <p class="hint">Shop status: {{ shop.status }} · Shop address: {{ shop.slug }}</p>
+    <app-shop-card [shop]="shop" />
+  }
+</main>

@@ -29,9 +29,11 @@ describe('Module routes', () => {
     expect(router.parseUrl(router.url).queryParams['returnUrl']).toBe('/account/profile');
   });
 
-  it('requires authentication for shop management', async () => {
+  it('requires authentication for shop management and preview', async () => {
     const harness = await RouterTestingHarness.create('/seller/shop');
     const router = TestBed.inject(Router);
     expect(router.parseUrl(router.url).queryParams['returnUrl']).toBe('/seller/shop');
+    await harness.navigateByUrl('/seller/shop/preview/moc-home');
+    expect(router.parseUrl(router.url).queryParams['returnUrl']).toBe('/seller/shop/preview/moc-home');
   });
 });
