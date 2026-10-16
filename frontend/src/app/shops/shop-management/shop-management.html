@@ -89,6 +89,26 @@
               </div>
             </div>
             <p class="hint">Manage your phone number and sharing consent in <a routerLink="/account/profile">Profile</a> and <a routerLink="/account/privacy">Privacy</a>.</p>
+            <section class="settings-section" aria-labelledby="shop-images-title">
+              <h2 id="shop-images-title">Logo and cover</h2>
+              <p class="hint">JPEG, PNG, or WebP. Up to 2 MiB each and 4096 pixels per side.</p>
+              <div class="form-grid">
+                <div class="field">
+                  <label for="shop-logo">Shop logo</label>
+                  @if (previewData().logo_url; as url) { <img class="logo-thumbnail" [src]="url" alt="Your shop logo" width="72" height="72" /> }
+                  <input #logoInput id="shop-logo" type="file" accept="image/jpeg,image/png,image/webp" (change)="chooseImage('logo', $event)" aria-describedby="shop-logo-error" />
+                  <small id="shop-logo-error" class="error">{{ uploadErrors().logo }} {{ shop.fieldErrors()['logo']?.join(' ') }}</small>
+                  @if (shop.shop()?.logo_url || selectedLogo()) { <label class="check-row"><input type="checkbox" formControlName="remove_logo" />Remove logo</label> }
+                </div>
+                <div class="field">
+                  <label for="shop-banner">Cover image</label>
+                  @if (previewData().banner_url; as url) { <img class="banner-thumbnail" [src]="url" alt="Your shop cover" /> }
+                  <input #bannerInput id="shop-banner" type="file" accept="image/jpeg,image/png,image/webp" (change)="chooseImage('banner', $event)" aria-describedby="shop-banner-error" />
+                  <small id="shop-banner-error" class="error">{{ uploadErrors().banner }} {{ shop.fieldErrors()['banner']?.join(' ') }}</small>
+                  @if (shop.shop()?.banner_url || selectedBanner()) { <label class="check-row"><input type="checkbox" formControlName="remove_banner" />Remove cover</label> }
+                </div>
+              </div>
+            </section>
             <div class="toolbar">
               <button class="btn" type="submit">{{ shop.pending() ? 'Saving…' : shop.shop() ? 'Save shop' : 'Create shop' }}</button>
             </div>

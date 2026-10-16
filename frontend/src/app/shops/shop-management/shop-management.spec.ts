@@ -79,4 +79,23 @@ describe('ShopManagement', () => {
     expect(element.textContent).toContain('Use an address');
     http.expectNone(`/api/v1/shops/${shopFixture.id}/`);
   });
+
+  it('keeps a selected image until save completes and releases its preview', async () => {
+    vi.stubGlobal('URL', class extends URL {
+      static override createObjectURL = vi.fn(() => 'blob:shop-logo');
+      static override revokeObjectURL = vi.fn();
+    });
+    const input = element.querySelector<HTMLInputElement>('#shop-logo')!;
+    const file = new File(['image'], 'logo.png', { type: 'image/png' });
+    Object.defineProperty(input, 'files', { configurable: true, value: [file] });
+    input.dispatchEvent(new Event('change'));
+    await fixture.whenStable();
+    submit();
+    const request = http.expectOne(`/api/v1/shops/${shopFixture.id}/`);
+    expect((request.request.body as FormData).get('logo')).toBe(file);
+    request.flush({ ...shopFixture, logo_url: '/api/v1/shops/logo/', version: 2 });
+    await fixture.whenStable();
+    expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:shop-logo');
+    expect(input.value).toBe('');
+  });
 });
