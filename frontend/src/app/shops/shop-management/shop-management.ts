@@ -5,11 +5,12 @@ import { Router, RouterLink } from '@angular/router';
 import { AccountNav } from '@app/accounts/account-nav/account-nav';
 import { AuthStore } from '@app/auth/auth.store';
 import { ShopData, ShopDisplayData } from '@app/shops/shop-api';
+import { ShopCard } from '@app/shops/shop-card/shop-card';
 import { ShopStore } from '@app/shops/shop.store';
 
 @Component({
   selector: 'app-shop-management',
-  imports: [ReactiveFormsModule, RouterLink, AccountNav],
+  imports: [ReactiveFormsModule, RouterLink, AccountNav, ShopCard],
   providers: [ShopStore],
   templateUrl: './shop-management.html',
   styleUrls: ['../../accounts/account.css', './shop-management.css'],
@@ -17,6 +18,7 @@ import { ShopStore } from '@app/shops/shop.store';
 export class ShopManagement implements OnInit {
   protected readonly form;
   protected readonly previewData;
+  protected readonly previewing = signal(false);
   protected readonly selectedLogo = signal<File | null>(null);
   protected readonly selectedBanner = signal<File | null>(null);
   protected readonly logoPreview = signal<string | null>(null);
@@ -134,6 +136,12 @@ export class ShopManagement implements OnInit {
     this.shop.save({ id: current?.id ?? null, body });
   }
 
+  protected preview(): void {
+    this.form.markAllAsTouched();
+    if (this.form.valid && !this.uploadErrors().logo && !this.uploadErrors().banner)
+      this.previewing.set(true);
+  }
+
   private canSubmit(): boolean {
     return this.form.valid && this.shop.loaded() && !this.shop.loading() && !this.shop.pending()
       && this.shop.shop()?.status !== 'closed'
@@ -156,6 +164,7 @@ export class ShopManagement implements OnInit {
     this.selectedBanner.set(null);
     this.uploadErrors.set({ logo: '', banner: '' });
     this.releaseImagePreviews();
+    this.previewing.set(false);
     for (const input of [this.logoInput(), this.bannerInput()]) {
       if (input) input.nativeElement.value = '';
     }

@@ -13,7 +13,7 @@ pnpm start
 
 Open `http://localhost:4200/` to view the app.
 
-After signing in, open `/seller/shop` or choose **My shop** in the account navigation. Create your shop and edit its details. Upload or remove a logo and cover image.
+After signing in, open `/seller/shop` or choose **My shop** in the account navigation. Create your shop and edit its details. Upload or remove a logo and cover image. Preview changes before saving.
 
 The Django backend must be running with the shop migration applied. Public storefronts and listing management are separate features.
 

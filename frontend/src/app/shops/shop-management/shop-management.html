@@ -111,9 +111,17 @@
             </section>
             <div class="toolbar">
               <button class="btn" type="submit">{{ shop.pending() ? 'Saving…' : shop.shop() ? 'Save shop' : 'Create shop' }}</button>
+              <button class="btn secondary" type="button" (click)="preview()">Preview changes</button>
             </div>
           </fieldset>
         </form>
+        @if (previewing()) {
+          <section class="settings-section" aria-labelledby="draft-preview-title">
+            <div class="toolbar"><h2 id="draft-preview-title">Preview your changes</h2><button class="text-link" type="button" (click)="previewing.set(false)">Hide preview</button></div>
+            <p class="hint">Only you can see this preview. Changes have not been saved.</p>
+            <app-shop-card [shop]="previewData()" />
+          </section>
+        }
       }
     </div>
   </div>

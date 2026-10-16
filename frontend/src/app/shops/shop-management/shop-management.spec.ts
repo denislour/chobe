@@ -72,6 +72,14 @@ describe('ShopManagement', () => {
     expect(element.textContent).toContain('changed');
   });
 
+  it('shows an unsaved preview without a mutation request', async () => {
+    enter('shop-name', 'Moc Living');
+    click('Preview changes');
+    await fixture.whenStable();
+    expect(element.querySelector('app-shop-card')?.textContent).toContain('Moc Living');
+    http.expectNone(`/api/v1/shops/${shopFixture.id}/`);
+  });
+
   it('blocks invalid shop addresses before submitting', async () => {
     enter('shop-slug', 'Invalid Address');
     submit();
