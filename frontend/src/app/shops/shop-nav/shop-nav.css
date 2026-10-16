@@ -1,0 +1,12 @@
+header { background: var(--yellow); }
+.header-inner { max-width: 1280px; padding: 18px 40px; margin: auto; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+.brand { display: inline-flex; align-items: center; min-height: 44px; }
+.brand img { display: block; width: 132px; height: auto; }
+nav { display: flex; gap: 8px; flex-wrap: wrap; }
+nav a { color: var(--ink); padding: 10px 14px; min-height: 44px; border-radius: 7px; text-decoration: none; font-weight: 600; }
+nav a:hover, nav a.active { background: white; }
+@media (max-width: 560px) {
+  .header-inner { padding: 16px; gap: 12px; }
+  nav { gap: 4px; }
+  nav a { padding-inline: 10px; }
+}

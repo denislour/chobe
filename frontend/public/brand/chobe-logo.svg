@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" class="chobe-wordmark" viewBox="50 0 196 68" fill="none" role="img" aria-labelledby="title desc">
+  <title id="title">Chobe</title>
+  <desc id="desc">The Chobe wordmark, drawn with rounded strokes and a bag-shaped letter o.</desc>
+  <g stroke="#24251F" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"><g class="logo-c" transform="translate(0 2)"><path d="M87 30c-14-11-28 0-28 11s14 22 28 11"/></g>
+    <g class="logo-h" transform="translate(0 -1)"><path d="M99 13v41m0-15c0-17 25-17 25 0v15"/></g>
+    <g transform="translate(0 4)"><g class="logo-o"><path d="M135 29q10 5 20 0l3 14c1 8-5 13-13 13s-14-5-13-13Z"/><path d="M135 29q10-9 20 0" stroke-width="2.2"/></g></g>
+    <g class="logo-b" transform="translate(0 -2)"><path d="M171 13v41m0-13c0-20 26-20 26 0s-26 20-26 0"/></g>
+    <g transform="translate(0 1)"><g class="logo-e"><path d="M235 51c-16 12-30 0-30-10s7-16 16-16 15 6 15 16h-30"/></g></g></g>
+</svg>

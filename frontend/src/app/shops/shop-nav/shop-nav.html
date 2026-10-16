@@ -1,0 +1,11 @@
+<header>
+  <div class="header-inner">
+    <a class="brand" routerLink="/" aria-label="Chobe home"><img src="/brand/chobe-logo.svg" alt="Chobe" width="132" height="40" /></a>
+    <nav aria-label="Shop navigation">
+      <a routerLink="/account/followed-shops" routerLinkActive="active" ariaCurrentWhenActive="page">Following</a>
+      <a routerLink="/seller/shop" routerLinkActive="active" ariaCurrentWhenActive="page">My shop</a>
+      @if (auth.user()) { <a routerLink="/account/profile">My account</a> }
+      @else { <a routerLink="/login">Log in</a> }
+    </nav>
+  </div>
+</header>
