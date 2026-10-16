@@ -5,7 +5,8 @@ from django.http import FileResponse, Http404
 from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
-from rest_framework.exceptions import ValidationError
+from rest_framework.decorators import action
+from rest_framework.exceptions import MethodNotAllowed, ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
@@ -32,6 +33,23 @@ class ShopViewSet(ModelViewSet):
         "preview": ShopPreviewSerializer,
     }
     schema = ShopSchema()
+    lookup_value_converter = "uuid"
+
+    def get_permissions(self):
+        actions = self.action_map.values() if self.action == "metadata" else (self.action,)
+        if not any(
+            action in (
+                "create",
+                "partial_update",
+                "mine",
+                "status",
+                "preview",
+                "image",
+            )
+            for action in actions
+        ):
+            raise MethodNotAllowed(self.request.method)
+        return super().get_permissions()
 
     def initialize_request(self, request, *args, **kwargs):
         request.upload_handlers.insert(0, ShopImageUploadHandler(request))
@@ -54,10 +72,13 @@ class ShopViewSet(ModelViewSet):
             raise ValidationError(error)
         return super().get_serializer(*args, **kwargs)
 
+    @action(detail=False, methods=["get"])
     def mine(self, request):
         shop = get_object_or_404(self.get_queryset())
+        self.check_object_permissions(request, shop)
         return Response(self.get_serializer(shop).data)
 
+    @action(detail=True, methods=["post"])
     def status(self, request, pk=None):
         shop = self.get_object()
         serializer = self.get_serializer(data=request.data)
@@ -65,6 +86,7 @@ class ShopViewSet(ModelViewSet):
         shop = change_shop_status(shop, request.user, serializer.validated_data)
         return Response(ShopSerializer(shop).data)
 
+    @action(detail=False, methods=["get"], url_path="<slug:slug>/preview")
     def preview(self, request, slug=None):
         alias = get_object_or_404(
             ShopSlug.objects.select_related("shop"),
@@ -74,6 +96,7 @@ class ShopViewSet(ModelViewSet):
         )
         return Response(self.get_serializer(alias.shop).data)
 
+    @action(detail=True, methods=["get"], url_path="images/<str:kind>")
     def image(self, request, pk=None, kind=None):
         if kind not in {"logo", "banner"}:
             raise Http404

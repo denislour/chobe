@@ -28,7 +28,7 @@ class ShopTests(AccountAPITestCase):
         return Shop.objects.get(pk=response.data["id"])
 
     def test_create_is_owner_scoped_and_only_one_shop_is_allowed(self):
-        self.assertEqual(self.request("get", "me/shop").status_code, 404)
+        self.assertEqual(self.request("get", "shops/mine").status_code, 404)
         response = self.request(
             "post",
             "shops",
@@ -43,7 +43,16 @@ class ShopTests(AccountAPITestCase):
         )
         self.assertEqual(duplicate.status_code, 400)
         self.assertEqual(Shop.objects.count(), 1)
-        self.assertEqual(self.request("get", "me/shop").data["id"], str(shop.pk))
+        self.assertEqual(self.request("get", "shops/mine").data["id"], str(shop.pk))
+
+    def test_router_does_not_expose_additional_shop_crud(self):
+        shop = self.create_shop()
+        self.assertEqual(self.request("get", "shops").status_code, 405)
+        self.assertEqual(self.request("get", f"shops/{shop.pk}").status_code, 405)
+        self.assertEqual(self.request("put", f"shops/{shop.pk}", {}).status_code, 405)
+        self.assertEqual(self.request("delete", f"shops/{shop.pk}").status_code, 405)
+        self.assertEqual(self.request("patch", "shops/mine", {}).status_code, 405)
+        self.assertTrue(Shop.objects.filter(pk=shop.pk).exists())
 
     def test_other_owners_cannot_update_preview_or_read_images(self):
         shop = self.create_shop()
