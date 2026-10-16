@@ -8,6 +8,9 @@ legend { font-size: 20px; font-weight: 600; margin-bottom: 20px; }
 .text-link { color: var(--ink); text-decoration: underline; text-underline-offset: 4px; padding: 8px 0; min-height: 44px; text-align: left; }
 .logo-thumbnail { width: 72px; height: 72px; object-fit: cover; border-radius: 8px; }
 .banner-thumbnail { width: 100%; max-height: 140px; object-fit: cover; border-radius: 8px; }
+.confirmation { margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--line); }
+.confirmation input { margin: 8px 0 16px; }
 .btn:hover:not(:disabled) { background: var(--yellow-hover); }
 .btn.secondary:hover:not(:disabled) { background: #f5f6f2; }
+.btn.danger:hover:not(:disabled) { background: #84291f; }
 @media (max-width: 600px) { .toolbar .text-link { flex: 1; } }

@@ -88,6 +88,32 @@ describe('ShopManagement', () => {
     http.expectNone(`/api/v1/shops/${shopFixture.id}/`);
   });
 
+  it('requires an explicit confirmation before pausing', async () => {
+    click('Pause shop');
+    await fixture.whenStable();
+    http.expectNone(`/api/v1/shops/${shopFixture.id}/status/`);
+    click('Confirm pause');
+    const request = http.expectOne(`/api/v1/shops/${shopFixture.id}/status/`);
+    expect(request.request.body).toEqual({ status: 'paused', version: 1 });
+    request.flush({ ...shopFixture, status: 'paused', version: 2 });
+    await fixture.whenStable();
+    expect(element.textContent).toContain('Reopen shop');
+  });
+
+  it('requires the shop name before confirming permanent closure', async () => {
+    click('Close shop');
+    await fixture.whenStable();
+    const confirm = [...element.querySelectorAll<HTMLButtonElement>('button')].find((button) => button.textContent?.includes('Confirm closure'))!;
+    expect(confirm.disabled).toBe(true);
+    enter('close-confirmation', shopFixture.name);
+    await fixture.whenStable();
+    confirm.click();
+    http.expectOne(`/api/v1/shops/${shopFixture.id}/status/`).flush({ ...shopFixture, status: 'closed', version: 2 });
+    await fixture.whenStable();
+    expect(element.querySelector<HTMLFieldSetElement>('fieldset')!.disabled).toBe(true);
+    expect(element.textContent).toContain('permanently closed');
+  });
+
   it('keeps a selected image until save completes and releases its preview', async () => {
     vi.stubGlobal('URL', class extends URL {
       static override createObjectURL = vi.fn(() => 'blob:shop-logo');

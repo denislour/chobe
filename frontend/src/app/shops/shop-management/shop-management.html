@@ -123,6 +123,33 @@
             <app-shop-card [shop]="previewData()" />
           </section>
         }
+        @if (shop.shop(); as current) {
+          @if (current.status === 'active' || current.status === 'paused') {
+            <section class="danger-zone" aria-labelledby="shop-status-title">
+              <h2 id="shop-status-title">Shop availability</h2>
+              <p>Pausing keeps your shop details and lets you reopen later. Closing is permanent.</p>
+              @if (form.dirty) { <p class="hint">Save or reload your edits before changing the shop status.</p> }
+              <div class="toolbar">
+                <button class="btn secondary" type="button" [disabled]="shop.pending() || shop.loading() || form.dirty" (click)="askStatus(current.status === 'active' ? 'paused' : 'active')">{{ current.status === 'active' ? 'Pause shop' : 'Reopen shop' }}</button>
+                <button class="btn danger" type="button" [disabled]="shop.pending() || shop.loading() || form.dirty" (click)="askStatus('closed')">Close shop</button>
+              </div>
+              @if (statusIntent(); as intent) {
+                <div class="confirmation" role="region" aria-labelledby="confirm-status-title">
+                  <h3 id="confirm-status-title">{{ intent === 'closed' ? 'Close this shop permanently?' : intent === 'paused' ? 'Pause this shop?' : 'Reopen this shop?' }}</h3>
+                  @if (intent === 'closed') {
+                    <p>This cannot be undone. You will not be able to create another shop on this account.</p>
+                    <label for="close-confirmation">Type {{ current.name }} to confirm</label>
+                    <input id="close-confirmation" [formControl]="closeConfirmation" autocomplete="off" />
+                  }
+                  <div class="toolbar">
+                    <button class="btn" type="button" [disabled]="shop.pending() || shop.loading() || form.dirty || (intent === 'closed' && closeConfirmation.value !== current.name)" (click)="confirmStatus()">Confirm {{ intent === 'closed' ? 'closure' : intent === 'paused' ? 'pause' : 'reopening' }}</button>
+                    <button class="btn secondary" type="button" (click)="statusIntent.set(null)">Cancel</button>
+                  </div>
+                </div>
+              }
+            </section>
+          }
+        }
       }
     </div>
   </div>

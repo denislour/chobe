@@ -1,10 +1,13 @@
-import { Component, computed, DestroyRef, effect, ElementRef, OnInit, signal, untracked, viewChild } from '@angular/core';
+import {
+  Component, computed, DestroyRef, effect, ElementRef, OnInit,
+  signal, untracked, viewChild,
+} from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AccountNav } from '@app/accounts/account-nav/account-nav';
 import { AuthStore } from '@app/auth/auth.store';
-import { ShopData, ShopDisplayData } from '@app/shops/shop-api';
+import { OwnerShopStatus, ShopData, ShopDisplayData } from '@app/shops/shop-api';
 import { ShopCard } from '@app/shops/shop-card/shop-card';
 import { ShopStore } from '@app/shops/shop.store';
 
@@ -24,6 +27,8 @@ export class ShopManagement implements OnInit {
   protected readonly logoPreview = signal<string | null>(null);
   protected readonly bannerPreview = signal<string | null>(null);
   protected readonly uploadErrors = signal({ logo: '', banner: '' });
+  protected readonly statusIntent = signal<OwnerShopStatus | null>(null);
+  protected readonly closeConfirmation = new FormControl('', { nonNullable: true });
   private readonly logoInput = viewChild<ElementRef<HTMLInputElement>>('logoInput');
   private readonly bannerInput = viewChild<ElementRef<HTMLInputElement>>('bannerInput');
   protected readonly statusLabels = {
@@ -140,6 +145,21 @@ export class ShopManagement implements OnInit {
     this.form.markAllAsTouched();
     if (this.form.valid && !this.uploadErrors().logo && !this.uploadErrors().banner)
       this.previewing.set(true);
+  }
+
+  protected askStatus(status: OwnerShopStatus): void {
+    if (this.shop.pending() || this.shop.loading() || this.form.dirty) return;
+    this.closeConfirmation.reset();
+    this.statusIntent.set(status);
+  }
+
+  protected confirmStatus(): void {
+    const current = this.shop.shop();
+    const status = this.statusIntent();
+    if (!current || !status || this.form.dirty) return;
+    if (status === 'closed' && this.closeConfirmation.value !== current.name) return;
+    this.shop.changeStatus({ id: current.id, status, version: current.version });
+    this.statusIntent.set(null);
   }
 
   private canSubmit(): boolean {
