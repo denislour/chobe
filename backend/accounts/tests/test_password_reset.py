@@ -89,7 +89,9 @@ class PasswordResetTests(APITestCase):
 
     def test_smtp_errors_are_not_silently_swallowed(self):
         with (
-            patch("accounts.emails.EmailMessage.send", side_effect=SMTPException),
+            patch(
+                "accounts.services.email.EmailMessage.send", side_effect=SMTPException
+            ),
             self.assertRaises(SMTPException),
         ):
             send_password_reset_email.call(self.user.email)

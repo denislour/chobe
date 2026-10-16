@@ -5,8 +5,8 @@ from django.tasks import task
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 
-from accounts.emails import send_account_email
 from accounts.models import User
+from accounts.services.email import send_account_email
 
 
 @task

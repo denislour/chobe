@@ -94,7 +94,9 @@ class WelcomeEmailTests(TestCase):
     def test_smtp_failure_is_recorded_without_deleting_the_account(self):
         result = send_welcome_email.enqueue(self.user.pk)
         with (
-            patch("accounts.emails.EmailMessage.send", side_effect=SMTPException),
+            patch(
+                "accounts.services.email.EmailMessage.send", side_effect=SMTPException
+            ),
             self.assertLogs("huey", level="ERROR"),
         ):
             self.run_worker()
