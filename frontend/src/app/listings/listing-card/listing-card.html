@@ -5,7 +5,26 @@
     } @else {
       <span class="image-placeholder">No image</span>
     }</a
+  ><button
+    type="button"
+    class="save"
+    [attr.aria-label]="
+      (card.saved() ?? listing().is_favorite) ? 'Remove saved listing' : 'Save listing'
+    "
+    [attr.aria-pressed]="card.saved() ?? listing().is_favorite"
+    [disabled]="card.pending()"
+    (click)="favorite()"
   >
+    <svg
+      viewBox="0 0 24 24"
+      width="20"
+      height="20"
+      aria-hidden="true"
+      [class.filled]="card.saved() ?? listing().is_favorite"
+    >
+      <path d="M12 21 3 12C-3 5 6-2 12 5c6-7 15 0 9 7Z" />
+    </svg>
+  </button>
   <h3>
     <a [routerLink]="['/listings', listing().id]">{{ listing().title }}</a>
   </h3>
