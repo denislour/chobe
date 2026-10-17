@@ -5,12 +5,31 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.utils import timezone
 from django_tasks_db.models import DBTaskResult
 
-from listings.models import Listing, ListingRevision
+from listings.models import Listing, ListingRevision, ModerationCase
 from listings.services.management import cleanup_inactive_listings, six_months_after
 from listings.tests.base import ListingAPITestCase
 
 
 class ListingManagementTests(ListingAPITestCase):
+    def test_draft_and_its_images_are_private(self):
+        listing = self.upload(self.create_draft())
+        image = listing.images.get()
+        self.assertEqual(
+            self.public.get(f"/api/v1/listings/{listing.pk}/").status_code, 404
+        )
+        self.assertEqual(
+            self.public.get(
+                f"/api/v1/listings/{listing.pk}/image/{image.pk}/"
+            ).status_code,
+            404,
+        )
+        self.assertEqual(
+            self.public.get(
+                f"/api/v1/me/listings/{listing.pk}/image/{image.pk}/"
+            ).status_code,
+            403,
+        )
+        self.assertEqual(self.public.get("/api/v1/listings/").data["count"], 0)
 
     def test_owner_cannot_read_or_edit_another_owners_draft(self):
         listing = self.create_draft()
@@ -363,3 +382,19 @@ class ListingManagementTests(ListingAPITestCase):
         )
         self.assertEqual(response.status_code, 409)
 
+    def test_rejecting_the_published_snapshot_removes_it_from_public_view(self):
+        listing = self.approve(self.create_draft())
+        case = ModerationCase.objects.get(revision__listing=listing)
+        response = self.admin_request(
+            "post",
+            f"admin/moderation/{case.pk}/decision",
+            {
+                "version": case.version,
+                "decision": "reject",
+                "reason": "Re-reviewed and found an issue.",
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            self.public.get(f"/api/v1/listings/{listing.pk}/").status_code, 404
+        )
