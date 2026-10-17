@@ -5,10 +5,10 @@ from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
 
-from listings.models import SavedSearch
+from listings.models import NotificationPreference, SavedSearch
 from listings.pagination import ListingPagination
-from listings.schemas.alerts import SavedSearchSchema
-from listings.serializers.alerts import SavedSearchSerializer
+from listings.schemas.alerts import PreferenceSchema, SavedSearchSchema
+from listings.serializers.alerts import NotificationPreferenceSerializer, SavedSearchSerializer
 from listings.throttles import MarketplaceMutationThrottle, MarketplaceReadThrottle
 
 
@@ -46,3 +46,31 @@ class SavedSearchViewSet(ModelViewSet):
 
 
 
+@method_decorator(never_cache, name="dispatch")
+class NotificationPreferenceViewSet(ModelViewSet):
+    permission_classes = (IsAuthenticated,)
+    throttle_classes = (
+        MarketplaceReadThrottle,
+        MarketplaceMutationThrottle,
+    )
+    serializer_class = NotificationPreferenceSerializer
+    schema = PreferenceSchema()
+
+    def get_permissions(self):
+        actions = (
+            self.action_map.values() if self.action == "metadata" else (self.action,)
+        )
+        if not any(action in ("me", "update_me") for action in actions):
+            raise MethodNotAllowed(self.request.method)
+        return super().get_permissions()
+
+    def get_object(self):
+        return NotificationPreference.objects.get_or_create(user=self.request.user)[0]
+
+    @action(detail=False, methods=["get"])
+    def me(self, request):
+        return self.retrieve(request)
+
+    @me.mapping.patch
+    def update_me(self, request):
+        return self.partial_update(request)

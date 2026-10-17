@@ -4,7 +4,7 @@ from django.db import transaction
 from rest_framework import serializers
 
 from accounts.services.versioning import VersionConflict
-from listings.models import SavedSearch
+from listings.models import NotificationPreference, SavedSearch
 from listings.serializers.discovery import ListingSearchSerializer
 from listings.services.search import search_listings
 
@@ -67,5 +67,23 @@ class SavedSearchSerializer(serializers.ModelSerializer):
         return instance
 
 
+class NotificationPreferenceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = NotificationPreference
+        fields = ("inbox", "email", "version")
+        extra_kwargs: ClassVar[dict] = {"version": {"required": True, "min_value": 1}}
+
+    def update(self, instance, validated_data):
+        with transaction.atomic():
+            instance = NotificationPreference.objects.select_for_update().get(
+                pk=instance.pk
+            )
+            if instance.version != validated_data.pop("version"):
+                raise VersionConflict()
+            for key, value in validated_data.items():
+                setattr(instance, key, value)
+            instance.version += 1
+            instance.save()
+        return instance
 
 

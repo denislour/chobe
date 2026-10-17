@@ -1,7 +1,7 @@
 from typing import ClassVar
 
 from accounts.schemas.base import CSRFSchema
-from listings.serializers.alerts import SavedSearchSerializer
+from listings.serializers.alerts import NotificationPreferenceSerializer, SavedSearchSerializer
 
 
 class SavedSearchSchema(CSRFSchema):
@@ -19,3 +19,11 @@ class SavedSearchSchema(CSRFSchema):
 
 
 
+class PreferenceSchema(CSRFSchema):
+    responses: ClassVar[dict] = {
+        "me": {200: NotificationPreferenceSerializer},
+        "update_me": {200: NotificationPreferenceSerializer},
+    }
+
+    def get_response_serializers(self):
+        return self.responses[self.view.action]

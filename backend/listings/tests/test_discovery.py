@@ -145,10 +145,60 @@ class MarketplaceDiscoveryTests(ListingAPITestCase):
         self.assertEqual(self.request("get", "me/favorites/history").data, [])
 
 
+    def test_saved_searches_validate_filters_and_require_current_version(self):
+        response = self.request(
+            "post",
+            "me/saved-searches",
+            {"name": "Phones", "filters": {"q": "demo"}, "frequency": "immediate"},
+        )
+        self.assertEqual(response.status_code, 201, response.data)
+        pk = response.data["id"]
+        self.assertEqual(
+            self.admin_request("get", f"me/saved-searches/{pk}").status_code, 404
+        )
+        self.assertEqual(
+            self.request(
+                "patch", f"me/saved-searches/{pk}", {"version": 1, "name": "New name"}
+            ).status_code,
+            200,
+        )
+        self.assertEqual(
+            self.request(
+                "patch", f"me/saved-searches/{pk}", {"version": 1, "name": "Lost"}
+            ).status_code,
+            409,
+        )
+        self.assertEqual(
+            self.request(
+                "post",
+                "me/saved-searches",
+                {"name": "Unsafe", "filters": {"private": "secret"}},
+            ).status_code,
+            400,
+        )
 
 
 
 
+    def test_notification_preferences_require_current_version(self):
+        data = self.request("get", "me/notification-preferences/me").data
+        self.assertFalse(data["inbox"])
+        self.assertEqual(
+            self.request(
+                "patch",
+                "me/notification-preferences/me",
+                {"version": data["version"], "inbox": True},
+            ).status_code,
+            200,
+        )
+        self.assertEqual(
+            self.request(
+                "patch",
+                "me/notification-preferences/me",
+                {"version": data["version"], "email": True},
+            ).status_code,
+            409,
+        )
 
 
 
