@@ -1,0 +1,112 @@
+
+from django.conf import settings
+from django.core.files.uploadedfile import SimpleUploadedFile
+
+from listings.tests.base import ListingAPITestCase
+
+
+class ListingManagementTests(ListingAPITestCase):
+
+    def test_owner_cannot_read_or_edit_another_owners_draft(self):
+        listing = self.create_draft()
+        self.assertEqual(
+            self.admin_request("get", f"me/listings/{listing.pk}").status_code, 404
+        )
+        self.assertEqual(
+            self.admin_request(
+                "patch", f"me/listings/{listing.pk}", {"version": 1, "title": "Attack"}
+            ).status_code,
+            404,
+        )
+
+    def test_create_requires_an_active_shop_and_ignores_owner_input(self):
+        self.shop.status = "suspended"
+        self.shop.save()
+        self.assertEqual(
+            self.request("post", "me/listings", self.values).status_code, 400
+        )
+        self.shop.status = "active"
+        self.shop.save()
+        self.assertEqual(
+            self.request(
+                "post", "me/listings", self.values | {"shop": str(self.shop.pk)}
+            ).status_code,
+            400,
+        )
+
+    def test_patch_requires_current_version(self):
+        listing = self.create_draft()
+        first = self.request(
+            "patch", f"me/listings/{listing.pk}", {"version": 1, "title": "Updated"}
+        )
+        self.assertEqual(first.status_code, 200)
+        self.assertEqual(
+            self.request(
+                "patch", f"me/listings/{listing.pk}", {"version": 1, "title": "Lost"}
+            ).status_code,
+            409,
+        )
+        self.assertEqual(
+            self.request(
+                "patch", f"me/listings/{listing.pk}", {"title": "Missing version"}
+            ).status_code,
+            400,
+        )
+        listing.refresh_from_db()
+        self.assertEqual(listing.title, "Updated")
+
+
+
+    def test_invalid_image_bytes_do_not_advance_the_version(self):
+        listing = self.create_draft()
+        response = self.client.post(
+            f"/api/v1/me/listings/{listing.pk}/images/",
+            {
+                "version": 1,
+                "image": SimpleUploadedFile(
+                    "bad.jpg", b"<svg>bad</svg>", content_type="image/jpeg"
+                ),
+            },
+            format="multipart",
+            HTTP_X_XSRF_TOKEN=self.client.cookies[settings.CSRF_COOKIE_NAME].value,
+        )
+        self.assertEqual(response.status_code, 400)
+        listing.refresh_from_db()
+        self.assertEqual(listing.version, 1)
+        self.assertFalse(listing.images.exists())
+
+    def test_photo_reordering_rejects_duplicates_and_foreign_assets(self):
+        listing = self.upload(self.create_draft())
+        image = str(listing.images.get().pk)
+        self.assertEqual(
+            self.request(
+                "post",
+                f"me/listings/{listing.pk}/images/order",
+                {"version": listing.version, "images": [image, image]},
+            ).status_code,
+            400,
+        )
+        self.assertEqual(
+            self.request(
+                "post",
+                f"me/listings/{listing.pk}/images/order",
+                {
+                    "version": listing.version,
+                    "images": ["00000000-0000-0000-0000-000000000000"],
+                },
+            ).status_code,
+            400,
+        )
+
+
+
+
+
+
+
+
+
+
+
+
+

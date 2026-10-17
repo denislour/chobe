@@ -1,4 +1,7 @@
+import io
 
+from django.http import FileResponse
+from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
@@ -11,7 +14,8 @@ from rest_framework.viewsets import ModelViewSet
 from listings.models import Listing
 from listings.pagination import ListingPagination
 from listings.schemas.management import ListingManagementSchema
-from listings.serializers.management import ListingAuditSerializer, ListingDraftSerializer, ModerationSerializer
+from listings.serializers.management import ImageOrderSerializer, ImageUploadSerializer, ListingAuditSerializer, ListingDraftSerializer, ModerationSerializer
+from listings.services.images import add_image, arrange_images
 from listings.throttles import MarketplaceMutationThrottle, MarketplaceReadThrottle
 
 
@@ -95,8 +99,44 @@ class ListingManagementViewSet(ModelViewSet):
 
 
 
+    @action(detail=True, methods=["post"], serializer_class=ImageUploadSerializer)
+    def images(self, request, pk=None):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        listing = add_image(
+            request.user,
+            self.get_object(),
+            serializer.validated_data["version"],
+            serializer.validated_data["image"],
+        )
+        return Response(ListingDraftSerializer(listing).data)
 
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path="images/order",
+        serializer_class=ImageOrderSerializer,
+    )
+    def order_images(self, request, pk=None):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        listing = arrange_images(
+            request.user,
+            self.get_object(),
+            serializer.validated_data["version"],
+            [str(pk) for pk in serializer.validated_data["images"]],
+        )
+        return Response(ListingDraftSerializer(listing).data)
 
+    @action(detail=True, methods=["get"], url_path="image/<uuid:image_id>")
+    def image(self, request, pk=None, image_id=None):
+        image = get_object_or_404(self.get_object().images, pk=image_id)
+        response = FileResponse(
+            io.BytesIO(bytes(image.content)), content_type="image/jpeg"
+        )
+        response["X-Content-Type-Options"] = "nosniff"
+        response["Content-Security-Policy"] = "default-src 'none'; sandbox"
+        return response
 
     @action(detail=True, methods=["get"])
     def moderation(self, request, pk=None):
