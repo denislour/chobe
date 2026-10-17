@@ -1,3 +1,4 @@
+import { ListingSearchPanel } from '@app/listings/search/listing-search-panel';
 import { Component, Injector, OnInit, signal, viewChild } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
@@ -8,7 +9,7 @@ import { CategoryStore } from './category.store';
 
 @Component({
   selector: 'app-category-browser',
-  imports: [RouterLink, AttributeFields, CategoryNav],
+  imports: [ListingSearchPanel, RouterLink, AttributeFields, CategoryNav],
   providers: [CategoryStore],
   templateUrl: './category-browser.html',
   styleUrls: ['../categories.css', './category-browser.css'],
