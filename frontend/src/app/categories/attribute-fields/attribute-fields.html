@@ -1,0 +1,64 @@
+<div [formGroup]="form" class="attribute-grid">
+  @for (field of fields(); track field.key) {
+    <div class="field">
+      <label [for]="prefix() + '-' + field.key">
+        {{ field.label }}{{ field.unit ? ' (' + field.unit + ')' : '' }}
+        @if (field.required) {
+          <span aria-label="required">*</span>
+        }
+      </label>
+      @switch (field.type) {
+        @case ('select') {
+          <select
+            [id]="prefix() + '-' + field.key"
+            [formControlName]="field.key"
+            [attr.aria-describedby]="prefix() + '-' + field.key + '-error'"
+          >
+            <option [ngValue]="null">Choose an option</option>
+            @for (choice of field.choices; track choice.value) {
+              <option [ngValue]="choice.value">{{ choice.label }}</option>
+            }
+          </select>
+        }
+        @case ('boolean') {
+          <select
+            [id]="prefix() + '-' + field.key"
+            [formControlName]="field.key"
+            [attr.aria-describedby]="prefix() + '-' + field.key + '-error'"
+          >
+            <option [ngValue]="null">Choose an option</option>
+            <option [ngValue]="true">Yes</option>
+            <option [ngValue]="false">No</option>
+          </select>
+        }
+        @default {
+          @if (field.type === 'text') {
+            <input
+              type="text"
+              [id]="prefix() + '-' + field.key"
+              [formControlName]="field.key"
+              [attr.maxlength]="field.max_length"
+              [attr.aria-describedby]="prefix() + '-' + field.key + '-error'"
+            />
+          } @else {
+            <input
+              type="number"
+              [id]="prefix() + '-' + field.key"
+              [formControlName]="field.key"
+              [attr.step]="field.type === 'integer' ? '1' : 'any'"
+              [attr.min]="field.min_value"
+              [attr.max]="field.max_value"
+              [attr.aria-describedby]="prefix() + '-' + field.key + '-error'"
+            />
+          }
+        }
+      }
+      <small class="error" [id]="prefix() + '-' + field.key + '-error'">
+        {{ errors()[field.key]?.join(' ') }}
+        @if (form.controls[field.key]?.touched && form.controls[field.key]?.invalid) {
+          Enter a valid value{{ field.required ? '; this field is required.' : '.' }}
+        }
+      </small>
+    </div>
+  }
+</div>
