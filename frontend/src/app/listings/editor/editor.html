@@ -1,0 +1,203 @@
+<app-marketplace-nav />
+<main class="market-page">
+  <nav class="breadcrumbs" aria-label="Breadcrumb">
+    <a routerLink="/seller/listings">My listings</a><span>/</span
+    ><span>{{ editor.listing() ? 'Edit listing' : 'Create listing' }}</span>
+  </nav>
+  <h1>Something useful? Give it another home.</h1>
+  <p class="muted">
+    Clear photos, honest details and your asking price. An admin reviews each submitted version.
+  </p>
+  @if (editor.loading()) {
+    <p role="status">Loading your draft…</p>
+  }
+  @if (editor.error()) {
+    <p class="feedback error" role="alert">{{ editor.error() }}</p>
+    <button type="button" class="secondary" [disabled]="editor.pending()" (click)="reload()">
+      Reload latest values
+    </button>
+  }
+  @if (localError()) {
+    <p class="feedback error" role="alert">{{ localError() }}</p>
+  }
+  @if (editor.notice()) {
+    <p class="feedback success" role="status">{{ editor.notice() }}</p>
+  }
+  @if (confirmation()) {
+    <section class="feedback" aria-labelledby="editor-confirm">
+      <h2 id="editor-confirm">
+        {{
+          confirmation() === 'reload' ? 'Discard unsaved changes?' : 'Send this version for review?'
+        }}
+      </h2>
+      <p>
+        {{
+          confirmation() === 'reload'
+            ? 'Your unsaved form values will be replaced.'
+            : 'An admin will review the saved text, attributes and images. It will be public only after approval.'
+        }}
+      </p>
+      <div class="toolbar">
+        <button type="button" (click)="confirm()">
+          {{ confirmation() === 'reload' ? 'Discard and reload' : 'Send for review' }}</button
+        ><button type="button" class="secondary" (click)="confirmation.set(null)">
+          Keep editing
+        </button>
+      </div>
+    </section>
+  }
+  @if (pendingCategory() !== null) {
+    <section class="feedback">
+      <p>Changing category clears the attributes you entered.</p>
+      <div class="toolbar">
+        <button type="button" (click)="setCategory(pendingCategory() ?? '')">Change category</button
+        ><button type="button" class="secondary" (click)="pendingCategory.set(null)">
+          Keep category
+        </button>
+      </div>
+    </section>
+  }
+  <form [formGroup]="form" (ngSubmit)="save()">
+    <fieldset [disabled]="editor.loading() || editor.pending()">
+      <div class="two-column">
+        <div>
+          <section class="form-section">
+            <h2>Your item</h2>
+            <div class="field">
+              <label for="listing-title">Title</label
+              ><input
+                id="listing-title"
+                formControlName="title"
+                maxlength="160"
+                placeholder="What is it, and what makes it useful?"
+              />
+            </div>
+            <div class="form-grid">
+              <div class="field">
+                <label for="listing-category">Category</label
+                ><select
+                  id="listing-category"
+                  formControlName="category"
+                  (change)="categoryChanged()"
+                >
+                  <option value="">Choose a category</option>
+                  @for (category of editor.categories(); track category.id) {
+                    <option [value]="category.id">{{ category.name }}</option>
+                  }
+                </select>
+              </div>
+              <div class="field">
+                <label for="listing-condition">Condition</label
+                ><select id="listing-condition" formControlName="condition">
+                  <option value="used">Used</option>
+                  <option value="new">New</option>
+                </select>
+              </div>
+            </div>
+            <div class="field">
+              <label for="listing-description">Description and things to know</label
+              ><textarea
+                id="listing-description"
+                formControlName="description"
+                maxlength="10000"
+                placeholder="How long have you used it? Any faults? What is included?"
+              ></textarea>
+            </div>
+            @if (category(); as selected) {
+              <h3>{{ selected.name }} details</h3>
+              <app-attribute-fields
+                [fields]="fields()"
+                [initialValues]="initialAttributes()"
+                [disabled]="editor.pending() || editor.loading()"
+                prefix="listing"
+              />
+            }
+          </section>
+          <section class="form-section">
+            <h2>Price and viewing area</h2>
+            <div class="form-grid">
+              <div class="field">
+                <label for="listing-price-mode">Price type</label
+                ><select id="listing-price-mode" formControlName="price_mode">
+                  <option value="fixed">Fixed price</option>
+                  <option value="negotiable">Negotiable</option>
+                  <option value="free">Free</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="listing-price">Price (VND)</label
+                ><input id="listing-price" type="number" min="0" step="1" formControlName="price" />
+              </div>
+              <div class="field full-span">
+                <label for="listing-area">City or viewing area</label
+                ><input
+                  id="listing-area"
+                  formControlName="area"
+                  maxlength="120"
+                  placeholder="For example: Thao Dien, Ho Chi Minh City"
+                /><small>Give an area, not your exact home address.</small>
+              </div>
+            </div>
+          </section>
+          <section class="form-section">
+            <h2>Before sending</h2>
+            <label class="check"
+              ><input type="checkbox" formControlName="rights_confirmed" />I confirm these details
+              are accurate and I may use these photos.</label
+            ><label class="check"
+              ><input type="checkbox" formControlName="phone_consent" />Show my phone number on this
+              approved listing.</label
+            >
+            <p class="muted">
+              Your phone appears only when sharing is also enabled in
+              <a routerLink="/account/privacy">privacy settings</a>.
+            </p>
+          </section>
+          <div class="toolbar">
+            <button type="submit" [disabled]="editor.pending() || editor.conflict()">
+              {{ editor.pending() ? 'Working…' : 'Save draft' }}</button
+            ><button type="button" class="secondary" (click)="preview.set(!preview())">
+              {{ preview() ? 'Close preview' : 'Preview' }}</button
+            ><button
+              type="button"
+              [disabled]="
+                !editor.listing() || hasUnsavedChanges() || editor.pending() || editor.conflict()
+              "
+              (click)="confirmation.set('submit')"
+            >
+              Send for review
+            </button>
+          </div>
+          @if (hasUnsavedChanges()) {
+            <p class="muted">Save your changes before sending this version for review.</p>
+          }
+        </div>
+        <aside class="aside">
+          <h2>Listing status</h2>
+          @if (editor.listing()?.moderation_hold) {
+            <p class="feedback error" role="status">
+              An admin hid this listing after a report. Update it and submit a new version for
+              review before it can be shown again.
+            </p>
+          }
+          @if (editor.listing(); as listing) {
+            <p>
+              <span class="badge">{{ listing.status }}</span> · Version {{ listing.version }}
+            </p>
+            <p>
+              Renew or update before
+              <strong>{{ listing.retention_due_at | date: 'mediumDate' }}</strong
+              >. Six calendar months without an owner action deletes the listing and its photos.
+            </p>
+            @if (listing.published['title']) {
+              <p>Your last approved version may remain public while this draft is reviewed.</p>
+            }
+          } @else {
+            <p>Your draft stays private. Save it whenever you need.</p>
+          }
+          <p>Check the item in person and agree on payment directly. Chobe has no checkout.</p>
+        </aside>
+      </div>
+    </fieldset>
+  </form>
+</main>
