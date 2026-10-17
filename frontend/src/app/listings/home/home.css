@@ -1,0 +1,43 @@
+@import '../marketplace.css';
+.intro h1 {
+  max-width: 680px;
+  font-size: 40px;
+  line-height: 1.24;
+  letter-spacing: -0.04em;
+}
+.category-strip {
+  display: flex;
+  gap: 26px;
+  overflow: auto;
+  padding: 12px 0 24px;
+}
+.category-strip a {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  min-width: 110px;
+  text-align: center;
+  text-decoration: none;
+}
+.category-strip span {
+  display: grid;
+  place-items: center;
+  width: 76px;
+  height: 76px;
+  background: var(--soft-yellow);
+  border-radius: 50%;
+  font-size: 28px;
+  font-weight: 600;
+}
+.latest {
+  margin-top: 36px;
+}
+@media (max-width: 560px) {
+  .intro h1 {
+    font-size: 32px;
+  }
+  .category-strip {
+    gap: 12px;
+  }
+}

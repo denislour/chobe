@@ -1,0 +1,58 @@
+<app-marketplace-nav />
+<main class="market-page">
+  <section class="intro">
+    <div>
+      <h1>Good things deserve another home.</h1>
+      <p>Find something useful nearby. Check the item and speak directly with its seller.</p>
+    </div>
+    <a class="button" routerLink="/seller/listings/new">Sell an item</a>
+  </section>
+  <section aria-labelledby="home-categories">
+    <h2 id="home-categories">Browse categories</h2>
+    @if (home.categoriesLoading()) {
+      <p role="status">Loading categories…</p>
+    }
+    @if (home.categoriesError()) {
+      <p class="feedback error" role="alert">{{ home.categoriesError() }}</p>
+      <button type="button" (click)="home.loadCategories()">Try categories again</button>
+    }
+    <div class="category-strip">
+      @for (category of home.categories(); track category.id) {
+        @if (!category.parent) {
+          <a routerLink="/search" [queryParams]="{ category: category.id }"
+            ><span aria-hidden="true">{{ category.name.slice(0, 1) }}</span
+            >{{ category.name }}</a
+          >
+        }
+      }
+    </div>
+    @if (!home.categoriesLoading() && !home.categoriesError() && !home.categories().length) {
+      <p class="feedback">Categories will appear when published.</p>
+    }
+  </section>
+  <section class="latest" aria-labelledby="home-latest">
+    <div class="intro">
+      <h2 id="home-latest">Just listed</h2>
+      <a routerLink="/search">Browse all listings</a>
+    </div>
+    @if (home.listingsLoading()) {
+      <p role="status">Loading listings…</p>
+    }
+    @if (home.listingsError()) {
+      <p class="feedback error" role="alert">{{ home.listingsError() }}</p>
+      <button type="button" (click)="home.loadListings()">Try listings again</button>
+    }
+    <div class="product-grid">
+      @for (listing of home.listings(); track listing.id) {
+        <app-listing-card [listing]="listing" />
+      }
+    </div>
+    @if (!home.listingsLoading() && !home.listingsError() && !home.listings().length) {
+      <div class="empty">
+        <h3>No public listings yet</h3>
+        <p>Approved listings will appear here. You can be the first to list an item.</p>
+        <a class="button" routerLink="/seller/listings/new">Create a listing</a>
+      </div>
+    }
+  </section>
+</main>

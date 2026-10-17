@@ -29,4 +29,9 @@ export const reviewRoutes: Routes = [
   },
 ];
 export const marketplaceRoutes: Routes = [
+  {
+    path: '',
+    pathMatch: 'full',
+    loadComponent: () => import('@app/listings/home/home').then((m) => m.Home),
+  },
 ];
