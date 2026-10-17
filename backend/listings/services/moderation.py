@@ -60,6 +60,10 @@ def decide_listing(user, case, values):
         listing.version += 1
         listing.save()
         audit(listing, user, decision, values["reason"])
+        if decision == "approve":
+            from listings.tasks.notifications import match_listing_searches
+
+            match_listing_searches.enqueue(listing.pk, snapshot["version"])
     return case
 
 

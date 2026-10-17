@@ -1,5 +1,6 @@
 from accounts.models import PrivacySettings, ViewingHistory
-from listings.models import Favorite, Listing
+from listings.models import Favorite, Listing, Notification, NotificationPreference, SavedSearch
+from listings.services.notifications import match_searches, send_notification_email
 from listings.tests.base import ListingAPITestCase
 
 
@@ -177,7 +178,43 @@ class MarketplaceDiscoveryTests(ListingAPITestCase):
             400,
         )
 
+    def test_matching_requires_consent_and_deduplicates_notifications(self):
+        SavedSearch.objects.create(
+            user=self.user, name="Phones", filters={"q": "demo"}, frequency="immediate"
+        )
+        listing = self.approve(self.create_draft())
+        self.assertEqual(match_searches(listing.pk, listing.published["version"]), 0)
+        NotificationPreference.objects.create(user=self.user, inbox=True, email=False)
+        self.assertEqual(match_searches(listing.pk, listing.published["version"]), 1)
+        self.assertEqual(match_searches(listing.pk, listing.published["version"]), 0)
+        notification = Notification.objects.get()
+        self.assertEqual(notification.email_status, "blocked")
+        self.assertEqual(
+            self.request("get", "me/notifications").data["results"][0]["title"],
+            self.values["title"],
+        )
+        self.assertEqual(
+            self.admin_request(
+                "post", f"me/notifications/{notification.pk}/read", {}
+            ).status_code,
+            404,
+        )
 
+    def test_email_rechecks_opt_in_and_visibility_before_sending(self):
+        SavedSearch.objects.create(
+            user=self.user, name="Phones", filters={}, frequency="immediate"
+        )
+        preferences = NotificationPreference.objects.create(
+            user=self.user, inbox=True, email=True
+        )
+        listing = self.approve(self.create_draft())
+        match_searches(listing.pk, listing.published["version"])
+        notification = Notification.objects.get()
+        preferences.email = False
+        preferences.save()
+        self.assertFalse(send_notification_email(notification.pk))
+        notification.refresh_from_db()
+        self.assertEqual(notification.email_status, "blocked")
 
 
     def test_notification_preferences_require_current_version(self):
@@ -205,6 +242,19 @@ class MarketplaceDiscoveryTests(ListingAPITestCase):
 
 
 
+    def test_queued_email_is_blocked_when_search_filters_no_longer_match(self):
+        search = SavedSearch.objects.create(
+            user=self.user, name="Phones", filters={}, frequency="immediate"
+        )
+        NotificationPreference.objects.create(user=self.user, inbox=True, email=True)
+        listing = self.approve(self.create_draft())
+        match_searches(listing.pk, listing.published["version"])
+        notification = Notification.objects.get()
+        search.filters = {"price_min": 1000001}
+        search.save()
+        self.assertFalse(send_notification_email(notification.pk))
+        notification.refresh_from_db()
+        self.assertEqual(notification.email_status, "blocked")
 
 
     def test_listing_phone_withdrawal_takes_effect_without_another_review(self):
