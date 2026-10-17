@@ -62,6 +62,85 @@
       <div class="two-column">
         <div>
           <section class="form-section">
+            <h2>Photos</h2>
+            <p>
+              Show the whole item and any wear or faults. Up to 10 JPEG, PNG or WebP images, 5 MiB
+              each.
+            </p>
+            @if (!editor.listing()) {
+              <p class="feedback">Save a draft to upload photos.</p>
+            } @else {
+              <label class="upload-area" for="listing-photo"
+                >Choose a photo<input
+                  id="listing-photo"
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  [disabled]="hasUnsavedChanges() || editor.pending() || editor.conflict()"
+                  (change)="upload($event)"
+              /></label>
+              @if (hasUnsavedChanges()) {
+                <p class="muted">Save your form changes before changing photos.</p>
+              }
+              <div class="image-grid">
+                @for (image of editor.listing()?.images; track image.id; let index = $index) {
+                  <figure>
+                    <img [src]="image.url" [alt]="'Listing photo ' + (index + 1)" />
+                    <figcaption>
+                      {{ index === 0 ? 'Cover photo' : 'Photo ' + (index + 1) }}
+                    </figcaption>
+                    <div class="toolbar">
+                      <button
+                        type="button"
+                        class="secondary"
+                        [disabled]="
+                          index === 0 ||
+                          hasUnsavedChanges() ||
+                          editor.pending() ||
+                          editor.conflict()
+                        "
+                        (click)="moveImage(image.id, -1)"
+                      >
+                        Move earlier
+                      </button>
+                      <button
+                        type="button"
+                        class="secondary"
+                        [disabled]="
+                          index === (editor.listing()?.images?.length ?? 0) - 1 ||
+                          hasUnsavedChanges() ||
+                          editor.pending() ||
+                          editor.conflict()
+                        "
+                        (click)="moveImage(image.id, 1)"
+                      >
+                        Move later
+                      </button>
+
+                      @if (index > 0) {
+                        <button
+                          type="button"
+                          class="secondary"
+                          [disabled]="hasUnsavedChanges() || editor.pending() || editor.conflict()"
+                          (click)="imageAction(image.id, false)"
+                        >
+                          Make cover
+                        </button>
+                      }
+                      <button
+                        type="button"
+                        class="secondary"
+                        [disabled]="hasUnsavedChanges() || editor.pending() || editor.conflict()"
+                        (click)="imageAction(image.id, true)"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </figure>
+                }
+              </div>
+            }
+          </section>
+          <section class="form-section">
             <h2>Your item</h2>
             <div class="field">
               <label for="listing-title">Title</label
