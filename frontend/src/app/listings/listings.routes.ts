@@ -27,6 +27,12 @@ export const reviewRoutes: Routes = [
     canActivate: [authGuard],
     loadComponent: () => import('@app/listings/moderation/moderation').then((m) => m.Moderation),
   },
+  {
+    path: 'reports',
+    canActivate: [authGuard],
+    data: { admin: true },
+    loadComponent: () => import('@app/listings/reports/reports').then((m) => m.Reports),
+  },
 ];
 export const marketplaceRoutes: Routes = [
   {
@@ -55,5 +61,10 @@ export const marketplaceRoutes: Routes = [
   {
     path: 'compare',
     loadComponent: () => import('@app/listings/comparison/comparison').then((m) => m.Comparison),
+  },
+  {
+    path: 'reports',
+    canActivate: [authGuard],
+    loadComponent: () => import('@app/listings/reports/reports').then((m) => m.Reports),
   },
 ];

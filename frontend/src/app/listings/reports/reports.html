@@ -1,0 +1,148 @@
+<app-marketplace-nav />
+<main class="market-page">
+  <div class="intro">
+    <div>
+      <h1>{{ admin ? 'Report review queue' : 'Your reports' }}</h1>
+      <p>
+        {{
+          admin
+            ? 'Investigate reports and record a reason for every action. A report is a signal, not proof.'
+            : 'Track the reports you submitted. The response contains only information we can safely share.'
+        }}
+      </p>
+    </div>
+    @if (admin) {
+      <a routerLink="/admin/moderation">Listing review queue</a>
+    }
+  </div>
+  @if (admin) {
+    <div class="toolbar">
+      <div>
+        <label for="report-status">Status</label
+        ><select id="report-status" [formControl]="filter">
+          <option value="">All reports</option>
+          <option value="open">Open</option>
+          <option value="reviewing">Reviewing</option>
+          <option value="resolved">Resolved</option>
+          <option value="dismissed">No action needed</option>
+        </select>
+      </div>
+      <button type="button" [disabled]="reports.pending()" (click)="page.set(1); load()">
+        Filter reports
+      </button>
+    </div>
+  }
+  @if (reports.loading()) {
+    <p role="status">Loading reports…</p>
+  }
+  @if (reports.error()) {
+    <p class="feedback error" role="alert">{{ reports.error() }}</p>
+    <button type="button" (click)="load()">Reload reports</button>
+  }
+  @if (reports.notice()) {
+    <p class="feedback success" role="status">{{ reports.notice() }}</p>
+  }
+  <div class="reports-layout">
+    <section aria-label="Report list">
+      @for (report of reports.reports(); track report.id) {
+        <button
+          class="report-row secondary"
+          type="button"
+          [disabled]="reports.pending()"
+          (click)="
+            reports.select(report, admin);
+            confirmation.set(false);
+            decision.reset({ action: 'review', reason: '', response: '' })
+          "
+        >
+          <strong>{{ report.reason }} · {{ report.status }}</strong
+          ><span>{{ report.created_at | date: 'short' }}</span
+          ><small>Reference {{ report.id }}</small>
+        </button>
+      } @empty {
+        <p class="empty">No reports to show.</p>
+      }
+      <nav class="pagination" aria-label="Report pages">
+        @if (page() > 1) {
+          <button type="button" (click)="changePage(-1)">Previous</button>
+        }
+        <span>Page {{ page() }}</span>
+        @if (page() * 20 < reports.count()) {
+          <button type="button" (click)="changePage(1)">Next</button>
+        }
+      </nav>
+    </section>
+    <section aria-label="Report details">
+      @if (reports.selected(); as report) {
+        <h2>{{ report.reason }}</h2>
+        <p class="badge">{{ report.status }}</p>
+        <p class="description">{{ report.description }}</p>
+        <p>Target: {{ report.listing ? 'Listing ' + report.listing : 'Shop ' + report.shop }}</p>
+        @if (report.response) {
+          <p class="feedback">Response: {{ report.response }}</p>
+        }
+        @if (admin) {
+          <form [formGroup]="decision" (ngSubmit)="ask()">
+            <div class="field">
+              <label for="report-action">Action</label
+              ><select id="report-action" formControlName="action">
+                <option value="review">Mark as reviewing</option>
+                <option value="dismiss">No action needed</option>
+                <option value="resolve">Resolve</option>
+                @if (report.listing) {
+                  <option value="hide_listing">Hide listing</option>
+                }
+                <option value="suspend_shop">Suspend shop (requires shop permission)</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="report-internal-reason">Internal reason</label
+              ><textarea
+                id="report-internal-reason"
+                formControlName="reason"
+                maxlength="2000"
+              ></textarea>
+            </div>
+            <div class="field">
+              <label for="report-public-response">Safe response for the reporter</label
+              ><textarea
+                id="report-public-response"
+                formControlName="response"
+                maxlength="500"
+              ></textarea>
+            </div>
+            @if (decision.touched && decision.invalid) {
+              <p class="error" role="alert">
+                Enter both an internal reason and a response for the reporter.
+              </p>
+            }
+            <button type="submit" [disabled]="reports.pending()">Review action</button>
+          </form>
+          @if (confirmation()) {
+            <div class="feedback">
+              <p>Apply this action to the reported item and record the decision?</p>
+              <div class="toolbar">
+                <button type="button" (click)="decide()">Confirm action</button
+                ><button type="button" class="secondary" (click)="confirmation.set(false)">
+                  Cancel
+                </button>
+              </div>
+            </div>
+          }
+          <h3>Decision history</h3>
+          @for (event of reports.history(); track event.id) {
+            <p>
+              {{ event.created_at | date: 'short' }} · {{ event.action }} · Actor {{ event.actor_id
+              }}<br />{{ event.reason }}
+            </p>
+          }
+        }
+      } @else {
+        <div class="empty">
+          <h2>Select a report</h2>
+          <p>Read its status and response here.</p>
+        </div>
+      }
+    </section>
+  </div>
+</main>
