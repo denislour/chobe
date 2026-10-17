@@ -1,5 +1,7 @@
+import { ListingSearchPanel } from '@app/listings/search/listing-search-panel';
+import { ReportForm } from '@app/listings/report-form/report-form';
 import { DatePipe } from '@angular/common';
-import { Component, DestroyRef, effect, OnInit, signal } from '@angular/core';
+import { Component, DestroyRef, Injector, effect, OnInit, signal } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -10,7 +12,7 @@ import { StorefrontStore } from './storefront.store';
 
 @Component({
   selector: 'app-shop-storefront',
-  imports: [DatePipe, RouterLink, ShopNav],
+  imports: [ListingSearchPanel, ReportForm, DatePipe, RouterLink, ShopNav],
   providers: [StorefrontStore],
   templateUrl: './shop-storefront.html',
   styleUrls: ['../shops.css', './shop-storefront.css'],
@@ -24,20 +26,25 @@ export class ShopStorefront implements OnInit {
     protected readonly storefront: StorefrontStore,
     protected readonly auth: AuthStore,
     private readonly route: ActivatedRoute,
+    private readonly injector: Injector,
     private readonly router: Router,
     title: Title,
     destroyRef: DestroyRef,
   ) {
     this.viewer = toObservable(auth.user);
-    this.tab = toSignal(route.queryParamMap.pipe(
-      map((params) => params.get('tab') === 'about' ? 'about' : 'listings'),
-    ), { initialValue: 'listings' });
+    this.tab = toSignal(
+      route.queryParamMap.pipe(
+        map((params) => (params.get('tab') === 'about' ? 'about' : 'listings')),
+      ),
+      { initialValue: 'listings' },
+    );
     effect(() => {
       const shop = this.storefront.shop();
       title.setTitle(shop ? `${shop.name} · Chobe` : 'Shop · Chobe');
       if (shop && this.slug() !== shop.slug) {
         void this.router.navigate(['/shops', shop.slug], {
-          queryParamsHandling: 'preserve', replaceUrl: true,
+          queryParamsHandling: 'preserve',
+          replaceUrl: true,
         });
       }
     });
@@ -45,13 +52,16 @@ export class ShopStorefront implements OnInit {
   }
 
   ngOnInit(): void {
-    this.storefront.load(combineLatest([this.route.paramMap, this.viewer]).pipe(
-      map(([params, user]) => {
-        const slug = params.get('slug') ?? '';
-        this.slug.set(slug);
-        return { slug, viewerId: user?.id ?? null };
-      }),
-    ));
+    this.storefront.load(
+      combineLatest([this.route.paramMap, this.viewer]).pipe(
+        map(([params, user]) => {
+          const slug = params.get('slug') ?? '';
+          this.slug.set(slug);
+          return { slug, viewerId: user?.id ?? null };
+        }),
+      ),
+      { injector: this.injector },
+    );
   }
 
   protected retry(): void {
@@ -65,8 +75,11 @@ export class ShopStorefront implements OnInit {
       void this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
       return;
     }
-    if (shop) this.storefront.changeFollowing({
-      shopId: shop.id, viewerId: user.id, following: !shop.is_following,
-    });
+    if (shop)
+      this.storefront.changeFollowing({
+        shopId: shop.id,
+        viewerId: user.id,
+        following: !shop.is_following,
+      });
   }
 }

@@ -86,6 +86,14 @@
           Inspect the item before paying. Never share passwords or verification codes. Chobe does
           not collect payment or arrange delivery.
         </p>
+        <button
+          type="button"
+          class="secondary"
+          [attr.aria-expanded]="reportOpen()"
+          (click)="reportOpen.set(!reportOpen())"
+        >
+          Report listing
+        </button>
       </section>
     </div>
     <section class="form-section">
@@ -107,6 +115,9 @@
       <button type="button" class="secondary" (click)="detail.recordHistory(listing.id)">
         Retry saving history
       </button>
+    }
+    @if (reportOpen()) {
+      <app-report-form [listingId]="listing.id" />
     }
   }
 </main>

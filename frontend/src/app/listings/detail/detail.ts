@@ -7,10 +7,11 @@ import { AuthStore } from '@app/auth/auth.store';
 import { ComparisonStore } from '@app/listings/comparison/comparison.store';
 import { listingPrice } from '@app/listings/listing-types';
 import { MarketplaceNav } from '@app/listings/marketplace-nav/marketplace-nav';
+import { ReportForm } from '@app/listings/report-form/report-form';
 import { DetailStore } from './detail.store';
 @Component({
   selector: 'app-detail',
-  imports: [DatePipe, RouterLink, MarketplaceNav],
+  imports: [DatePipe, RouterLink, MarketplaceNav, ReportForm],
   providers: [DetailStore],
   templateUrl: './detail.html',
   styleUrl: './detail.css',

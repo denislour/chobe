@@ -1,56 +1,118 @@
 <app-shop-nav />
 <main class="shops-page" [attr.aria-busy]="storefront.loading()">
-  @if (storefront.loading()) { <p class="feedback" role="status">Loading shop…</p> }
+  @if (storefront.loading()) {
+    <p class="feedback" role="status">Loading shop…</p>
+  }
   @if (storefront.error()) {
     <section class="empty-state" aria-labelledby="shop-error-title">
       <h1 id="shop-error-title">Shop unavailable</h1>
       <p class="error" role="alert">{{ storefront.error() }}</p>
-      <button class="btn secondary" type="button" [disabled]="storefront.loading()" (click)="retry()">Try again</button>
+      <button
+        class="btn secondary"
+        type="button"
+        [disabled]="storefront.loading()"
+        (click)="retry()"
+      >
+        Try again
+      </button>
     </section>
   }
   @if (storefront.shop(); as shop) {
-    <nav class="breadcrumbs" aria-label="Breadcrumb"><a routerLink="/account/followed-shops">Shops you follow</a><span aria-hidden="true">/</span><span>{{ shop.name }}</span></nav>
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+      <a routerLink="/account/followed-shops">Shops you follow</a><span aria-hidden="true">/</span
+      ><span>{{ shop.name }}</span>
+    </nav>
     <section class="shop-cover" aria-labelledby="shop-name">
-      @if (shop.banner_url; as banner) { <img class="banner" [src]="banner" alt="Shop cover" /> }
+      @if (shop.banner_url; as banner) {
+        <img class="banner" [src]="banner" alt="Shop cover" />
+      }
       <div class="cover-content">
         <div class="shop-title">
-          @if (shop.logo_url; as logo) { <img class="shop-mark" [src]="logo" alt="Shop logo" width="84" height="84" /> }
-          @else { <span class="shop-mark mark-placeholder" aria-hidden="true">{{ shop.name.slice(0, 1).toUpperCase() }}</span> }
+          @if (shop.logo_url; as logo) {
+            <img class="shop-mark" [src]="logo" alt="Shop logo" width="84" height="84" />
+          } @else {
+            <span class="shop-mark mark-placeholder" aria-hidden="true">{{
+              shop.name.slice(0, 1).toUpperCase()
+            }}</span>
+          }
           <div>
             <h1 id="shop-name">{{ shop.name }}</h1>
             <p>{{ shop.area }}</p>
-            <span class="hint">Shop since {{ shop.created_at | date:'MMMM yyyy' }}</span>
+            <span class="hint">Shop since {{ shop.created_at | date: 'MMMM yyyy' }}</span>
           </div>
         </div>
-        <button class="btn follow-button" [class.secondary]="shop.is_following" type="button" [attr.aria-pressed]="shop.is_following" [disabled]="storefront.pending() || auth.pending()" (click)="follow()">
-          {{ storefront.pending() ? 'Updating…' : shop.is_following ? 'Following — unfollow' : 'Follow shop' }}
+        <button
+          class="btn follow-button"
+          [class.secondary]="shop.is_following"
+          type="button"
+          [attr.aria-pressed]="shop.is_following"
+          [disabled]="storefront.pending() || auth.pending()"
+          (click)="follow()"
+        >
+          {{
+            storefront.pending()
+              ? 'Updating…'
+              : shop.is_following
+                ? 'Following — unfollow'
+                : 'Follow shop'
+          }}
         </button>
       </div>
     </section>
-    @if (storefront.followError()) { <p class="feedback error" role="alert">{{ storefront.followError() }}</p> }
-    @if (storefront.notice()) { <p class="feedback success" role="status">{{ storefront.notice() }}</p> }
+    @if (storefront.followError()) {
+      <p class="feedback error" role="alert">{{ storefront.followError() }}</p>
+    }
+    @if (storefront.notice()) {
+      <p class="feedback success" role="status">{{ storefront.notice() }}</p>
+    }
     <div class="shop-info-line">
-      @if (shop.contact_hours) { <span><strong>Contact hours:</strong> {{ shop.contact_hours }}</span> }
-      @if (shop.website_url) { <a [href]="shop.website_url" target="_blank" rel="noopener noreferrer">Website (new tab)</a> }
-      @if (shop.social_url) { <a [href]="shop.social_url" target="_blank" rel="noopener noreferrer">Social page (new tab)</a> }
+      @if (shop.contact_hours) {
+        <span><strong>Contact hours:</strong> {{ shop.contact_hours }}</span>
+      }
+      @if (shop.website_url) {
+        <a [href]="shop.website_url" target="_blank" rel="noopener noreferrer">Website (new tab)</a>
+      }
+      @if (shop.social_url) {
+        <a [href]="shop.social_url" target="_blank" rel="noopener noreferrer"
+          >Social page (new tab)</a
+        >
+      }
     </div>
     <p class="description">{{ shop.description }}</p>
+    <details>
+      <summary>Report this shop</summary>
+      <app-report-form [shopId]="shop.id" />
+    </details>
     <nav class="tabs" aria-label="Shop sections">
-      <a [routerLink]="['/shops', shop.slug]" [class.active]="tab() !== 'about'" [attr.aria-current]="tab() !== 'about' ? 'page' : null">Listings</a>
-      <a [routerLink]="['/shops', shop.slug]" [queryParams]="{ tab: 'about' }" [class.active]="tab() === 'about'" [attr.aria-current]="tab() === 'about' ? 'page' : null">About the shop</a>
+      <a
+        [routerLink]="['/shops', shop.slug]"
+        [class.active]="tab() !== 'about'"
+        [attr.aria-current]="tab() !== 'about' ? 'page' : null"
+        >Listings</a
+      >
+      <a
+        [routerLink]="['/shops', shop.slug]"
+        [queryParams]="{ tab: 'about' }"
+        [class.active]="tab() === 'about'"
+        [attr.aria-current]="tab() === 'about' ? 'page' : null"
+        >About the shop</a
+      >
     </nav>
     @if (tab() === 'about') {
       <section class="about" aria-labelledby="about-title">
         <h2 id="about-title">About {{ shop.name }}</h2>
         <p class="description">{{ shop.description }}</p>
-        <p class="feedback">Following a shop does not verify its seller or guarantee a transaction. Check the item and agree on details directly with the seller.</p>
+        <details>
+          <summary>Report this shop</summary>
+          <app-report-form [shopId]="shop.id" />
+        </details>
+        <p class="feedback">
+          Following a shop does not verify its seller or guarantee a transaction. Check the item and
+          agree on details directly with the seller.
+        </p>
       </section>
     } @else {
-      <section class="empty-state" aria-labelledby="listings-title">
-        <svg viewBox="0 0 48 48" aria-hidden="true" class="empty-icon"><path d="M8 19h32v23H8zM5 19l4-13h30l4 13M18 42V28h12v14M5 19c0 6 9 6 9 0 0 6 10 6 10 0 0 6 10 6 10 0 0 6 9 6 9 0" /></svg>
-        <h2 id="listings-title">No public listings yet</h2>
-        <p>There are no items to browse in this shop yet. You can follow the shop to keep it in your list.</p>
-      </section>
+      <app-listing-search-panel [shopId]="shop.id" />
     }
   }
 </main>
