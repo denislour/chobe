@@ -44,6 +44,40 @@ requests per minute per IP; follow changes use the account mutation limit.
 There is no listing model yet. Storefront listing data, filters and sorting will
 be connected in F-011. No listing API is exposed by this feature.
 
+## Categories and attribute schemas
+
+Apply `categories/0001_initial` before using taxonomy. Public category browsing is
+available at `GET /api/v1/categories/`, with a published schema at
+`GET /api/v1/categories/{uuid}/` and filter definitions at the `facets/` action.
+`POST .../validate-attributes/` checks a schema version and typed values without
+saving a listing. Unknown fields, invalid values and outdated versions are rejected.
+
+Manage categories in the Angular workspace at `/admin/categories`. The Django
+admin's category lists link to this workspace and remain read-only. Staff need
+`categories.view_category` plus `add_category` or `change_category` to edit;
+`publish_category` and `retire_category` are separate permissions. All management
+writes require CSRF and the current draft version. The API uses
+`/api/v1/admin/categories/`, including `publish/`, `retire/`, `revisions/`,
+`history/` and `capabilities/` actions.
+
+Draft edits leave the published snapshot unchanged. Publication records an
+immutable revision and an audit event in the same transaction. Restoring an old
+version creates a new draft through the editor. Category addresses stay fixed
+after first publication; attribute keys keep their type and unit across versions.
+Trees allow four levels. Publish parents first and retire or move active children
+before retiring their parent. Restricted categories cannot be published.
+
+Optional demo data (eight category groups) can be created with
+`DJANGO_DEMO_MODE=true uv run python manage.py seed_demo_categories --username admin`.
+An existing active staff superuser is required. Existing categories are never
+overwritten. The command is covered by isolated tests; it has not been run against
+the development database.
+
+Listings, search results and search/moderation consumers are not available yet.
+Published revisions and audit events are retained for those integrations; no jobs
+are sent to services that do not exist. F-011 will reuse the attribute validator
+when saving listings, and F-021 will use category facets for search.
+
 ## Cache storage
 
 Django uses `DatabaseCache` in a separate `cache.sqlite3` file. The cache connection enables WAL with `synchronous=NORMAL`; business data, sessions and task records stay in `db.sqlite3`. All web processes must share the same local cache file. Set `DJANGO_CACHE_DB_PATH` to change its path; its parent directory must exist. Do not use a network filesystem or point the cache path at the business database.
@@ -82,3 +116,46 @@ Run `just emails` from the repository root to build email templates. Run `just w
 The API documentation is available at `http://localhost:8000/api/v1/docs/`.
 
 The Django Unfold admin is available at `http://localhost:8000/admin/`. With `DJANGO_DEMO_MODE=true`, the demo account is `admin` with password `abc123ABC!!!`, and the login page shows demo placeholders. Demo mode is disabled by default. Disabling it hides the placeholders and blocks seeding; it does not remove an existing demo account.
+
+## Listings and marketplace
+
+The `listings` app provides private drafts, local image processing, immutable
+submitted snapshots and manual moderation. Seller APIs live at
+`/api/v1/me/listings/`; public discovery uses `/api/v1/home/` and
+`/api/v1/listings/`. All routes use the native DRF SimpleRouter.
+
+Review submissions at the frontend `/admin/moderation` workspace. Active staff
+need `listings.moderate_listing`. They can approve, reject, review appeals and
+approve a previously rejected current snapshot. Decisions retain their actor,
+reason and source. Automatic moderation and FastAPI integration are deferred;
+there is no service dependency or simulated AI job. Editing a draft leaves its
+last approved snapshot public until hidden, sold, removed or otherwise ineligible.
+
+Images accept JPEG, PNG and WebP up to 5 MiB, 8192 pixels per side and 24 million
+pixels total; they are converted to metadata-free JPEGs up to 1920 pixels.
+Listings allow 10 attached images, with the first as cover. Draft and moderation
+image endpoints enforce ownership or staff permission. Public images must belong
+to the approved snapshot.
+
+SQLite FTS5 indexes only published snapshots using unicode61 with diacritic
+removal and Vietnamese d normalization. Search validates category, area, price,
+condition and typed category filters. Every public query checks current shop,
+account, category, status and activity deadline.
+
+Private APIs also support favorites, saved searches, notification preferences,
+inbox and reports. Inbox and email require explicit opt-in. Saved-search matching
+and email run through Huey/outbox tasks, with deduplication and delivery-time
+consent checks. Daily matching runs at 04:00 UTC; maintenance runs at 03:15 UTC.
+No workers are started by installing the app. Use the existing `run_huey` command.
+
+Eligible owner actions renew a six-calendar-month deadline. Views, contacts,
+admin decisions and background processing do not renew it. Maintenance erases
+expired listing content, images and revisions, retaining a deleted record and
+minimal audit; deletion cannot be undone. Public queries hide expired listings
+before maintenance runs. Development data is not migrated, seeded or cleaned
+as part of implementation.
+
+Reports require login. Staff need `listings.review_report`; hiding a listing also
+requires `listings.moderate_listing`, and suspending a shop requires
+`shops.change_shop`. Internal reasons and reporter identity are not public.
+
