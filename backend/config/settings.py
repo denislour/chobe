@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     "accounts",
     "shops",
     "categories",
+    "listings.apps.ListingsConfig",
 ]
 
 MIDDLEWARE = [
@@ -124,6 +125,9 @@ REST_FRAMEWORK = {
         "account_mutation": "20/min",
         "shop_read": "120/min",
         "category_read": "120/min",
+        "marketplace_read": "120/min",
+        "marketplace_contact": "20/min",
+        "marketplace_report": "10/hour",
     },
     "NUM_PROXIES": 0,
 }
