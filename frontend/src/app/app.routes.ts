@@ -2,6 +2,10 @@ import { Routes } from '@angular/router';
 
 export const routes: Routes = [
   {
+    path: 'categories',
+    loadChildren: () => import('@app/categories/categories.routes').then((m) => m.categoriesRoutes),
+  },
+  {
     path: 'seller',
     loadChildren: () => import('@app/shops/shops.routes').then((m) => m.sellerShopRoutes),
   },

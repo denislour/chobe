@@ -1,0 +1,142 @@
+<app-category-nav />
+<main class="categories-page">
+  <div class="page-heading">
+    <div>
+      <h1>Find your category</h1>
+      <p>Browse the market by category and see which details matter.</p>
+    </div>
+  </div>
+  @if (pendingCategory() !== null) {
+    <section class="notice" aria-label="Unsaved attribute values" role="alert">
+      <p>Changing or reloading this category will clear the attribute values you entered.</p>
+      <div class="actions">
+        <button type="button" (click)="confirmCategory()">Continue and clear values</button>
+        <button class="secondary" type="button" (click)="pendingCategory.set(null)">
+          Keep editing
+        </button>
+      </div>
+    </section>
+  }
+  @if (categories.loading()) {
+    <p role="status">Loading categories…</p>
+  } @else if (categories.error()) {
+    <p class="error" role="alert">{{ categories.error() }}</p>
+    <div class="actions">
+      <button type="button" (click)="reload()">Try again</button
+      ><a routerLink="/categories">All categories</a>
+    </div>
+  } @else if (!categories.categories().length) {
+    <section class="empty">
+      <h2>No categories available yet</h2>
+      <p>Categories will appear here after they are published.</p>
+      <button type="button" (click)="reload()">Refresh categories</button>
+    </section>
+  } @else {
+    <div class="category-layout">
+      <aside aria-label="Choose a category">
+        <h2>Categories</h2>
+        <button
+          type="button"
+          class="category-option"
+          [class.selected]="!categories.category()"
+          (click)="chooseCategory(null)"
+          [disabled]="categories.pending()"
+        >
+          All categories
+        </button>
+        @for (item of categories.categories(); track item.id) {
+          <button
+            type="button"
+            class="category-option"
+            [class.child]="item.parent"
+            [class.selected]="categories.category()?.id === item.id"
+            [attr.aria-current]="categories.category()?.id === item.id ? 'page' : null"
+            [disabled]="categories.pending()"
+            (click)="chooseCategory(item.id)"
+          >
+            {{ item.name }}
+          </button>
+        }
+      </aside>
+      <div class="category-content">
+        @if (categories.category(); as category) {
+          <nav class="breadcrumbs" aria-label="Category path">
+            <button class="text-button" type="button" (click)="chooseCategory(null)">
+              All categories
+            </button>
+            @for (parent of breadcrumbs(category); track parent.id) {
+              <span aria-hidden="true">/</span
+              ><button class="text-button" type="button" (click)="chooseCategory(parent.id)">
+                {{ parent.name }}
+              </button>
+            }
+            <span aria-hidden="true">/</span><span aria-current="page">{{ category.name }}</span>
+          </nav>
+          <h2>{{ category.name }}</h2>
+          <p>{{ category.description }}</p>
+        } @else {
+          <h2>Explore the market</h2>
+          <p>Choose a category to see its subcategories and product details.</p>
+        }
+        @if (children().length) {
+          <ul class="category-list" aria-label="Subcategories">
+            @for (child of children(); track child.id) {
+              <li>
+                <button class="text-button" type="button" (click)="chooseCategory(child.id)">
+                  {{ child.name }}</button
+                ><span>{{ child.description }}</span>
+              </li>
+            }
+          </ul>
+        }
+        @if (categories.category(); as category) {
+          <section class="section" aria-labelledby="attributes-title">
+            <h3 id="attributes-title">Product details for {{ category.name }}</h3>
+            <p class="hint">
+              Try the fields for this category. These values are not saved as a listing.
+            </p>
+            <form (submit)="$event.preventDefault(); checkAttributes()">
+              <app-attribute-fields
+                [fields]="category.attributes"
+                [errors]="categories.fieldErrors()"
+                [disabled]="categories.pending()"
+                (changed)="categories.clearValidation()"
+              />
+              @if (!category.attributes.length) {
+                <p>This category has no additional fields.</p>
+              }
+              @if (categories.validationError()) {
+                <p class="error" role="alert">{{ categories.validationError() }}</p>
+              }
+              @if (categories.notice()) {
+                <p class="success" role="status">{{ categories.notice() }}</p>
+              }
+              <div class="actions">
+                <button type="submit" [disabled]="categories.pending()">
+                  {{ categories.pending() ? 'Checking…' : 'Check attributes' }}
+                </button>
+                <button
+                  class="secondary"
+                  type="button"
+                  [disabled]="categories.pending()"
+                  (click)="reload()"
+                >
+                  Reload fields
+                </button>
+              </div>
+            </form>
+            @if (categories.facets()?.fields?.length) {
+              <h3>Available filters</h3>
+              <ul class="filter-list">
+                @for (field of categories.facets()!.fields; track field.key) {
+                  <li>{{ field.label }}{{ field.unit ? ' (' + field.unit + ')' : '' }}</li>
+                }
+              </ul>
+            }
+          </section>
+          
+        }
+      </div>
+    </div>
+  }
+</main>
