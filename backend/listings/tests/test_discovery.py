@@ -319,7 +319,64 @@ class MarketplaceDiscoveryTests(ListingAPITestCase):
         self.assertNotIn("reporter", response.data)
         self.assertNotIn("reporter_id", response.data)
 
+    def test_report_decision_hides_listing_with_audit_and_safe_response(self):
+        listing = self.approve(self.create_draft())
+        report = self.request(
+            "post",
+            "me/reports",
+            {"listing": listing.pk, "reason": "incorrect", "description": "Concern"},
+        ).data
+        values = {
+            "version": report["version"],
+            "action": "hide_listing",
+            "reason": "Internal evidence reviewed.",
+            "response": "We reviewed your report and took action.",
+        }
+        self.assertEqual(
+            self.request(
+                "post", f"admin/reports/{report['id']}/decision", values
+            ).status_code,
+            403,
+        )
+        response = self.admin_request(
+            "post", f"admin/reports/{report['id']}/decision", values
+        )
+        self.assertEqual(response.status_code, 200, response.data)
+        self.assertEqual(
+            self.public.get(f"/api/v1/listings/{listing.pk}/").status_code, 404
+        )
+        safe = self.request("get", f"me/reports/{report['id']}").data
+        self.assertNotIn("Internal evidence", str(safe))
+        self.assertEqual(safe["response"], values["response"])
+        self.assertEqual(
+            self.admin_request(
+                "post", f"admin/reports/{report['id']}/decision", values
+            ).status_code,
+            409,
+        )
+        self.assertEqual(Report.objects.get().decisions.count(), 1)
 
+    def test_report_admin_can_suspend_the_target_shop(self):
+        self.approve(self.create_draft())
+        report = self.request(
+            "post",
+            "me/reports",
+            {"shop": str(self.shop.pk), "reason": "fraud", "description": "Concern"},
+        ).data
+        response = self.admin_request(
+            "post",
+            f"admin/reports/{report['id']}/decision",
+            {
+                "version": 1,
+                "action": "suspend_shop",
+                "reason": "Reviewed the evidence.",
+                "response": "We took action.",
+            },
+        )
+        self.assertEqual(response.status_code, 200, response.data)
+        self.shop.refresh_from_db()
+        self.assertEqual(self.shop.status, "suspended")
+        self.assertEqual(self.public.get("/api/v1/listings/").data["count"], 0)
 
 
     def test_queued_email_is_blocked_when_search_filters_no_longer_match(self):
@@ -366,3 +423,31 @@ class MarketplaceDiscoveryTests(ListingAPITestCase):
             self.public.get(f"/api/v1/listings/{listing.pk}/").data["phone"]
         )
 
+    def test_owner_cannot_restore_a_listing_hidden_by_report_review(self):
+        listing = self.approve(self.create_draft())
+        report = self.request(
+            "post",
+            "me/reports",
+            {"listing": listing.pk, "reason": "fraud", "description": "Concern"},
+        ).data
+        self.admin_request(
+            "post",
+            f"admin/reports/{report['id']}/decision",
+            {
+                "version": 1,
+                "action": "hide_listing",
+                "reason": "Reviewed",
+                "response": "We took action.",
+            },
+        )
+        listing.refresh_from_db()
+        self.assertTrue(listing.moderation_hold)
+        response = self.request(
+            "post",
+            f"me/listings/{listing.pk}/status",
+            {"version": listing.version, "status": "active"},
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(
+            self.public.get(f"/api/v1/listings/{listing.pk}/").status_code, 404
+        )

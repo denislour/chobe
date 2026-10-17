@@ -1,7 +1,7 @@
 from typing import ClassVar
 
 from accounts.schemas.base import CSRFSchema
-from listings.serializers.reports import ReportSerializer
+from listings.serializers.reports import ReportAuditSerializer, ReportSerializer
 
 
 class ReportSchema(CSRFSchema):
@@ -15,3 +15,13 @@ class ReportSchema(CSRFSchema):
         return self.responses[self.view.action]
 
 
+class ReportManagementSchema(CSRFSchema):
+    responses: ClassVar[dict] = {
+        "list": {200: ReportSerializer(many=True)},
+        "retrieve": {200: ReportSerializer},
+        "decision": {200: ReportSerializer},
+        "history": {200: ReportAuditSerializer(many=True)},
+    }
+
+    def get_response_serializers(self):
+        return self.responses[self.view.action]
