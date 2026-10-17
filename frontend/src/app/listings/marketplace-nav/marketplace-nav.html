@@ -1,0 +1,32 @@
+<header>
+  <div class="header-inner">
+    <a routerLink="/" aria-label="Chobe home"
+      ><img src="/brand/chobe-logo.svg" width="130" height="40" alt="Chobe"
+    /></a>
+    <form (submit)="search($event)" role="search">
+      <label for="market-search" class="sr-only">Search listings</label
+      ><input
+        id="market-search"
+        [formControl]="query"
+        maxlength="160"
+        placeholder="What are you looking for?"
+      /><button type="submit">Search</button>
+    </form>
+    <a routerLink="/saved">Saved</a><a routerLink="/alerts">Notifications</a
+    ><a routerLink="/account/profile">Account</a
+    ><a class="sell" routerLink="/seller/listings/new">Sell an item</a>
+  </div>
+</header>
+<nav aria-label="Marketplace">
+  <a routerLink="/" [routerLinkActiveOptions]="{ exact: true }" routerLinkActive="active"
+    >Discover</a
+  ><a routerLink="/search" routerLinkActive="active">Find items</a
+  ><a routerLink="/categories" routerLinkActive="active">Categories</a
+  ><a routerLink="/shops">Shops</a
+  ><a routerLink="/seller/listings" routerLinkActive="active">My listings</a
+  ><a routerLink="/seller/shop">My shop</a
+  >
+</nav>
+@if (comparison.error()) {
+  <p role="alert" class="compare-error">{{ comparison.error() }}</p>
+}
