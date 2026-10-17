@@ -4,13 +4,19 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
 from rest_framework.decorators import action
 from rest_framework.exceptions import MethodNotAllowed
+from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from listings.models import ModerationCase
 from listings.pagination import ListingPagination
 from listings.permissions import ModerationPermission
 from listings.schemas.moderation import ModerationSchema
-from listings.serializers.management import ModerationSerializer
+from listings.serializers.management import (
+    ListingAuditSerializer,
+    ModerationDecisionSerializer,
+    ModerationSerializer,
+)
+from listings.services.moderation import decide_listing
 from listings.throttles import MarketplaceMutationThrottle, MarketplaceReadThrottle
 
 
@@ -52,7 +58,25 @@ class ModerationViewSet(ModelViewSet):
                 queryset = queryset.filter(appeal_open=True)
         return queryset
 
+    @action(
+        detail=True, methods=["post"], serializer_class=ModerationDecisionSerializer
+    )
+    def decision(self, request, pk=None):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        case = decide_listing(
+            request.user, self.get_object(), serializer.validated_data
+        )
+        return Response(ModerationSerializer(case).data)
 
+    @action(detail=True, methods=["get"])
+    def history(self, request, pk=None):
+        case = self.get_object()
+        return Response(
+            ListingAuditSerializer(
+                case.revision.listing.audit_events.all()[:100], many=True
+            ).data
+        )
 
     @action(detail=True, methods=["get"], url_path="image/<uuid:image_id>")
     def image(self, request, pk=None, image_id=None):

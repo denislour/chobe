@@ -1,8 +1,9 @@
 
 from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django_tasks_db.models import DBTaskResult
 
-from listings.models import ListingRevision
+from listings.models import Listing, ListingRevision
 from listings.tests.base import ListingAPITestCase
 
 
@@ -126,10 +127,80 @@ class ListingManagementTests(ListingAPITestCase):
             400,
         )
 
+    def test_manual_approval_publishes_only_the_submitted_snapshot(self):
+        listing = self.approve(self.create_draft())
+        response = self.public.get(f"/api/v1/listings/{listing.pk}/")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["title"], self.values["title"])
+        self.assertNotIn("rights_confirmed", response.data)
+        self.assertTrue(
+            DBTaskResult.objects.filter(
+                task_path="listings.tasks.notifications.match_listing_searches"
+            ).exists()
+        )
 
 
+    def test_owner_cannot_moderate_and_admin_cannot_skip_csrf(self):
+        listing = self.create_draft()
+        case = self.submit(listing)
+        data = {"version": case.version, "decision": "approve", "reason": "Approved"}
+        self.assertEqual(
+            self.request(
+                "post", f"admin/moderation/{case.pk}/decision", data
+            ).status_code,
+            403,
+        )
+        self.assertEqual(
+            self.admin_client.post(
+                f"/api/v1/admin/moderation/{case.pk}/decision/", data, format="json"
+            ).status_code,
+            403,
+        )
 
+    def test_new_draft_makes_the_previous_moderation_result_stale(self):
+        listing = self.create_draft()
+        case = self.submit(listing)
+        self.request(
+            "patch",
+            f"me/listings/{listing.pk}",
+            {"version": listing.version, "title": "New draft"},
+        )
+        response = self.admin_request(
+            "post",
+            f"admin/moderation/{case.pk}/decision",
+            {
+                "version": case.version,
+                "decision": "approve",
+                "reason": "Stale approval",
+            },
+        )
+        self.assertEqual(response.status_code, 409)
+        self.assertFalse(Listing.objects.get(pk=listing.pk).published)
 
+    def test_edit_and_remove_photo_do_not_change_the_live_snapshot(self):
+        listing = self.approve(self.create_draft())
+        old_image = listing.published["images"][0]
+        response = self.request(
+            "patch",
+            f"me/listings/{listing.pk}",
+            {"version": listing.version, "title": "Private new title"},
+        )
+        response = self.request(
+            "post",
+            f"me/listings/{listing.pk}/images/order",
+            {"version": response.data["version"], "images": []},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            self.public.get(f"/api/v1/listings/{listing.pk}/").data["title"],
+            self.values["title"],
+        )
+        self.assertEqual(
+            self.public.get(
+                f"/api/v1/listings/{listing.pk}/image/{old_image}/"
+            ).status_code,
+            200,
+        )
 
 
 
