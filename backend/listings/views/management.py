@@ -15,9 +15,18 @@ from rest_framework.viewsets import ModelViewSet
 from listings.models import Listing
 from listings.pagination import ListingPagination
 from listings.schemas.management import ListingManagementSchema
-from listings.serializers.management import AppealSerializer, ImageOrderSerializer, ImageUploadSerializer, ListingAuditSerializer, ListingDraftSerializer, ListingVersionSerializer, ModerationSerializer
+from listings.serializers.management import (
+    AppealSerializer,
+    ImageOrderSerializer,
+    ImageUploadSerializer,
+    ListingAuditSerializer,
+    ListingDraftSerializer,
+    ListingStatusSerializer,
+    ListingVersionSerializer,
+    ModerationSerializer,
+)
 from listings.services.images import add_image, arrange_images
-from listings.services.management import draft_snapshot, submit_listing
+from listings.services.management import change_status, delete_listing, draft_snapshot, submit_listing
 from listings.services.moderation import appeal_listing
 from listings.throttles import MarketplaceMutationThrottle, MarketplaceReadThrottle
 
@@ -45,6 +54,7 @@ class ListingManagementViewSet(ModelViewSet):
                 "retrieve",
                 "create",
                 "partial_update",
+                "destroy",
                 "submit",
                 "preview",
                 "status",
@@ -96,6 +106,13 @@ class ListingManagementViewSet(ModelViewSet):
                 )
         return queryset
 
+    def destroy(self, request, pk=None):
+        serializer = ListingVersionSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        delete_listing(
+            request.user, self.get_object(), serializer.validated_data["version"]
+        )
+        return Response(status=204)
 
     @action(detail=True, methods=["post"], serializer_class=ListingVersionSerializer)
     def submit(self, request, pk=None):
@@ -110,6 +127,17 @@ class ListingManagementViewSet(ModelViewSet):
     def preview(self, request, pk=None):
         return Response(draft_snapshot(self.get_object()))
 
+    @action(detail=True, methods=["post"], serializer_class=ListingStatusSerializer)
+    def status(self, request, pk=None):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        listing = change_status(
+            request.user,
+            self.get_object(),
+            serializer.validated_data["version"],
+            serializer.validated_data["status"],
+        )
+        return Response(ListingDraftSerializer(listing).data)
 
 
 

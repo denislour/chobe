@@ -154,11 +154,66 @@ def submit_listing(user, listing, version):
     return listing
 
 
+def change_status(user, listing, version, target):
+    with transaction.atomic():
+        listing = locked_listing(listing, user)
+        check_version(listing, version)
+        allowed = {
+            "active": {"hidden", "sold"},
+            "pending": {"hidden", "sold"},
+            "rejected": {"hidden"},
+            "hidden": {"active", "sold"},
+            "sold": {"active"},
+        }
+        if target not in allowed.get(listing.status, set()):
+            raise ValidationError("This status change is not available.")
+        if target == "active" and listing.moderation_hold:
+            raise ValidationError(
+                "An admin must review this listing before it can be shown again."
+            )
+        if target == "active" and not listing.published:
+            raise ValidationError("Only an approved snapshot can be made public.")
+        listing.status = target
+        listing.submitted_version = None
+        listing.version += 1
+        owner_activity(listing)
+        listing.save()
+        audit(listing, user, f"status_{target}")
+    return listing
 
 
 
 
+def delete_listing(user, listing, version):
+    with transaction.atomic():
+        listing = locked_listing(listing, user)
+        check_version(listing, version)
+        erase_listing(listing, user, "owner_deleted")
 
 
+def erase_listing(listing, user, action):
+    from accounts.models import ViewingHistory
+
+    listing.version += 1
+    listing.status = "deleted"
+    listing.deleted_at = timezone.now()
+    listing.title = ""
+    listing.description = ""
+    listing.area = ""
+    listing.attributes = {}
+    listing.category = None
+    listing.price = None
+    listing.rights_confirmed = False
+    listing.audit_events.update(reason="")
+    listing.published = {}
+    listing.phone_consent = False
+    listing.submitted_version = None
+    listing.save()
+    listing.images.all().delete()
+    listing.revisions.all().delete()
+    listing.favorites.all().delete()
+    listing.notification_set.all().delete()
+    ViewingHistory.objects.filter(listing_id=listing.pk).delete()
+    audit(listing, user, action)
 
 

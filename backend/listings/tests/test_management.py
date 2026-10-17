@@ -247,6 +247,26 @@ class ListingManagementTests(ListingAPITestCase):
             200,
         )
 
+    def test_status_requires_approval_and_sold_items_leave_public_results(self):
+        listing = self.create_draft()
+        self.assertEqual(
+            self.request(
+                "post",
+                f"me/listings/{listing.pk}/status",
+                {"version": 1, "status": "active"},
+            ).status_code,
+            400,
+        )
+        self.approve(listing)
+        response = self.request(
+            "post",
+            f"me/listings/{listing.pk}/status",
+            {"version": listing.version, "status": "sold"},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            self.public.get(f"/api/v1/listings/{listing.pk}/").status_code, 404
+        )
 
 
 
@@ -265,4 +285,21 @@ class ListingManagementTests(ListingAPITestCase):
             listing.revisions.get().snapshot["title"], self.values["title"]
         )
 
+    def test_hiding_a_submission_withdraws_it_from_the_moderation_queue(self):
+        listing = self.create_draft()
+        case = self.submit(listing)
+        self.assertEqual(
+            self.request(
+                "post",
+                f"me/listings/{listing.pk}/status",
+                {"version": listing.version, "status": "hidden"},
+            ).status_code,
+            200,
+        )
+        response = self.admin_request(
+            "post",
+            f"admin/moderation/{case.pk}/decision",
+            {"version": case.version, "decision": "approve", "reason": "Late decision"},
+        )
+        self.assertEqual(response.status_code, 409)
 
