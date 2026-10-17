@@ -1,5 +1,5 @@
 import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { App } from './app';
@@ -17,10 +17,19 @@ describe('App', () => {
     expect(TestBed.createComponent(App).componentInstance).toBeTruthy();
   });
 
-  it('opens login at the root route', async () => {
+  it('opens discovery at the root route', async () => {
     const fixture = TestBed.createComponent(App);
     await TestBed.inject(Router).navigateByUrl('/');
     await fixture.whenStable();
-    expect(fixture.nativeElement.querySelector('h1')?.textContent).toBe('Log in');
+    const http = TestBed.inject(HttpTestingController);
+    http.expectOne('/api/v1/categories/').flush([]);
+    http
+      .expectOne('/api/v1/listings/')
+      .flush({ results: [], count: 0, next: null, previous: null });
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('h1')?.textContent).toBe(
+      'Good things deserve another home.',
+    );
+    http.verify();
   });
 });

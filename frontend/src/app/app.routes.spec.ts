@@ -35,7 +35,9 @@ describe('Module routes', () => {
     const router = TestBed.inject(Router);
     expect(router.parseUrl(router.url).queryParams['returnUrl']).toBe('/seller/shop');
     await harness.navigateByUrl('/seller/shop/preview/moc-home');
-    expect(router.parseUrl(router.url).queryParams['returnUrl']).toBe('/seller/shop/preview/moc-home');
+    expect(router.parseUrl(router.url).queryParams['returnUrl']).toBe(
+      '/seller/shop/preview/moc-home',
+    );
   });
 
   it('allows public storefronts while guarding the followed shops page', async () => {
@@ -44,6 +46,9 @@ describe('Module routes', () => {
       .expectOne('/api/v1/shop-storefronts/moc-home/')
       .flush(storefrontFixture);
     harness.detectChanges();
+    TestBed.inject(HttpTestingController)
+      .expectOne((request) => request.url === '/api/v1/listings/')
+      .flush({ results: [], count: 0, next: null, previous: null });
     const router = TestBed.inject(Router);
     expect(router.url).toBe('/shops/moc-home');
     await harness.navigateByUrl('/account/followed-shops');
