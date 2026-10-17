@@ -1,7 +1,9 @@
 import io
 
+from django.db.models import F
 from django.http import FileResponse, Http404
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
 from rest_framework.decorators import action
@@ -11,6 +13,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from categories.services.publication import visible_categories
+from listings.models import ListingMetric
 from listings.pagination import ListingPagination
 from listings.schemas.discovery import DiscoverySchema, HomeSchema
 from listings.serializers.discovery import ListingPublicSerializer, ListingSearchSerializer
@@ -45,6 +48,13 @@ class ListingViewSet(ModelViewSet):
             return search_listings(serializer.validated_data)
         return public_listings()
 
+    def retrieve(self, request, pk=None):
+        listing = self.get_object()
+        metric, _ = ListingMetric.objects.get_or_create(
+            listing=listing, day=timezone.localdate(), kind="view"
+        )
+        ListingMetric.objects.filter(pk=metric.pk).update(count=F("count") + 1)
+        return Response(self.get_serializer(listing).data)
 
     @action(detail=True, methods=["get"], url_path="image/<uuid:image_id>")
     def image(self, request, pk=None, image_id=None):

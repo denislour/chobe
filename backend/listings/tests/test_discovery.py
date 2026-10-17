@@ -1,3 +1,4 @@
+from accounts.models import PrivacySettings
 from listings.tests.base import ListingAPITestCase
 
 
@@ -71,6 +72,24 @@ class MarketplaceDiscoveryTests(ListingAPITestCase):
             400,
         )
 
+    def test_phone_requires_both_listing_and_current_account_consent(self):
+        listing = self.approve(self.create_draft())
+        self.assertEqual(
+            self.public.get(f"/api/v1/listings/{listing.pk}/").data["phone"],
+            "+84901234567",
+        )
+        PrivacySettings.objects.filter(user=self.user).update(share_phone=False)
+        self.assertIsNone(
+            self.public.get(f"/api/v1/listings/{listing.pk}/").data["phone"]
+        )
+        self.assertEqual(
+            self.public.post(
+                f"/api/v1/listings/{listing.pk}/events/",
+                {"kind": "call"},
+                format="json",
+            ).status_code,
+            400,
+        )
 
 
 
@@ -88,4 +107,15 @@ class MarketplaceDiscoveryTests(ListingAPITestCase):
 
 
 
+    def test_listing_phone_withdrawal_takes_effect_without_another_review(self):
+        listing = self.approve(self.create_draft())
+        response = self.request(
+            "patch",
+            f"me/listings/{listing.pk}",
+            {"version": listing.version, "phone_consent": False},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIsNone(
+            self.public.get(f"/api/v1/listings/{listing.pk}/").data["phone"]
+        )
 
