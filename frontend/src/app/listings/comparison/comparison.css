@@ -1,0 +1,23 @@
+@import '../marketplace.css';
+table {
+  min-width: 640px;
+  table-layout: fixed;
+}
+th:first-child {
+  width: 160px;
+}
+th img {
+  display: block;
+  width: 100%;
+  max-width: 250px;
+  aspect-ratio: 1.18;
+  object-fit: cover;
+  margin-bottom: 16px;
+  border-radius: 9px;
+}
+th a {
+  display: block;
+}
+th button {
+  margin-top: 12px;
+}

@@ -1,0 +1,89 @@
+<app-marketplace-nav />
+<main class="market-page">
+  <div class="intro">
+    <div>
+      <h1>Compare your shortlist</h1>
+      <p>
+        Up to three listings from the same category. Compare real details, without a generated
+        score.
+      </p>
+    </div>
+    <button type="button" class="secondary" (click)="clear()">Clear comparison</button>
+  </div>
+  @if (comparison.loading()) {
+    <p role="status">Loading current listing details…</p>
+  }
+  @if (comparison.error()) {
+    <p class="feedback error" role="alert">{{ comparison.error() }}</p>
+    <button type="button" (click)="comparison.load(ids())">Try again</button>
+  }
+  @for (id of comparison.unavailable(); track id) {
+    <p class="feedback">
+      Listing {{ id }} is no longer public.
+      <button type="button" class="secondary" (click)="remove(id)">Remove it</button>
+    </p>
+  }
+  @if (comparison.listings().length) {
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Details</th>
+            @for (listing of comparison.listings(); track listing.id) {
+              <th scope="col">
+                @if (listing.images[0]; as image) {
+                  <img [src]="image.url" [alt]="listing.title" />
+                }
+                <a [routerLink]="['/listings', listing.id]">{{ listing.title }}</a
+                ><button type="button" class="secondary" (click)="remove(listing.id)">
+                  Remove
+                </button>
+              </th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Price</th>
+            @for (listing of comparison.listings(); track listing.id) {
+              <td class="numeric">
+                <strong>{{ price(listing) }}</strong>
+              </td>
+            }
+          </tr>
+          <tr>
+            <th scope="row">Condition</th>
+            @for (listing of comparison.listings(); track listing.id) {
+              <td>{{ listing.condition }}</td>
+            }
+          </tr>
+          <tr>
+            <th scope="row">Area</th>
+            @for (listing of comparison.listings(); track listing.id) {
+              <td>{{ listing.area }}</td>
+            }
+          </tr>
+          @for (field of comparison.fields(); track field.key) {
+            <tr>
+              <th scope="row">
+                {{ field.label }}
+                @if (field.unit) {
+                  ({{ field.unit }})
+                }
+              </th>
+              @for (listing of comparison.listings(); track listing.id) {
+                <td>{{ listing.attributes[field.key] ?? 'Not provided' }}</td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  } @else if (!comparison.loading() && !comparison.error()) {
+    <section class="empty">
+      <h2>Choose items to compare</h2>
+      <p>Use Compare on a listing card or detail page.</p>
+      <a class="button" routerLink="/search">Find items</a>
+    </section>
+  }
+</main>

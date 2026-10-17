@@ -52,4 +52,8 @@ export const marketplaceRoutes: Routes = [
     canActivate: [authGuard],
     loadComponent: () => import('@app/listings/alerts/alerts').then((m) => m.Alerts),
   },
+  {
+    path: 'compare',
+    loadComponent: () => import('@app/listings/comparison/comparison').then((m) => m.Comparison),
+  },
 ];
