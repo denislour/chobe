@@ -1,0 +1,45 @@
+<section class="report-form" aria-labelledby="report-form-title">
+  <h2 id="report-form-title">Report a concern</h2>
+  <p>Reports help an admin investigate. Your identity is not shared with the seller.</p>
+  @if (report.receipt()) {
+    <div class="feedback success" role="status">
+      <p>Your report was received. Reference: {{ report.receipt() }}</p>
+      <a routerLink="/reports">View your report status</a>
+    </div>
+  } @else {
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <div class="field">
+        <label for="report-reason">Reason</label
+        ><select id="report-reason" formControlName="reason">
+          <option value="prohibited">Prohibited item</option>
+          <option value="fraud">Suspected fraud</option>
+          <option value="incorrect">Incorrect information</option>
+          <option value="images">Image rights or misleading photos</option>
+          <option value="spam">Spam</option>
+          <option value="other">Other concern</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="report-description">What should we investigate?</label
+        ><textarea
+          id="report-description"
+          formControlName="description"
+          maxlength="2000"
+          placeholder="Describe what you observed. Avoid including private contact details."
+          [attr.aria-invalid]="
+            form.controls.description.touched && form.controls.description.invalid
+          "
+        ></textarea>
+        @if (form.controls.description.touched && form.controls.description.invalid) {
+          <p class="error">Enter a description, up to 2,000 characters.</p>
+        }
+      </div>
+      @if (report.error()) {
+        <p class="feedback error" role="alert">{{ report.error() }}</p>
+      }
+      <button type="submit" [disabled]="report.pending()">
+        {{ report.pending() ? 'Sending…' : 'Send report' }}
+      </button>
+    </form>
+  }
+</section>
