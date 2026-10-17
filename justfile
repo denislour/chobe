@@ -52,6 +52,21 @@ emails:
     cd backend && mise exec node@24 -- pnpm install --frozen-lockfile
     cd backend && mise exec node@24 -- pnpm run build:emails
 
+# Seed all demo data in dependency order: just seed demo data.
+seed scope target:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    case "$1 $2" in
+        "demo data") ;;
+        *) echo "Usage: just seed demo data" >&2; exit 2 ;;
+    esac
+    cd backend
+    export DJANGO_DEMO_MODE=true
+    uv run python manage.py seed_demo_accounts
+    uv run python manage.py seed_demo_categories
+    uv run python manage.py seed_demo_shops
+    uv run python manage.py seed_demo_listings
+
 # Run, test, migrate, or lint the product recommendation service.
 service action="run":
     #!/usr/bin/env bash
