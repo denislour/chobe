@@ -31,7 +31,14 @@
   <p class="price">{{ price(listing()) }}</p>
   <p class="meta">{{ listing().condition === 'new' ? 'New' : 'Used' }} · {{ listing().area }}</p>
   <a class="shop" [routerLink]="['/shops', listing().shop.slug]">{{ listing().shop.name }}</a
+  ><button
+    type="button"
+    class="compare"
+    [attr.aria-pressed]="comparison.ids().includes(listing().id)"
+    (click)="comparison.toggle(listing().id)"
   >
+    {{ comparison.ids().includes(listing().id) ? 'Remove comparison' : 'Compare' }}
+  </button>
   @if (card.error()) {
     <p role="alert" class="error">{{ card.error() }}</p>
   }

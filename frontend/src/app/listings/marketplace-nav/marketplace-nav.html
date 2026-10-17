@@ -25,6 +25,8 @@
   ><a routerLink="/shops">Shops</a
   ><a routerLink="/seller/listings" routerLinkActive="active">My listings</a
   ><a routerLink="/seller/shop">My shop</a
+  ><a routerLink="/compare" [queryParams]="{ ids: comparison.ids().join(',') || null }"
+    >Compare ({{ comparison.ids().length }})</a
   >
 </nav>
 @if (comparison.error()) {
