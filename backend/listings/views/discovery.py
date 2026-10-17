@@ -12,6 +12,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
+from accounts.services.privacy import viewing_history_for
 from categories.services.publication import visible_categories
 from listings.models import Favorite, Listing, ListingMetric
 from listings.pagination import ListingPagination
@@ -166,3 +167,18 @@ class FavoriteViewSet(ModelViewSet):
         Favorite.objects.filter(user=request.user, listing_id=pk).delete()
         return Response(status=204)
 
+    @action(detail=False, methods=["get"])
+    def history(self, request):
+        ids = list(
+            viewing_history_for(request.user).values_list("listing_id", flat=True)
+        )
+        by_id = {
+            listing.pk: listing for listing in public_listings().filter(pk__in=ids)
+        }
+        return Response(
+            ListingPublicSerializer(
+                [by_id[pk] for pk in ids if pk in by_id],
+                many=True,
+                context=self.get_serializer_context(),
+            ).data
+        )

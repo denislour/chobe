@@ -1,4 +1,4 @@
-from accounts.models import PrivacySettings
+from accounts.models import PrivacySettings, ViewingHistory
 from listings.models import Favorite, Listing
 from listings.tests.base import ListingAPITestCase
 
@@ -124,6 +124,25 @@ class MarketplaceDiscoveryTests(ListingAPITestCase):
             self.request("delete", f"me/favorites/{listing.pk}").status_code, 204
         )
 
+    def test_history_respects_privacy_and_returns_only_public_items(self):
+        listing = self.approve(self.create_draft())
+        response = self.request(
+            "post", "me/viewing-history", {"listing_id": listing.pk}
+        )
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(
+            self.request("get", "me/favorites/history").data[0]["id"], listing.pk
+        )
+        PrivacySettings.objects.filter(user=self.user).update(record_history=False)
+        ViewingHistory.objects.all().delete()
+        self.assertEqual(
+            self.request(
+                "post", "me/viewing-history", {"listing_id": listing.pk}
+            ).status_code,
+            204,
+        )
+        self.assertFalse(ViewingHistory.objects.exists())
+        self.assertEqual(self.request("get", "me/favorites/history").data, [])
 
 
 
