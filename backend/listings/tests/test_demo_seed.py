@@ -1,29 +1,45 @@
-from io import StringIO
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
-from django.core.management import call_command
 from django.core.management.base import CommandError
+from django.db import transaction
 from django.test import override_settings
 from django_tasks_db.models import DBTaskResult
 
+from accounts.management.commands.seed_demo_accounts import (
+    DEMO_PASSWORD,
+    seed_demo_account_lifecycle,
+    seed_demo_accounts,
+)
 from accounts.models import PrivacySettings, User, ViewingHistory
-from accounts.services.demo import DEMO_PASSWORD
 from accounts.tests.base import AccountAPITestCase
+from categories.management.commands.seed_demo_categories import (
+    finish_demo_taxonomy,
+    seed_demo_taxonomy,
+)
+from listings.management.commands.seed_demo_listings import (
+    seed_demo_engagement,
+    seed_demo_listings,
+    write_demo_guide,
+)
 from listings.models import Listing, Notification, Report
 from listings.services.search import public_listings
+from shops.management.commands.seed_demo_shops import seed_demo_shops
 from shops.models import Shop
 
 
 @override_settings(DEMO_MODE=True)
 class DemoSeedTests(AccountAPITestCase):
     def seed(self, guide):
-        call_command(
-            "seed_demo_marketplace",
-            guide=guide,
-            skip_backup=True,
-            stdout=StringIO(),
-        )
+        with transaction.atomic():
+            users = seed_demo_accounts()
+            categories = seed_demo_taxonomy(users["demo_catalog"])
+            shops = seed_demo_shops(users)
+            listings = seed_demo_listings(users, shops, categories)
+            seed_demo_engagement(users, listings, categories)
+            finish_demo_taxonomy(users["demo_catalog"], categories)
+            seed_demo_account_lifecycle(users)
+        write_demo_guide(guide, users, shops, listings, categories)
 
     def test_complete_demo_links_accounts_shops_and_private_scenarios(self):
         with TemporaryDirectory() as directory:
