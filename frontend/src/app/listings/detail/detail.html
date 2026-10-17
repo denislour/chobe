@@ -1,0 +1,112 @@
+<app-marketplace-nav />
+<main class="market-page">
+  @if (detail.loading()) {
+    <p role="status">Loading listing…</p>
+  }
+  @if (detail.error()) {
+    <section class="empty">
+      <h1>Listing unavailable</h1>
+      <p class="error" role="alert">{{ detail.error() }}</p>
+      <p>This item may have been sold, hidden or removed.</p>
+      <div class="toolbar">
+        <button type="button" (click)="retry()">Try again</button
+        ><a class="button secondary" routerLink="/search">Find other items</a>
+      </div>
+    </section>
+  }
+  @if (detail.listing(); as listing) {
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+      <a routerLink="/">Chobe</a><span>/</span
+      ><a routerLink="/search" [queryParams]="{ category: listing.category }">{{
+        listing.category_schema.name
+      }}</a
+      ><span>/</span><span>{{ listing.title }}</span>
+    </nav>
+    <div class="detail-layout">
+      <section aria-label="Listing photos">
+        <div class="main-photo">
+          @if (listing.images[activeImage()]; as image) {
+            <img [src]="image.url" [alt]="listing.title + ' — photo ' + (activeImage() + 1)" />
+          }
+        </div>
+        <div class="thumbnails">
+          @for (image of listing.images; track image.id; let index = $index) {
+            <button
+              type="button"
+              [attr.aria-label]="'Show photo ' + (index + 1)"
+              [attr.aria-pressed]="index === activeImage()"
+              (click)="activeImage.set(index)"
+            >
+              <img [src]="image.url" alt="" />
+            </button>
+          }
+        </div>
+      </section>
+      <section class="item-info">
+        <p class="badge">{{ listing.condition === 'new' ? 'New' : 'Used' }}</p>
+        <h1>{{ listing.title }}</h1>
+        <p class="price">{{ price(listing) }}</p>
+        <p>{{ listing.area }}</p>
+        <p class="muted">Published {{ listing.published_at | date: 'mediumDate' }}</p>
+        <div class="toolbar">
+          <button
+            type="button"
+            class="secondary"
+            [attr.aria-pressed]="listing.is_favorite"
+            [disabled]="detail.pending()"
+            (click)="favorite()"
+          >
+            {{ listing.is_favorite ? 'Remove saved listing' : 'Save listing' }}</button
+          ><button type="button" class="secondary" (click)="comparison.toggle(listing.id)">
+            {{ comparison.ids().includes(listing.id) ? 'Remove comparison' : 'Compare' }}</button
+          ><button type="button" class="secondary" (click)="share()">Share</button>
+        </div>
+        @if (detail.actionError()) {
+          <p class="feedback error" role="alert">{{ detail.actionError() }}</p>
+        }
+        <section class="seller">
+          <h2>
+            <a [routerLink]="['/shops', listing.shop.slug]">{{ listing.shop.name }}</a>
+          </h2>
+          @if (listing.phone) {
+            <p class="phone">{{ listing.phone }}</p>
+            <div class="toolbar">
+              <a class="button" [href]="'tel:' + listing.phone" (click)="contact()">Call seller</a
+              ><button type="button" class="secondary" (click)="copyPhone()">Copy number</button>
+            </div>
+          } @else {
+            <p>The seller has not shared a phone number.</p>
+          }
+          <a [routerLink]="['/shops', listing.shop.slug]">View shop</a>
+        </section>
+        @if (copyMessage()) {
+          <p class="feedback" role="status">{{ copyMessage() }}</p>
+        }
+        <p class="feedback">
+          Inspect the item before paying. Never share passwords or verification codes. Chobe does
+          not collect payment or arrange delivery.
+        </p>
+      </section>
+    </div>
+    <section class="form-section">
+      <h2>About this item</h2>
+      <p class="description">{{ listing.description }}</p>
+      <h2>Item details</h2>
+      <dl>
+        @for (field of listing.category_schema.attributes; track field.key) {
+          <dt>{{ field.label }}</dt>
+          <dd>
+            {{ listing.attributes[field.key] ?? 'Not provided' }}
+            {{ listing.attributes[field.key] !== undefined ? field.unit : '' }}
+          </dd>
+        }
+      </dl>
+    </section>
+    @if (detail.historyError()) {
+      <p class="feedback" role="status">{{ detail.historyError() }}</p>
+      <button type="button" class="secondary" (click)="detail.recordHistory(listing.id)">
+        Retry saving history
+      </button>
+    }
+  }
+</main>

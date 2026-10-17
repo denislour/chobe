@@ -38,4 +38,8 @@ export const marketplaceRoutes: Routes = [
     path: 'search',
     loadComponent: () => import('@app/listings/search/search').then((m) => m.Search),
   },
+  {
+    path: 'listings/:id',
+    loadComponent: () => import('@app/listings/detail/detail').then((m) => m.Detail),
+  },
 ];

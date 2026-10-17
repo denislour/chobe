@@ -1,0 +1,72 @@
+@import '../marketplace.css';
+.detail-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: 40px;
+}
+.main-photo {
+  aspect-ratio: 1.18;
+  background: var(--wash);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.main-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.thumbnails {
+  display: flex;
+  gap: 10px;
+  overflow: auto;
+  margin-top: 12px;
+}
+.thumbnails button {
+  padding: 3px;
+  min-width: 76px;
+}
+.thumbnails img {
+  width: 70px;
+  height: 60px;
+  object-fit: cover;
+}
+.thumbnails [aria-pressed='true'] {
+  border: 2px solid var(--focus);
+}
+.price {
+  font-size: 30px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.seller {
+  padding: 22px;
+  background: var(--soft-yellow);
+  border-radius: 12px;
+  margin: 24px 0;
+}
+.phone {
+  font-size: 22px;
+  font-weight: 600;
+}
+.description {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+dl {
+  display: grid;
+  grid-template-columns: minmax(140px, 1fr) 2fr;
+  max-width: 700px;
+}
+dt,
+dd {
+  border-bottom: 1px solid var(--line);
+  padding: 12px;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 800px) {
+  .detail-layout {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+}
