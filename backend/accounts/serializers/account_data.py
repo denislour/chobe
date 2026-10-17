@@ -5,6 +5,20 @@ from django.utils import timezone
 from rest_framework import serializers
 
 from accounts.models import ConsentEvent, PrivacySettings, Profile, User, ViewingHistory
+from listings.models import (
+    Favorite,
+    Listing,
+    NotificationPreference,
+    Report,
+    SavedSearch,
+)
+from listings.serializers.account_data import (
+    FavoriteSnapshotSerializer,
+    ListingSnapshotSerializer,
+    NotificationPreferenceSnapshotSerializer,
+    ReportSnapshotSerializer,
+    SavedSearchSnapshotSerializer,
+)
 from shops.models import Shop
 from shops.serializers.account_data import (
     ShopFollowSnapshotSerializer,
@@ -76,6 +90,11 @@ class AccountDataSnapshotSerializer(serializers.Serializer):
     )
     viewing_history = serializers.SerializerMethodField()
     shop = serializers.SerializerMethodField()
+    listings = serializers.SerializerMethodField()
+    favorites = serializers.SerializerMethodField()
+    saved_searches = serializers.SerializerMethodField()
+    reports = serializers.SerializerMethodField()
+    notification_preferences = serializers.SerializerMethodField()
     followed_shops = ShopFollowSnapshotSerializer(
         source="shop_follows", many=True, read_only=True
     )
@@ -92,3 +111,32 @@ class AccountDataSnapshotSerializer(serializers.Serializer):
     def get_shop(self, user) -> dict | None:
         shop = Shop.objects.filter(owner=user).first()
         return ShopSnapshotSerializer(shop).data if shop is not None else None
+
+    def get_listings(self, user) -> list:
+        return ListingSnapshotSerializer(
+            Listing.objects.filter(shop__owner=user).exclude(status="deleted"),
+            many=True,
+        ).data
+
+    def get_favorites(self, user) -> list:
+        return FavoriteSnapshotSerializer(
+            Favorite.objects.filter(user=user), many=True
+        ).data
+
+    def get_saved_searches(self, user) -> list:
+        return SavedSearchSnapshotSerializer(
+            SavedSearch.objects.filter(user=user), many=True
+        ).data
+
+    def get_reports(self, user) -> list:
+        return ReportSnapshotSerializer(
+            Report.objects.filter(reporter=user), many=True
+        ).data
+
+    def get_notification_preferences(self, user) -> dict | None:
+        preferences = NotificationPreference.objects.filter(user=user).first()
+        return (
+            NotificationPreferenceSnapshotSerializer(preferences).data
+            if preferences
+            else None
+        )
