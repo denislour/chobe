@@ -47,4 +47,9 @@ export const marketplaceRoutes: Routes = [
     canActivate: [authGuard],
     loadComponent: () => import('@app/listings/library/library').then((m) => m.Library),
   },
+  {
+    path: 'alerts',
+    canActivate: [authGuard],
+    loadComponent: () => import('@app/listings/alerts/alerts').then((m) => m.Alerts),
+  },
 ];
