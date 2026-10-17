@@ -1,0 +1,60 @@
+import { categoryFixture } from '@app/categories/category-fixtures';
+import { ListingDraft, ModerationCase, PublicListing } from './listing-types';
+export const listingFixture: PublicListing = {
+  id: 12,
+  title: 'Demo phone',
+  description: 'A used demo phone.',
+  category: categoryFixture.id,
+  category_schema: categoryFixture,
+  condition: 'used',
+  price_mode: 'fixed',
+  price: 1000000,
+  area: 'Ha Noi',
+  attributes: { storage_gb: 128, tested: false },
+  schema_version: 2,
+  version: 3,
+  images: [
+    {
+      id: '33333333-3333-4333-8333-333333333333',
+      url: '/api/v1/listings/12/image/33333333-3333-4333-8333-333333333333/',
+    },
+  ],
+  published_at: '2026-10-17T00:00:00Z',
+  shop: { id: '44444444-4444-4444-8444-444444444444', name: 'Demo shop', slug: 'demo-shop' },
+  phone: '+84901234567',
+  is_favorite: false,
+};
+export const draftFixture: ListingDraft = {
+  ...listingFixture,
+  phone_consent: true,
+  rights_confirmed: true,
+  version: 4,
+  status: 'active',
+  submitted_version: 3,
+  moderation_hold: false,
+  published: { title: listingFixture.title },
+  last_owner_action_at: '2026-10-17T00:00:00Z',
+  retention_due_at: '2027-04-17T00:00:00Z',
+  created_at: '2026-10-17T00:00:00Z',
+  updated_at: '2026-10-17T00:00:00Z',
+};
+export const reviewFixture: ModerationCase = {
+  id: 7,
+  listing_id: 12,
+  listing_version: 3,
+  snapshot: {
+    ...listingFixture,
+    phone_consent: true,
+    rights_confirmed: true,
+    images: listingFixture.images.map((image) => image.id),
+  },
+  current: true,
+  status: 'pending',
+  source: 'manual',
+  reason: '',
+  appeal: '',
+  appeal_open: false,
+  version: 1,
+  created_at: '2026-10-17T00:00:00Z',
+  updated_at: '2026-10-17T00:00:00Z',
+};
