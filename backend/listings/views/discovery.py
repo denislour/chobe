@@ -7,7 +7,7 @@ from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
 from rest_framework.decorators import action
-from rest_framework.exceptions import MethodNotAllowed
+from rest_framework.exceptions import MethodNotAllowed, ValidationError
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
@@ -16,9 +16,9 @@ from categories.services.publication import visible_categories
 from listings.models import ListingMetric
 from listings.pagination import ListingPagination
 from listings.schemas.discovery import DiscoverySchema, HomeSchema
-from listings.serializers.discovery import ListingPublicSerializer, ListingSearchSerializer
+from listings.serializers.discovery import ContactEventSerializer, ListingPublicSerializer, ListingSearchSerializer
 from listings.services.search import public_listings, search_listings
-from listings.throttles import MarketplaceReadThrottle
+from listings.throttles import ContactThrottle, MarketplaceReadThrottle
 
 
 @method_decorator(never_cache, name="dispatch")
@@ -69,6 +69,25 @@ class ListingViewSet(ModelViewSet):
         response["Content-Security-Policy"] = "default-src 'none'; sandbox"
         return response
 
+    @action(
+        detail=True,
+        methods=["post"],
+        serializer_class=ContactEventSerializer,
+        throttle_classes=[ContactThrottle],
+    )
+    def events(self, request, pk=None):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        listing = self.get_object()
+        if not ListingPublicSerializer(listing).data["phone"]:
+            raise ValidationError("This seller has not shared a phone number.")
+        metric, _ = ListingMetric.objects.get_or_create(
+            listing=listing,
+            day=timezone.localdate(),
+            kind=serializer.validated_data["kind"],
+        )
+        ListingMetric.objects.filter(pk=metric.pk).update(count=F("count") + 1)
+        return Response(status=204)
 
 
 

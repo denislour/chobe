@@ -91,6 +91,16 @@ class MarketplaceDiscoveryTests(ListingAPITestCase):
             400,
         )
 
+    def test_contact_events_are_aggregate_counts_and_never_owner_activity(self):
+        listing = self.approve(self.create_draft())
+        deadline = listing.retention_due_at
+        response = self.public.post(
+            f"/api/v1/listings/{listing.pk}/events/", {"kind": "call"}, format="json"
+        )
+        self.assertEqual(response.status_code, 204)
+        self.assertEqual(listing.listingmetric_set.get(kind="call").count, 1)
+        listing.refresh_from_db()
+        self.assertEqual(listing.retention_due_at, deadline)
 
 
 
