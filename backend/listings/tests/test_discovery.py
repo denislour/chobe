@@ -1,4 +1,5 @@
 from accounts.models import PrivacySettings
+from listings.models import Favorite, Listing
 from listings.tests.base import ListingAPITestCase
 
 
@@ -102,6 +103,26 @@ class MarketplaceDiscoveryTests(ListingAPITestCase):
         listing.refresh_from_db()
         self.assertEqual(listing.retention_due_at, deadline)
 
+    def test_favorites_are_idempotent_private_and_hide_unavailable_items(self):
+        listing = self.approve(self.create_draft())
+        for _ in range(2):
+            self.assertEqual(
+                self.request("put", f"me/favorites/{listing.pk}", {}).status_code, 204
+            )
+        self.assertEqual(Favorite.objects.count(), 1)
+        self.assertEqual(self.request("get", "me/favorites").data["count"], 1)
+        self.assertEqual(self.admin_request("get", "me/favorites").data["count"], 0)
+        self.assertEqual(
+            self.public.put(
+                f"/api/v1/me/favorites/{listing.pk}/", {}, format="json"
+            ).status_code,
+            403,
+        )
+        Listing.objects.filter(pk=listing.pk).update(status="hidden")
+        self.assertEqual(self.request("get", "me/favorites").data["count"], 0)
+        self.assertEqual(
+            self.request("delete", f"me/favorites/{listing.pk}").status_code, 204
+        )
 
 
 

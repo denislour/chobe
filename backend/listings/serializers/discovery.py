@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from accounts.models import Profile
 from accounts.services.privacy import public_listing_phone
 from categories.serializers.public import CategorySerializer
 from listings.models import Favorite, Listing
@@ -47,10 +48,39 @@ class ListingSearchSerializer(serializers.Serializer):
         return attrs
 
 
+class ListingShopSerializer(serializers.Serializer):
+    id = serializers.UUIDField(read_only=True)
+    name = serializers.CharField(read_only=True)
+    slug = serializers.CharField(read_only=True)
 
 
+class PublicImageSerializer(serializers.Serializer):
+    id = serializers.UUIDField(read_only=True)
+    url = serializers.CharField(read_only=True)
 
 
+class PublicListingListSerializer(serializers.ListSerializer):
+    def to_representation(self, data):
+        instances = list(data.all() if hasattr(data, "all") else data)
+        self.context["phone_numbers"] = dict(
+            Profile.objects.filter(
+                user_id__in={listing.shop.owner_id for listing in instances},
+                user__is_active=True,
+                user__privacy__share_phone=True,
+            ).values_list("user_id", "phone")
+        )
+        request = self.context.get("request")
+        user = getattr(request, "user", None)
+        self.context["favorite_ids"] = (
+            set(
+                Favorite.objects.filter(
+                    user=user, listing_id__in=[listing.pk for listing in instances]
+                ).values_list("listing_id", flat=True)
+            )
+            if user and user.is_authenticated
+            else set()
+        )
+        return super().to_representation(instances)
 
 
 class ListingPublicSerializer(serializers.ModelSerializer):

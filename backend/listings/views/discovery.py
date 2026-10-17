@@ -8,17 +8,21 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
 from rest_framework.decorators import action
 from rest_framework.exceptions import MethodNotAllowed, ValidationError
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from categories.services.publication import visible_categories
-from listings.models import ListingMetric
+from listings.models import Favorite, Listing, ListingMetric
 from listings.pagination import ListingPagination
-from listings.schemas.discovery import DiscoverySchema, HomeSchema
+from listings.schemas.discovery import DiscoverySchema, FavoriteSchema, HomeSchema
 from listings.serializers.discovery import ContactEventSerializer, ListingPublicSerializer, ListingSearchSerializer
 from listings.services.search import public_listings, search_listings
-from listings.throttles import ContactThrottle, MarketplaceReadThrottle
+from listings.throttles import (
+    ContactThrottle,
+    MarketplaceMutationThrottle,
+    MarketplaceReadThrottle,
+)
 
 
 @method_decorator(never_cache, name="dispatch")
@@ -118,4 +122,47 @@ class HomeViewSet(ModelViewSet):
             }
         )
 
+
+@method_decorator(never_cache, name="dispatch")
+class FavoriteViewSet(ModelViewSet):
+    permission_classes = (IsAuthenticated,)
+    throttle_classes = (
+        MarketplaceReadThrottle,
+        MarketplaceMutationThrottle,
+    )
+    serializer_class = ListingPublicSerializer
+    schema = FavoriteSchema()
+    pagination_class = ListingPagination
+    lookup_value_converter = "int"
+
+    def get_permissions(self):
+        actions = (
+            self.action_map.values() if self.action == "metadata" else (self.action,)
+        )
+        if not any(
+            action in ("list", "update", "destroy", "history") for action in actions
+        ):
+            raise MethodNotAllowed(self.request.method)
+        return super().get_permissions()
+
+    def get_queryset(self):
+        if (
+            getattr(self, "swagger_fake_view", False)
+            or not self.request.user.is_authenticated
+        ):
+            return Listing.objects.none()
+        return (
+            public_listings()
+            .filter(favorites__user=self.request.user)
+            .order_by("-favorites__created_at", "-pk")
+        )
+
+    def update(self, request, pk=None):
+        listing = get_object_or_404(public_listings(), pk=pk)
+        Favorite.objects.get_or_create(user=request.user, listing=listing)
+        return Response(status=204)
+
+    def destroy(self, request, pk=None):
+        Favorite.objects.filter(user=request.user, listing_id=pk).delete()
+        return Response(status=204)
 
