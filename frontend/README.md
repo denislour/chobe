@@ -26,3 +26,38 @@ currently shows an empty state. Shop metrics, reports and follow notifications
 are not included.
 
 `pnpm run prepare` sets up a Git pre-commit hook. It runs lint and unit tests for the backend, frontend, and recommendation service before each commit. The hook uses `just`, `uv`, and `mise` with Node.js 24 and pnpm. A failed check blocks the commit.
+
+## Categories
+
+Public routes `/categories` and `/categories/:id` show published categories,
+subcategories, dynamic attribute fields and available filter definitions. The
+attribute check validates against the displayed schema version without saving a
+listing. Changing or reloading a category asks before discarding entered values.
+
+The authenticated `/admin/categories` workspace uses Django permissions. It
+supports draft editing, attribute form/filter previews, publication and retirement
+confirmation, version conflicts, audit history and copying an old published
+version into a new draft. The Django admin links to this workspace. No admin
+permissions are inferred from a username or from the route guard.
+
+Apply the backend category migration first. The optional backend demo seed can
+populate sample categories. Listing results and the listing editor will be
+connected in later features; this feature shows their empty states.
+
+## Marketplace routes
+
+- `/`: published categories and recent listings, with independent section retries.
+- `/search`: URL-based keywords, filters, sorting, pagination and saved searches.
+- `/listings/:id`: approved photos, details, current phone consent and contact actions.
+- `/seller/listings`: private dashboard, status actions, renewal, deletion and CSV.
+- `/seller/listings/new`, `/seller/listings/:id/edit`: draft editor, image management,
+  preview, manual-review submission, reasons and appeals.
+- `/admin/moderation`: permission-checked manual approval, rejection and re-review.
+- `/saved`: favorites and consent-controlled viewing history.
+- `/alerts`: saved searches, inbox and explicit email/inbox preferences.
+- `/compare`: up to three compatible public listings; IDs remain in the URL/memory.
+- `/reports`, `/admin/reports`: private report status and staff review actions.
+
+Angular calls Django only. Automatic moderation and FastAPI services are planned
+for a later phase. Draft changes are separate from approved public snapshots;
+forms retain input on errors and require a reload after version conflicts.
