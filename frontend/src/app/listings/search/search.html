@@ -1,0 +1,113 @@
+<app-marketplace-nav />
+<main class="market-page">
+  <nav class="breadcrumbs" aria-label="Breadcrumb">
+    <a routerLink="/">Chobe</a><span>/</span><span>Find items</span>
+  </nav>
+  <div class="search-layout">
+    <details class="filters" open>
+      <summary>Filters</summary>
+      <form [formGroup]="form" (ngSubmit)="apply()">
+        <div class="field">
+          <label for="filter-query">Keywords</label
+          ><input id="filter-query" formControlName="q" maxlength="160" />
+        </div>
+        <div class="field">
+          <label for="filter-category">Category</label
+          ><select id="filter-category" formControlName="category" (change)="changeCategory()">
+            <option value="">All categories</option>
+            @for (category of categories.categories(); track category.id) {
+              <option [value]="category.id">{{ category.name }}</option>
+            }
+          </select>
+        </div>
+        @if (categories.error()) {
+          <p class="error" role="alert">{{ categories.error() }}</p>
+          <button type="button" (click)="categories.load(null)">Retry categories</button>
+        }
+        <div class="field">
+          <label for="filter-location">Area</label
+          ><input
+            id="filter-location"
+            formControlName="location"
+            maxlength="120"
+            placeholder="City or district"
+          />
+        </div>
+        <div class="field">
+          <label for="filter-condition">Condition</label
+          ><select id="filter-condition" formControlName="condition">
+            <option value="">Any condition</option>
+            <option value="new">New</option>
+            <option value="used">Used</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="price-min">Minimum price (VND)</label
+          ><input id="price-min" formControlName="price_min" type="number" min="0" step="1" />
+        </div>
+        <div class="field">
+          <label for="price-max">Maximum price (VND)</label
+          ><input id="price-max" formControlName="price_max" type="number" min="0" step="1" />
+        </div>
+        <app-attribute-fields
+          [fields]="fields()"
+          [initialValues]="initialAttributes()"
+          prefix="search"
+        />
+        <div class="field">
+          <label for="filter-sort">Sort by</label
+          ><select id="filter-sort" formControlName="sort">
+            <option value="newest">Newest first</option>
+            <option value="price_asc">Price: low to high</option>
+            <option value="price_desc">Price: high to low</option>
+          </select>
+        </div>
+        <div class="toolbar">
+          <button type="submit">Apply filters</button
+          ><button type="button" class="secondary" (click)="clear()">Clear filters</button>
+        </div>
+      </form>
+    </details>
+    <section>
+      <h1>
+        {{ current().q ? 'Results for “' + current().q + '”' : 'Find your next useful thing' }}
+      </h1>
+      <p class="muted">{{ search.count() }} matching listings · Public items only</p>
+      @if (urlError()) {
+        <p class="feedback error" role="alert">{{ urlError() }}</p>
+      }
+      @if (search.loading()) {
+        <p role="status">Finding listings…</p>
+      }
+      @if (search.error()) {
+        <p class="feedback error" role="alert">{{ search.error() }}</p>
+        <button type="button" (click)="search.load(current())">Try again</button>
+      }
+      <div class="product-grid">
+        @for (listing of search.listings(); track listing.id) {
+          <app-listing-card [listing]="listing" />
+        }
+      </div>
+      @if (!search.loading() && !search.error() && !search.listings().length) {
+        <div class="empty">
+          <h2>No matching listings</h2>
+          <p>Try fewer filters or a different keyword.</p>
+          <button type="button" (click)="clear()">Clear filters</button>
+        </div>
+      }
+      <nav class="pagination" aria-label="Search pages">
+        @if ((current().page ?? 1) > 1) {
+          <button type="button" class="secondary" (click)="page((current().page ?? 1) - 1)">
+            Previous
+          </button>
+        }
+        <span>Page {{ current().page ?? 1 }}</span>
+        @if ((current().page ?? 1) * 20 < search.count()) {
+          <button type="button" class="secondary" (click)="page((current().page ?? 1) + 1)">
+            Next
+          </button>
+        }
+      </nav>
+    </section>
+  </div>
+</main>
