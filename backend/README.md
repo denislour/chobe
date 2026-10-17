@@ -67,11 +67,10 @@ after first publication; attribute keys keep their type and unit across versions
 Trees allow four levels. Publish parents first and retire or move active children
 before retiring their parent. Restricted categories cannot be published.
 
-Optional demo data (eight category groups) can be created with
-`DJANGO_DEMO_MODE=true uv run python manage.py seed_demo_categories --username admin`.
-An existing active staff superuser is required. Existing categories are never
-overwritten. The command is covered by isolated tests; it has not been run against
-the development database.
+Demo taxonomy is available through `seed_demo_categories`. Run `seed_demo_accounts`
+first to create the default `demo_catalog` editor, or pass `--username` with an
+existing active staff user who has taxonomy permissions. Existing categories are
+preserved; reserved demo slugs owned by unrelated records stop the seed.
 
 Listings, search results and search/moderation consumers are not available yet.
 Published revisions and audit events are retained for those integrations; no jobs
@@ -107,7 +106,7 @@ uv sync
 uv run python manage.py migrate
 uv run python manage.py createcachetable --database cache
 export DJANGO_DEMO_MODE=true
-uv run python manage.py seed_demo_admin
+uv run python manage.py seed_demo_accounts --admin-only
 uv run python manage.py runserver localhost:8000
 ```
 
@@ -159,37 +158,77 @@ Reports require login. Staff need `listings.review_report`; hiding a listing als
 requires `listings.moderate_listing`, and suspending a shop requires
 `shops.change_shop`. Internal reasons and reporter identity are not public.
 
-## Complete marketplace demo
+## Demo seed data
 
-From `backend/`, after applying migrations:
+Each app owns a standard Django command directly under `management/commands/`.
+The seed file contains its fixtures, helper functions and `Command` class;
+`manage.py` discovers it without a loader or manual Python imports.
+
+| App | Seed file | Clear file |
+| --- | --- | --- |
+| accounts | `seed_demo_accounts.py` | `clear_seed_demo_accounts.py` |
+| categories | `seed_demo_categories.py` | `clear_seed_demo_categories.py` |
+| shops | `seed_demo_shops.py` | `clear_seed_demo_shops.py` |
+| listings | `seed_demo_listings.py` | `clear_seed_demo_listings.py` |
+
+After migrations, run these shortcuts from the repository root:
 
 ```bash
-DJANGO_DEMO_MODE=true uv run python manage.py seed_demo_marketplace
+just seed demo data
+just clear seed demo data
 ```
 
-This creates 10 seller accounts/shops, 5 buyer-only accounts, 3 staff accounts with
-separate permissions, and 3 inactive accounts for deletion scenarios. The 100
-listing scenarios cover all lifecycle states, draft/public differences, appeals,
-admin review, contact consent, retention and unavailable shops/categories. The
-seed also creates follows, favorites, history, saved searches, inbox entries,
-reports, audit records, aggregate demo metrics, exports and deletion receipts.
+The recipes enable demo mode for their commands. Seed runs accounts, categories,
+shops and listings; clear reverses that order. Both stop on the first error and
+do not run migrations, tests or workers. Earlier commands remain committed if a
+later command fails, since each command owns its transaction.
 
-The generated `../docs/DEMO_DATA.md` lists the demo login details and each
-account's shop, profile, privacy, follows, listings and interactions. Demo-only
-credentials and fictional data are clearly labeled. Read that guide for the
-manual review journeys. Email delivery states are fixtures, including `sent`;
-the command does not send email/SMS, call AI, enqueue outbox jobs or start workers.
+After migrations, run from `backend/` in dependency order:
 
-The command backs up SQLite into ignored `backend/backups/` before writing and
-uses one transaction. Re-running it preserves existing demo edits and passwords;
-it does not flush the database. Reserved demo usernames use `@demo.chobe.invalid`,
-shop/category slugs use `demo-`, and listing IDs 1101–2010 are reserved by this
-fixture. Conflicts with unrelated records stop the seed. Module seed logic stays
-in each app's services; `seed_demo_marketplace` coordinates their order.
+```bash
+export DJANGO_DEMO_MODE=true
+uv run python manage.py seed_demo_accounts
+uv run python manage.py seed_demo_categories
+uv run python manage.py seed_demo_shops
+uv run python manage.py seed_demo_listings
+```
 
-Photos in `listings/fixtures/demo/` are existing prototype stock images; their
-source URLs are recorded in `SOURCES.json`. They illustrate fictional items and
-are not evidence of an actual offer or transaction.
+Accounts include 10 sellers, 5 buyer-only users, 3 staff with separate permissions
+and 3 inactive accounts. Categories include public, draft, restricted and retired
+scenarios. Shops include follows and all four statuses. Listings include 100 item
+scenarios, image/review snapshots, moderation, appeals, audit, favorites, history,
+saved searches, notifications, reports and metrics. Each command reads its
+prerequisites and reports missing data; it does not run another app's seed.
 
-Missing demo relationships may be added again on a later seed run. Existing
-records are preserved; this command is not a destructive reset operation.
+`seed_demo_accounts --admin-only` creates or updates the separate bootstrap demo
+superuser. `seed_demo_categories --username <editor>` chooses another staff editor.
+`seed_demo_listings --guide <path>` selects the output guide path, defaulting to
+`../docs/DEMO_DATA.md`. The guide describes accounts, credentials and review journeys.
+
+To clear the demo, reverse the dependency order:
+
+```bash
+uv run python manage.py clear_seed_demo_listings
+uv run python manage.py clear_seed_demo_shops
+uv run python manage.py clear_seed_demo_categories
+uv run python manage.py clear_seed_demo_accounts
+```
+
+All seed and clear commands require demo mode and use transactions. Clear selects
+reserved records by stable IDs plus demo ownership/markers. Accounts with shops,
+shops with listings, and categories referenced by listings or non-demo children
+are preserved with an error. Referencing rows such as follows and favorites of
+removed demo entities are removed with those entities. Shared taxonomy and the
+bootstrap admin are preserved. No command flushes the database or automatically
+backs it up, and there is no transaction spanning all four commands.
+
+Existing demo edits and passwords survive seeding. Clear removes matching demo
+records, including their edits; a following seed can rebuild them. Reserved demo
+usernames use `@demo.chobe.invalid`, child-category/shop slugs use `demo-`, and
+listing IDs 1101–2010 belong to the dataset. Records outside that identity are
+preserved; namespace conflicts stop seeding.
+
+Email delivery states such as `sent` are fixtures, not proof of delivery. Seeds
+do not send email/SMS, call AI, enqueue jobs or start workers. Runtime services
+continue to handle real validation, image processing and publication. Photos
+remain in `listings/fixtures/demo/`, with source URLs in `SOURCES.json`.
