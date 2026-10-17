@@ -1,9 +1,12 @@
+from datetime import UTC, datetime, timedelta
 
 from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.utils import timezone
 from django_tasks_db.models import DBTaskResult
 
 from listings.models import Listing, ListingRevision
+from listings.services.management import cleanup_inactive_listings, six_months_after
 from listings.tests.base import ListingAPITestCase
 
 
@@ -278,8 +281,56 @@ class ListingManagementTests(ListingAPITestCase):
             self.admin_request("get", "me/listings/export").content.decode(),
         )
 
+    def test_retention_uses_calendar_months_and_public_reads_do_not_renew(self):
+        value = datetime(2026, 8, 31, tzinfo=UTC)
+        self.assertEqual(six_months_after(value), datetime(2027, 2, 28, tzinfo=UTC))
+        listing = self.approve(self.create_draft())
+        deadline = listing.retention_due_at
+        self.public.get(f"/api/v1/listings/{listing.pk}/")
+        listing.refresh_from_db()
+        self.assertEqual(listing.retention_due_at, deadline)
 
+    def test_expired_listings_are_hidden_before_cleanup_and_erased_once(self):
+        listing = self.approve(self.create_draft())
+        Listing.objects.filter(pk=listing.pk).update(
+            retention_due_at=timezone.now() - timedelta(seconds=1)
+        )
+        self.assertEqual(self.public.get("/api/v1/listings/").data["count"], 0)
+        self.assertEqual(cleanup_inactive_listings(), 1)
+        self.assertEqual(cleanup_inactive_listings(), 0)
+        listing.refresh_from_db()
+        self.assertEqual(listing.status, "deleted")
+        self.assertFalse(listing.published)
+        self.assertFalse(listing.images.exists())
+        self.assertFalse(listing.revisions.exists())
 
+    def test_renewal_prevents_cleanup_and_deleted_items_cannot_be_restored(self):
+        listing = self.create_draft()
+        Listing.objects.filter(pk=listing.pk).update(
+            retention_due_at=timezone.now() - timedelta(seconds=1)
+        )
+        self.assertEqual(
+            self.request(
+                "post", f"me/listings/{listing.pk}/renew", {"version": listing.version}
+            ).status_code,
+            200,
+        )
+        self.assertEqual(cleanup_inactive_listings(), 0)
+        listing.refresh_from_db()
+        self.assertEqual(
+            self.request(
+                "delete", f"me/listings/{listing.pk}", {"version": listing.version}
+            ).status_code,
+            204,
+        )
+        self.assertEqual(
+            self.request(
+                "post",
+                f"me/listings/{listing.pk}/renew",
+                {"version": listing.version + 1},
+            ).status_code,
+            404,
+        )
 
     def test_submitted_revision_is_immutable(self):
         from django.core.exceptions import ValidationError

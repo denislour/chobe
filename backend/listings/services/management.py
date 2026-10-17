@@ -226,3 +226,20 @@ def erase_listing(listing, user, action):
     audit(listing, user, action)
 
 
+def cleanup_inactive_listings():
+    count = 0
+    for pk in (
+        Listing.objects.filter(retention_due_at__lte=timezone.now())
+        .exclude(status="deleted")
+        .values_list("pk", flat=True)
+        .iterator()
+    ):
+        with transaction.atomic():
+            listing = Listing.objects.select_for_update().get(pk=pk)
+            if (
+                listing.status != "deleted"
+                and listing.retention_due_at <= timezone.now()
+            ):
+                erase_listing(listing, None, "retention_deleted")
+                count += 1
+    return count
