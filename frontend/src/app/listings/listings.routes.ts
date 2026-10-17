@@ -16,6 +16,11 @@ export const sellerListingRoutes: Routes = [
   },
 ];
 export const reviewRoutes: Routes = [
+  {
+    path: 'moderation',
+    canActivate: [authGuard],
+    loadComponent: () => import('@app/listings/moderation/moderation').then((m) => m.Moderation),
+  },
 ];
 export const marketplaceRoutes: Routes = [
 ];

@@ -302,4 +302,40 @@
       <p class="feedback">Private preview. This is not a public listing.</p>
     </section>
   }
+  <section class="form-section">
+    <h2>Review history</h2>
+    @for (review of editor.cases(); track review.id) {
+      <article class="review">
+        <h3>Version {{ review.listing_version }} · {{ review.status }}</h3>
+        <p>{{ review.reason || 'Waiting for manual review.' }}</p>
+        @if (review.appeal) {
+          <p>Appeal: {{ review.appeal }} · {{ review.appeal_open ? 'Open' : 'Reviewed' }}</p>
+        }
+        @if (review.current && review.status === 'rejected' && !review.appeal_open) {
+          <label [for]="'appeal-' + review.id">Why should this decision be reviewed?</label
+          ><textarea [id]="'appeal-' + review.id" [formControl]="appeal" maxlength="2000"></textarea
+          ><button
+            type="button"
+            [disabled]="editor.pending() || editor.conflict()"
+            (click)="sendAppeal()"
+          >
+            Send appeal
+          </button>
+        }
+      </article>
+    } @empty {
+      <p class="muted">No submitted versions yet.</p>
+    }
+    <details>
+      <summary>Activity log</summary>
+      @for (event of editor.history(); track event.id) {
+        <p>
+          {{ event.created_at | date: 'short' }} · {{ event.action }} · Version {{ event.version }}
+          @if (event.reason) {
+            — {{ event.reason }}
+          }
+        </p>
+      }
+    </details>
+  </section>
 </main>
