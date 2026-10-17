@@ -145,6 +145,20 @@ class MarketplaceDiscoveryTests(ListingAPITestCase):
         self.assertFalse(ViewingHistory.objects.exists())
         self.assertEqual(self.request("get", "me/favorites/history").data, [])
 
+    def test_comparison_limits_ids_and_does_not_expose_private_items(self):
+        listing = self.approve(self.create_draft())
+        private = self.create_draft()
+        response = self.public.get(
+            "/api/v1/listings/compare/", {"ids": f"{listing.pk},{private.pk}"}
+        )
+        self.assertEqual(response.status_code, 200, response.data)
+        self.assertEqual(response.data["unavailable"], [private.pk])
+        self.assertEqual(len(response.data["results"]), 1)
+        for ids in ("1,1", "1,2,3,4", "bad", "-1"):
+            self.assertEqual(
+                self.public.get("/api/v1/listings/compare/", {"ids": ids}).status_code,
+                400,
+            )
 
     def test_saved_searches_validate_filters_and_require_current_version(self):
         response = self.request(

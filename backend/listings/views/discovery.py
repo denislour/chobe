@@ -17,7 +17,12 @@ from categories.services.publication import visible_categories
 from listings.models import Favorite, Listing, ListingMetric
 from listings.pagination import ListingPagination
 from listings.schemas.discovery import DiscoverySchema, FavoriteSchema, HomeSchema
-from listings.serializers.discovery import ContactEventSerializer, ListingPublicSerializer, ListingSearchSerializer
+from listings.serializers.discovery import (
+    CompareQuerySerializer,
+    ContactEventSerializer,
+    ListingPublicSerializer,
+    ListingSearchSerializer,
+)
 from listings.services.search import public_listings, search_listings
 from listings.throttles import (
     ContactThrottle,
@@ -94,6 +99,26 @@ class ListingViewSet(ModelViewSet):
         ListingMetric.objects.filter(pk=metric.pk).update(count=F("count") + 1)
         return Response(status=204)
 
+    @action(detail=False, methods=["get"])
+    def compare(self, request):
+        serializer = CompareQuerySerializer(data=request.query_params)
+        serializer.is_valid(raise_exception=True)
+        ids = serializer.validated_data["ids"]
+        by_id = {
+            listing.pk: listing for listing in public_listings().filter(pk__in=ids)
+        }
+        listings = [by_id[pk] for pk in ids if pk in by_id]
+        categories = {listing.published["category"] for listing in listings}
+        if len(categories) > 1:
+            raise ValidationError("Compare listings from the same category.")
+        return Response(
+            {
+                "results": ListingPublicSerializer(
+                    listings, many=True, context=self.get_serializer_context()
+                ).data,
+                "unavailable": [pk for pk in ids if pk not in by_id],
+            }
+        )
 
 
 @method_decorator(never_cache, name="dispatch")
