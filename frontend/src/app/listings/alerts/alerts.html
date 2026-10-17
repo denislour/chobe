@@ -1,0 +1,220 @@
+<app-marketplace-nav />
+<main class="market-page">
+  <h1>Your alerts and saved searches</h1>
+  <p class="muted">Choose what to receive. Inbox and email alerts are off until you enable them.</p>
+  @if (alerts.loading()) {
+    <p role="status">Loading alerts…</p>
+  }
+  @if (alerts.error()) {
+    <p class="feedback error" role="alert">{{ alerts.error() }}</p>
+    <button type="button" [disabled]="alerts.pending()" (click)="alerts.load(page())">
+      Reload alerts and settings
+    </button>
+  }
+  @if (alerts.notice()) {
+    <p class="feedback success" role="status">{{ alerts.notice() }}</p>
+  }
+  <div class="two-column">
+    <section>
+      <div class="intro">
+        <h2>Notifications</h2>
+        <button
+          type="button"
+          class="secondary"
+          [disabled]="alerts.pending()"
+          (click)="alerts.change({ kind: 'readAll' })"
+        >
+          Mark all read
+        </button>
+      </div>
+      @for (notification of alerts.notifications(); track notification.id) {
+        <article class="notification" [class.unread]="!notification.read_at">
+          <h3>
+            @if (notification.available) {
+              <a [routerLink]="['/listings', notification.listing_id]">{{ notification.title }}</a>
+            } @else {
+              Listing no longer available
+            }
+          </h3>
+          <p>
+            Matches “{{ notification.search_name }}” · {{ notification.created_at | date: 'short' }}
+          </p>
+          @if (!notification.read_at) {
+            <button
+              type="button"
+              class="secondary"
+              [disabled]="alerts.pending()"
+              (click)="alerts.change({ kind: 'read', id: notification.id })"
+            >
+              Mark read
+            </button>
+          }
+        </article>
+      } @empty {
+        <div class="empty">
+          <h3>No notifications yet</h3>
+          <p>Save a search and enable alerts to hear about new matching listings.</p>
+          <a class="button" routerLink="/search">Find items</a>
+        </div>
+      }
+      <nav class="pagination" aria-label="Notification pages">
+        @if (page() > 1) {
+          <button type="button" (click)="changePage(-1)">Previous</button>
+        }
+        <span>Page {{ page() }}</span>
+        @if (page() * 20 < alerts.count()) {
+          <button type="button" (click)="changePage(1)">Next</button>
+        }
+      </nav>
+    </section>
+    <aside class="aside">
+      <h2>Notification settings</h2>
+      <form [formGroup]="preferencesForm" (ngSubmit)="savePreferences()">
+        <label class="check"
+          ><input type="checkbox" formControlName="inbox" />Notify me in my Chobe inbox about
+          saved-search matches.</label
+        ><label class="check"
+          ><input type="checkbox" formControlName="email" />Also send these alerts by email.</label
+        >
+        <p>Email requires inbox alerts to be enabled. You can turn both off here at any time.</p>
+        <button type="submit" [disabled]="alerts.pending() || !alerts.preferences()">
+          Save preferences
+        </button>
+      </form>
+    </aside>
+  </div>
+  <section class="form-section">
+    <h2>Saved searches</h2>
+    @for (search of alerts.searches(); track search.id) {
+      <article class="search-row">
+        <div>
+          <h3>
+            <a routerLink="/search" [queryParams]="searchParams(search)">{{ search.name }}</a>
+          </h3>
+          <p>
+            {{ search.active ? 'Active' : 'Paused' }} ·
+            {{ search.frequency === 'daily' ? 'Daily' : 'When a listing is published' }}
+          </p>
+        </div>
+        <div class="toolbar">
+          <button
+            type="button"
+            class="secondary"
+            [disabled]="alerts.pending()"
+            (click)="edit(search)"
+          >
+            Edit</button
+          ><button
+            type="button"
+            class="secondary"
+            [disabled]="alerts.pending()"
+            (click)="
+              alerts.save({
+                id: search.id,
+                values: {
+                  name: search.name,
+                  filters: search.filters,
+                  frequency: search.frequency,
+                  active: !search.active,
+                  version: search.version,
+                },
+              })
+            "
+          >
+            {{ search.active ? 'Pause' : 'Resume' }}</button
+          ><button
+            type="button"
+            class="secondary danger"
+            [disabled]="alerts.pending()"
+            (click)="deleting.set(search.id)"
+          >
+            Delete
+          </button>
+        </div>
+      </article>
+    } @empty {
+      <p>No saved searches. Use “Save this search” on a results page.</p>
+    }
+    @if (deleting() !== null) {
+      <div class="feedback">
+        <p>Delete this saved search and its matching notifications?</p>
+        <div class="toolbar">
+          <button
+            type="button"
+            (click)="alerts.change({ kind: 'delete', id: deleting()! }); deleting.set(null)"
+          >
+            Delete search</button
+          ><button type="button" class="secondary" (click)="deleting.set(null)">Cancel</button>
+        </div>
+      </div>
+    }
+    @if (editing(); as search) {
+      <form class="edit-search" [formGroup]="searchForm" (ngSubmit)="saveSearch()">
+        <h3>Edit {{ search.name }}</h3>
+        <div class="field">
+          <label for="saved-search-name">Name</label
+          ><input id="saved-search-name" formControlName="name" maxlength="80" />
+        </div>
+        <div class="field">
+          <label for="saved-search-frequency">Frequency</label
+          ><select id="saved-search-frequency" formControlName="frequency">
+            <option value="daily">Daily</option>
+            <option value="immediate">When a listing is published</option>
+          </select>
+        </div>
+        <label class="check"><input type="checkbox" formControlName="active" />Active</label>
+        <div class="form-grid">
+          <div class="field">
+            <label for="saved-filter-q">Keywords</label
+            ><input id="saved-filter-q" formControlName="q" maxlength="160" />
+          </div>
+          <div class="field">
+            <label for="saved-filter-category">Category</label
+            ><select
+              id="saved-filter-category"
+              formControlName="category"
+              (change)="changeCategory()"
+            >
+              <option value="">All categories</option>
+              @for (category of categories.categories(); track category.id) {
+                <option [value]="category.id">{{ category.name }}</option>
+              }
+            </select>
+          </div>
+          <div class="field">
+            <label for="saved-filter-location">Area</label
+            ><input id="saved-filter-location" formControlName="location" maxlength="120" />
+          </div>
+          <div class="field">
+            <label for="saved-filter-condition">Condition</label
+            ><select id="saved-filter-condition" formControlName="condition">
+              <option value="">Any condition</option>
+              <option value="new">New</option>
+              <option value="used">Used</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="saved-filter-min">Minimum price (VND)</label
+            ><input id="saved-filter-min" type="number" min="0" formControlName="price_min" />
+          </div>
+          <div class="field">
+            <label for="saved-filter-max">Maximum price (VND)</label
+            ><input id="saved-filter-max" type="number" min="0" formControlName="price_max" />
+          </div>
+        </div>
+        <app-attribute-fields
+          [fields]="fields()"
+          [initialValues]="initialAttributes()"
+          prefix="saved-search"
+        />
+        @if (filterError()) {
+          <p class="error" role="alert">{{ filterError() }}</p>
+        }
+        <div class="toolbar">
+          <button type="submit" [disabled]="alerts.pending()">Save search changes</button
+          ><button type="button" class="secondary" (click)="editing.set(null)">Close editor</button>
+        </div>
+      </form>
+    }
+  </section>
+</main>

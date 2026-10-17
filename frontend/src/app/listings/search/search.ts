@@ -2,9 +2,11 @@ import { Component, Injector, OnInit, computed, signal, viewChild } from '@angul
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
+import { AuthStore } from '@app/auth/auth.store';
 import { CategoryStore } from '@app/categories/browse/category.store';
 import { AttributeFields } from '@app/categories/attribute-fields/attribute-fields';
 import { AttributeValues } from '@app/categories/category-types';
+import { AlertsStore } from '@app/listings/alerts/alerts.store';
 import { ListingCard } from '@app/listings/listing-card/listing-card';
 import { MarketplaceNav } from '@app/listings/marketplace-nav/marketplace-nav';
 import { SearchFilters } from '@app/listings/listing-types';
@@ -12,7 +14,7 @@ import { SearchStore } from './search.store';
 @Component({
   selector: 'app-search',
   imports: [ReactiveFormsModule, RouterLink, AttributeFields, ListingCard, MarketplaceNav],
-  providers: [SearchStore, CategoryStore],
+  providers: [SearchStore, CategoryStore, AlertsStore],
   templateUrl: './search.html',
   styleUrl: './search.css',
 })
@@ -31,9 +33,12 @@ export class Search implements OnInit {
         .map((field) => ({ ...field, required: false })) ?? [],
   );
   protected readonly form;
+  protected readonly saveForm;
   constructor(
     protected readonly search: SearchStore,
     protected readonly categories: CategoryStore,
+    protected readonly alerts: AlertsStore,
+    private readonly auth: AuthStore,
     private readonly route: ActivatedRoute,
     private readonly router: Router,
     private readonly injector: Injector,
@@ -48,6 +53,7 @@ export class Search implements OnInit {
       price_max: fb.control<number | null>(null),
       sort: fb.nonNullable.control('newest'),
     });
+    this.saveForm = fb.nonNullable.group({ name: [''], frequency: ['daily'] });
   }
   ngOnInit(): void {
     this.categories.load(null);
@@ -119,6 +125,26 @@ export class Search implements OnInit {
       relativeTo: this.route,
       queryParams: { page },
       queryParamsHandling: 'merge',
+    });
+  }
+  protected saveSearch(): void {
+    if (!this.auth.user()) {
+      void this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
+      return;
+    }
+    const values = this.saveForm.getRawValue();
+    if (!values.name.trim()) {
+      this.saveForm.controls.name.setErrors({ required: true });
+      return;
+    }
+    this.alerts.save({
+      id: null,
+      values: {
+        name: values.name.trim(),
+        frequency: values.frequency as 'daily' | 'immediate',
+        filters: this.current(),
+        active: true,
+      },
     });
   }
 }

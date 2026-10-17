@@ -108,6 +108,30 @@
           </button>
         }
       </nav>
+      <details class="save-search">
+        <summary>Save this search</summary>
+        <form [formGroup]="saveForm" (ngSubmit)="saveSearch()">
+          <div class="field">
+            <label for="search-name">Search name</label
+            ><input id="search-name" formControlName="name" maxlength="80" required />
+          </div>
+          <div class="field">
+            <label for="search-frequency">Notification frequency</label
+            ><select id="search-frequency" formControlName="frequency">
+              <option value="daily">Daily</option>
+              <option value="immediate">When a listing is published</option>
+            </select>
+          </div>
+          <p>Enable inbox or email alerts in notification settings to receive matches.</p>
+          <button type="submit" [disabled]="alerts.pending()">Save search</button>
+        </form>
+        @if (alerts.error()) {
+          <p class="feedback error" role="alert">{{ alerts.error() }}</p>
+        }
+        @if (alerts.notice()) {
+          <p class="feedback success" role="status">{{ alerts.notice() }}</p>
+        }
+      </details>
     </section>
   </div>
 </main>

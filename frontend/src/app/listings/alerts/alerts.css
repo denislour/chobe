@@ -1,0 +1,31 @@
+@import '../marketplace.css';
+.notification {
+  padding: 22px 0;
+  border-bottom: 1px solid var(--line);
+}
+.notification.unread {
+  background: var(--soft-yellow);
+  padding: 22px;
+  border-radius: 9px;
+}
+.search-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--line);
+}
+.edit-search {
+  max-width: 680px;
+  padding: 24px 0;
+}
+summary {
+  cursor: pointer;
+  margin: 12px 0;
+}
+@media (max-width: 560px) {
+  .search-row {
+    flex-direction: column;
+    gap: 0;
+  }
+}
