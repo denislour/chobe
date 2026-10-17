@@ -1,5 +1,6 @@
 import io
 
+from django.db.models import Count
 from django.http import FileResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -181,4 +182,8 @@ class ListingManagementViewSet(ModelViewSet):
             ).data
         )
 
+    @action(detail=False, methods=["get"])
+    def summary(self, request):
+        counts = self.get_queryset().values("status").annotate(count=Count("pk"))
+        return Response({row["status"]: row["count"] for row in counts})
 
