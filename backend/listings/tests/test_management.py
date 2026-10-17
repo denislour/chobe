@@ -139,6 +139,51 @@ class ListingManagementTests(ListingAPITestCase):
             ).exists()
         )
 
+    def test_manual_rejection_can_be_appealed_and_overridden_with_audit(self):
+        listing = self.create_draft()
+        case = self.submit(listing)
+        response = self.admin_request(
+            "post",
+            f"admin/moderation/{case.pk}/decision",
+            {
+                "version": case.version,
+                "decision": "reject",
+                "reason": "Please clarify the condition.",
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        listing.refresh_from_db()
+        self.assertEqual(
+            self.public.get(f"/api/v1/listings/{listing.pk}/").status_code, 404
+        )
+        self.assertEqual(
+            self.request(
+                "post",
+                f"me/listings/{listing.pk}/appeal",
+                {
+                    "version": listing.version,
+                    "reason": "The description explains the condition.",
+                },
+            ).status_code,
+            200,
+        )
+        case.refresh_from_db()
+        response = self.admin_request(
+            "post",
+            f"admin/moderation/{case.pk}/decision",
+            {
+                "version": case.version,
+                "decision": "approve",
+                "reason": "Reviewed the appeal and approved.",
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            self.public.get(f"/api/v1/listings/{listing.pk}/").status_code, 200
+        )
+        self.assertEqual(
+            listing.audit_events.filter(action__in=("approve", "reject")).count(), 2
+        )
 
     def test_owner_cannot_moderate_and_admin_cannot_skip_csrf(self):
         listing = self.create_draft()

@@ -14,9 +14,10 @@ from rest_framework.viewsets import ModelViewSet
 from listings.models import Listing
 from listings.pagination import ListingPagination
 from listings.schemas.management import ListingManagementSchema
-from listings.serializers.management import ImageOrderSerializer, ImageUploadSerializer, ListingAuditSerializer, ListingDraftSerializer, ListingVersionSerializer, ModerationSerializer
+from listings.serializers.management import AppealSerializer, ImageOrderSerializer, ImageUploadSerializer, ListingAuditSerializer, ListingDraftSerializer, ListingVersionSerializer, ModerationSerializer
 from listings.services.images import add_image, arrange_images
 from listings.services.management import draft_snapshot, submit_listing
+from listings.services.moderation import appeal_listing
 from listings.throttles import MarketplaceMutationThrottle, MarketplaceReadThrottle
 
 
@@ -163,6 +164,14 @@ class ListingManagementViewSet(ModelViewSet):
             ).data
         )
 
+    @action(detail=True, methods=["post"], serializer_class=AppealSerializer)
+    def appeal(self, request, pk=None):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        listing = appeal_listing(
+            request.user, self.get_object(), **serializer.validated_data
+        )
+        return Response(ListingDraftSerializer(listing).data)
 
     @action(detail=True, methods=["get"])
     def history(self, request, pk=None):
