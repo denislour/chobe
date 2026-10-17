@@ -1,0 +1,19 @@
+<article>
+  <a class="image-link" [routerLink]="['/listings', listing().id]">
+    @if (listing().images[0]; as image) {
+      <img [src]="image.url" [alt]="listing().title" loading="lazy" />
+    } @else {
+      <span class="image-placeholder">No image</span>
+    }</a
+  >
+  <h3>
+    <a [routerLink]="['/listings', listing().id]">{{ listing().title }}</a>
+  </h3>
+  <p class="price">{{ price(listing()) }}</p>
+  <p class="meta">{{ listing().condition === 'new' ? 'New' : 'Used' }} · {{ listing().area }}</p>
+  <a class="shop" [routerLink]="['/shops', listing().shop.slug]">{{ listing().shop.name }}</a
+  >
+  @if (card.error()) {
+    <p role="alert" class="error">{{ card.error() }}</p>
+  }
+</article>
