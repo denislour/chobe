@@ -42,4 +42,9 @@ export const marketplaceRoutes: Routes = [
     path: 'listings/:id',
     loadComponent: () => import('@app/listings/detail/detail').then((m) => m.Detail),
   },
+  {
+    path: 'saved',
+    canActivate: [authGuard],
+    loadComponent: () => import('@app/listings/library/library').then((m) => m.Library),
+  },
 ];

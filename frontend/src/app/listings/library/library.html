@@ -1,0 +1,68 @@
+<app-marketplace-nav />
+<main class="market-page">
+  <h1>Keep it for later</h1>
+  <p class="muted">Your saved items and recent views. Only listings still public appear here.</p>
+  <nav class="tabs" aria-label="Your library">
+    <a routerLink="/saved" [class.active]="mode() === 'favorites'">Saved listings</a
+    ><a routerLink="/saved" [queryParams]="{ tab: 'history' }" [class.active]="mode() === 'history'"
+      >Viewing history</a
+    ><a routerLink="/account/followed-shops">Followed shops</a
+    ><a routerLink="/alerts">Saved searches</a>
+  </nav>
+  @if (mode() === 'history') {
+    <div class="toolbar">
+      <a routerLink="/account/privacy">Turn history recording on or off</a
+      ><button
+        type="button"
+        class="secondary"
+        [disabled]="library.pending()"
+        (click)="confirmation.set(true)"
+      >
+        Clear viewing history
+      </button>
+    </div>
+    <p class="muted">History is kept for up to 30 days when recording is enabled.</p>
+  }
+  @if (confirmation()) {
+    <div class="feedback">
+      <p>Clear your recorded viewing history?</p>
+      <div class="toolbar">
+        <button type="button" (click)="clear()">Clear history</button
+        ><button type="button" class="secondary" (click)="confirmation.set(false)">Cancel</button>
+      </div>
+    </div>
+  }
+  @if (library.loading()) {
+    <p role="status">Loading your listings…</p>
+  }
+  @if (library.error()) {
+    <p class="feedback error" role="alert">{{ library.error() }}</p>
+    <button type="button" (click)="library.load({ mode: mode(), page: page() })">Try again</button>
+  }
+  @if (library.notice()) {
+    <p class="feedback success" role="status">{{ library.notice() }}</p>
+  }
+  <div class="product-grid">
+    @for (listing of library.listings(); track listing.id) {
+      <app-listing-card [listing]="listing" />
+    }
+  </div>
+  @if (!library.loading() && !library.error() && !library.listings().length) {
+    <section class="empty">
+      <h2>{{ mode() === 'favorites' ? 'No saved listings yet' : 'No recorded views' }}</h2>
+      <p>Browse public items and keep the ones you want to revisit.</p>
+      <a class="button" routerLink="/search">Find items</a>
+    </section>
+  }
+  @if (mode() === 'favorites') {
+    <nav class="pagination" aria-label="Saved listing pages">
+      @if (page() > 1) {
+        <button type="button" (click)="changePage(-1)">Previous</button>
+      }
+      <span>Page {{ page() }}</span>
+      @if (page() * 20 < library.count()) {
+        <button type="button" (click)="changePage(1)">Next</button>
+      }
+    </nav>
+  }
+</main>
