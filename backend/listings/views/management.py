@@ -1,7 +1,8 @@
+import csv
 import io
 
 from django.db.models import Count
-from django.http import FileResponse
+from django.http import FileResponse, HttpResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.decorators import method_decorator
@@ -215,3 +216,39 @@ class ListingManagementViewSet(ModelViewSet):
         counts = self.get_queryset().values("status").annotate(count=Count("pk"))
         return Response({row["status"]: row["count"] for row in counts})
 
+    @action(detail=False, methods=["get"])
+    def export(self, request):
+        response = HttpResponse(content_type="text/csv; charset=utf-8")
+        response["Content-Disposition"] = 'attachment; filename="chobe-listings.csv"'
+        writer = csv.writer(response)
+        writer.writerow(
+            (
+                "ID",
+                "Title",
+                "Status",
+                "Price mode",
+                "Price VND",
+                "Area",
+                "Retention due",
+            )
+        )
+        for listing in self.get_queryset()[:1000]:
+            row = (
+                listing.pk,
+                listing.title,
+                listing.status,
+                listing.price_mode,
+                listing.price,
+                listing.area,
+                listing.retention_due_at.isoformat(),
+            )
+            writer.writerow(
+                [
+                    "'" + value
+                    if isinstance(value, str)
+                    and value.lstrip().startswith(("=", "+", "-", "@"))
+                    else value
+                    for value in row
+                ]
+            )
+        return response

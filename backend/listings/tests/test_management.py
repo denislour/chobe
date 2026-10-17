@@ -268,6 +268,15 @@ class ListingManagementTests(ListingAPITestCase):
             self.public.get(f"/api/v1/listings/{listing.pk}/").status_code, 404
         )
 
+    def test_owner_summary_and_csv_are_private_and_escape_formulas(self):
+        listing = self.create_draft(self.values | {"title": "=SUM(A1:A2)"})
+        self.assertEqual(self.request("get", "me/listings/summary").data, {"draft": 1})
+        response = self.request("get", "me/listings/export")
+        self.assertIn("'=SUM", response.content.decode())
+        self.assertNotIn(
+            str(listing.pk),
+            self.admin_request("get", "me/listings/export").content.decode(),
+        )
 
 
 
