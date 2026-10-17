@@ -1,17 +1,15 @@
-from io import StringIO
-
-from django.core.management import call_command
 from django.core.management.base import CommandError
 from django.test import TestCase, override_settings
 
 from accounts.constants import DEMO_ADMIN_PASSWORD, DEMO_ADMIN_USERNAME
+from accounts.management.commands.seed_demo_accounts import seed_demo_admin
 from accounts.models import User
 
 
 @override_settings(DEMO_MODE=True)
 class DemoAdminTests(TestCase):
     def setUp(self):
-        call_command("seed_demo_admin", stdout=StringIO())
+        seed_demo_admin()
 
     @override_settings(DEMO_MODE=False)
     def test_seed_is_blocked_without_changing_existing_admin(self):
@@ -19,7 +17,7 @@ class DemoAdminTests(TestCase):
         password_hash = user.password
         User.objects.filter(pk=user.pk).update(is_staff=False, is_superuser=False)
         with self.assertRaisesMessage(CommandError, "Demo mode is disabled."):
-            call_command("seed_demo_admin", stdout=StringIO())
+            seed_demo_admin()
         user.refresh_from_db()
         self.assertEqual(user.password, password_hash)
         self.assertFalse(user.is_staff or user.is_superuser)
@@ -27,7 +25,7 @@ class DemoAdminTests(TestCase):
     def test_seed_can_run_again_without_creating_another_user(self):
         user = User.objects.get(username=DEMO_ADMIN_USERNAME)
         password_hash = user.password
-        call_command("seed_demo_admin", stdout=StringIO())
+        seed_demo_admin()
         user.refresh_from_db()
 
         self.assertEqual(User.objects.count(), 1)
@@ -43,7 +41,7 @@ class DemoAdminTests(TestCase):
         User.objects.filter(username=DEMO_ADMIN_USERNAME).update(
             password="!", is_active=False, is_staff=False, is_superuser=False
         )
-        call_command("seed_demo_admin", stdout=StringIO())
+        seed_demo_admin()
         self.assertTrue(
             self.client.login(
                 username=DEMO_ADMIN_USERNAME, password=DEMO_ADMIN_PASSWORD
