@@ -216,6 +216,27 @@ class MarketplaceDiscoveryTests(ListingAPITestCase):
         notification.refresh_from_db()
         self.assertEqual(notification.email_status, "blocked")
 
+    def test_daily_matching_and_read_actions_are_private_and_idempotent(self):
+        SavedSearch.objects.create(
+            user=self.user, name="Daily", filters={}, frequency="daily"
+        )
+        NotificationPreference.objects.create(user=self.user, inbox=True)
+        listing = self.approve(self.create_draft())
+        self.assertEqual(match_searches(listing.pk, listing.published["version"]), 0)
+        self.assertEqual(match_searches(frequency="daily"), 1)
+        notification = Notification.objects.get()
+        for _ in range(2):
+            self.assertEqual(
+                self.request(
+                    "post", f"me/notifications/{notification.pk}/read", {}
+                ).status_code,
+                200,
+            )
+        self.assertEqual(
+            self.request("post", "me/notifications/read-all", {}).status_code, 204
+        )
+        notification.refresh_from_db()
+        self.assertIsNotNone(notification.read_at)
 
     def test_notification_preferences_require_current_version(self):
         data = self.request("get", "me/notification-preferences/me").data

@@ -4,7 +4,7 @@ from django.db import transaction
 from rest_framework import serializers
 
 from accounts.services.versioning import VersionConflict
-from listings.models import NotificationPreference, SavedSearch
+from listings.models import Notification, NotificationPreference, SavedSearch
 from listings.serializers.discovery import ListingSearchSerializer
 from listings.services.search import search_listings
 
@@ -87,3 +87,31 @@ class NotificationPreferenceSerializer(serializers.ModelSerializer):
         return instance
 
 
+class NotificationSerializer(serializers.ModelSerializer):
+    available = serializers.SerializerMethodField()
+    title = serializers.SerializerMethodField()
+    search_name = serializers.CharField(source="search.name", read_only=True)
+
+    class Meta:
+        model = Notification
+        fields = (
+            "id",
+            "listing_id",
+            "title",
+            "available",
+            "search_name",
+            "read_at",
+            "email_status",
+            "created_at",
+        )
+        read_only_fields = fields
+
+    def get_available(self, instance) -> bool:
+        return instance.listing_id in self.context.get("visible_ids", set())
+
+    def get_title(self, instance) -> str:
+        return (
+            instance.listing.published.get("title", "Listing unavailable")
+            if self.get_available(instance)
+            else "Listing unavailable"
+        )
