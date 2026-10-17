@@ -1,5 +1,12 @@
 from accounts.models import PrivacySettings, ViewingHistory
-from listings.models import Favorite, Listing, Notification, NotificationPreference, SavedSearch
+from listings.models import (
+    Favorite,
+    Listing,
+    Notification,
+    NotificationPreference,
+    Report,
+    SavedSearch,
+)
 from listings.services.notifications import match_searches, send_notification_email
 from listings.tests.base import ListingAPITestCase
 
@@ -272,7 +279,45 @@ class MarketplaceDiscoveryTests(ListingAPITestCase):
             409,
         )
 
+    def test_report_requires_login_and_duplicate_reports_return_one_receipt(self):
+        listing = self.approve(self.create_draft())
+        values = {
+            "listing": listing.pk,
+            "reason": "incorrect",
+            "description": "The description needs checking.",
+        }
+        self.assertEqual(
+            self.public.post("/api/v1/me/reports/", values, format="json").status_code,
+            403,
+        )
+        first = self.request("post", "me/reports", values)
+        second = self.request("post", "me/reports", values)
+        self.assertEqual(first.status_code, 201, first.data)
+        self.assertEqual(first.data["id"], second.data["id"])
+        self.assertEqual(Report.objects.count(), 1)
+        self.assertEqual(self.admin_request("get", "me/reports").data["count"], 0)
 
+    def test_reports_validate_targets_and_do_not_publish_reporter_identity(self):
+        listing = self.approve(self.create_draft())
+        values = {
+            "listing": listing.pk,
+            "shop": str(self.shop.pk),
+            "reason": "fraud",
+            "description": "Concern",
+        }
+        self.assertEqual(self.request("post", "me/reports", values).status_code, 400)
+        response = self.request(
+            "post",
+            "me/reports",
+            {
+                "shop": str(self.shop.pk),
+                "reason": "spam",
+                "description": "Repeated content.",
+            },
+        )
+        self.assertEqual(response.status_code, 201)
+        self.assertNotIn("reporter", response.data)
+        self.assertNotIn("reporter_id", response.data)
 
 
 
@@ -291,6 +336,23 @@ class MarketplaceDiscoveryTests(ListingAPITestCase):
         notification.refresh_from_db()
         self.assertEqual(notification.email_status, "blocked")
 
+    def test_nonpublic_items_cannot_be_added_to_favorites_or_reported(self):
+        listing = self.create_draft()
+        self.assertEqual(
+            self.request("put", f"me/favorites/{listing.pk}", {}).status_code, 404
+        )
+        self.assertEqual(
+            self.request(
+                "post",
+                "me/reports",
+                {
+                    "listing": listing.pk,
+                    "reason": "spam",
+                    "description": "Private target",
+                },
+            ).status_code,
+            400,
+        )
 
     def test_listing_phone_withdrawal_takes_effect_without_another_review(self):
         listing = self.approve(self.create_draft())
