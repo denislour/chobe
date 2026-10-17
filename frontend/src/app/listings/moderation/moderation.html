@@ -1,0 +1,171 @@
+<app-marketplace-nav />
+<main class="market-page">
+  <div class="intro">
+    <div>
+      <h1>Manual listing review</h1>
+      <p>
+        Review the submitted snapshot. You may review a rejected decision again; every decision
+        stays in the audit log.
+      </p>
+    </div>
+    <a routerLink="/admin/reports">Report queue</a>
+  </div>
+  <form class="toolbar" [formGroup]="form" (ngSubmit)="page.set(1); load()">
+    <div>
+      <label for="review-status">Review status</label
+      ><select id="review-status" formControlName="status">
+        <option value="">All current submissions</option>
+        <option value="pending">Pending</option>
+        <option value="approved">Approved</option>
+        <option value="rejected">Rejected</option>
+      </select>
+    </div>
+    <label class="check"><input type="checkbox" formControlName="appeals" />Open appeals only</label
+    ><button type="submit" [disabled]="moderation.pending()">Load queue</button>
+  </form>
+  @if (moderation.loading() || moderation.selecting()) {
+    <p role="status">Loading reviews…</p>
+  }
+  @if (moderation.error()) {
+    <p class="feedback error" role="alert">{{ moderation.error() }}</p>
+    <button type="button" (click)="load()">Retry queue</button>
+    @if (moderation.selected(); as review) {
+      <button type="button" class="secondary" (click)="choose(review.id)">
+        Reload selected review
+      </button>
+    }
+  }
+  @if (moderation.notice()) {
+    <p class="feedback success" role="status">{{ moderation.notice() }}</p>
+  }
+  <div class="review-layout">
+    <section aria-label="Submitted listings">
+      @for (review of moderation.cases(); track review.id) {
+        <button
+          class="review-row secondary"
+          type="button"
+          [disabled]="moderation.pending()"
+          [attr.aria-pressed]="moderation.selected()?.id === review.id"
+          (click)="choose(review.id)"
+        >
+          <strong>{{ review.snapshot.title }}</strong
+          ><span
+            >Listing {{ review.listing_id }} · Version {{ review.listing_version }} ·
+            {{ review.status }}</span
+          >
+          @if (review.appeal_open) {
+            <span class="badge">Open appeal</span>
+          }
+        </button>
+      } @empty {
+        <p class="empty">No reviews match this queue.</p>
+      }
+      <nav class="pagination" aria-label="Review pages">
+        @if (page() > 1) {
+          <button type="button" (click)="changePage(-1)">Previous</button>
+        }
+        <span>Page {{ page() }}</span>
+        @if (page() * 20 < moderation.count()) {
+          <button type="button" (click)="changePage(1)">Next</button>
+        }
+      </nav>
+    </section>
+    <section aria-label="Selected review">
+      @if (moderation.selected(); as review) {
+        <h2>{{ review.snapshot.title }}</h2>
+        <p class="numeric">
+          <strong>{{ price(review.snapshot) }}</strong> · {{ review.snapshot.area }}
+        </p>
+        <p>
+          Submitted version {{ review.listing_version }} · Decision version {{ review.version }} ·
+          {{ review.source }}
+        </p>
+        @if (!review.current) {
+          <p class="feedback error">
+            The seller has a newer draft. This version cannot be published.
+          </p>
+        }
+        <div class="gallery">
+          @for (id of review.snapshot.images; track id) {
+            <img
+              [src]="'/api/v1/admin/moderation/' + review.id + '/image/' + id + '/'"
+              [alt]="'Submitted photo for ' + review.snapshot.title"
+            />
+          }
+        </div>
+        <p class="description">{{ review.snapshot.description }}</p>
+        <dl>
+          @for (attribute of review.snapshot.attributes | keyvalue; track attribute.key) {
+            <dt>{{ attribute.key }}</dt>
+            <dd>{{ attribute.value }}</dd>
+          }
+        </dl>
+        <p>
+          Condition: {{ review.snapshot.condition }} · Rights confirmed:
+          {{ review.snapshot.rights_confirmed ? 'Yes' : 'No' }}
+        </p>
+        @if (review.reason) {
+          <p class="feedback">Previous decision: {{ review.status }} — {{ review.reason }}</p>
+        }
+        @if (review.appeal) {
+          <p class="feedback">Seller appeal: {{ review.appeal }}</p>
+        }
+        <label for="review-reason">Reason shown to the seller</label
+        ><textarea
+          id="review-reason"
+          [formControl]="reason"
+          maxlength="2000"
+          [attr.aria-invalid]="reason.touched && reason.invalid"
+        ></textarea>
+        @if (reason.touched && reason.invalid) {
+          <p class="error" role="alert">Enter a reason for your decision.</p>
+        }
+        <div class="toolbar">
+          <button
+            type="button"
+            [disabled]="moderation.pending() || !review.current"
+            (click)="ask('approve')"
+          >
+            Approve and publish</button
+          ><button
+            type="button"
+            class="secondary danger"
+            [disabled]="moderation.pending() || !review.current"
+            (click)="ask('reject')"
+          >
+            Reject this version
+          </button>
+        </div>
+        @if (confirmation()) {
+          <div class="feedback">
+            <p>
+              {{
+                confirmation() === 'approve'
+                  ? 'Publish this exact submitted snapshot?'
+                  : 'Reject this exact submitted snapshot?'
+              }}
+            </p>
+            <div class="toolbar">
+              <button type="button" (click)="decide()">Confirm decision</button
+              ><button type="button" class="secondary" (click)="confirmation.set(null)">
+                Cancel
+              </button>
+            </div>
+          </div>
+        }
+        <h3>Audit log</h3>
+        @for (event of moderation.history(); track event.id) {
+          <p>
+            {{ event.created_at | date: 'short' }} · {{ event.action }} · Actor
+            {{ event.actor_id ?? 'system' }} · v{{ event.version }}<br />{{ event.reason }}
+          </p>
+        }
+      } @else {
+        <div class="empty">
+          <h2>Choose a submission</h2>
+          <p>Photos, details, appeals and decisions appear here.</p>
+        </div>
+      }
+    </section>
+  </div>
+</main>
