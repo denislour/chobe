@@ -1,0 +1,38 @@
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 20px max(20px, calc((100% - 1200px) / 2));
+  background: var(--yellow);
+}
+.brand {
+  display: flex;
+}
+nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+}
+nav a {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--ink);
+  text-decoration: none;
+}
+nav a.active {
+  text-decoration: underline;
+  text-underline-offset: 7px;
+  font-weight: 700;
+}
+@media (max-width: 560px) {
+  header {
+    padding: 16px;
+    gap: 8px;
+  }
+  nav {
+    gap: 4px 16px;
+  }
+}
