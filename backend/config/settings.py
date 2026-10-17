@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     "tasks",
     "accounts",
     "shops",
+    "categories",
 ]
 
 MIDDLEWARE = [
@@ -122,6 +123,7 @@ REST_FRAMEWORK = {
         "deletion_receipt": "60/min",
         "account_mutation": "20/min",
         "shop_read": "120/min",
+        "category_read": "120/min",
     },
     "NUM_PROXIES": 0,
 }
