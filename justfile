@@ -67,6 +67,21 @@ seed scope target:
     uv run python manage.py seed_demo_shops
     uv run python manage.py seed_demo_listings
 
+# Clear demo data in reverse dependency order: just clear seed demo data.
+clear action scope target:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    case "$1 $2 $3" in
+        "seed demo data") ;;
+        *) echo "Usage: just clear seed demo data" >&2; exit 2 ;;
+    esac
+    cd backend
+    export DJANGO_DEMO_MODE=true
+    uv run python manage.py clear_seed_demo_listings
+    uv run python manage.py clear_seed_demo_shops
+    uv run python manage.py clear_seed_demo_categories
+    uv run python manage.py clear_seed_demo_accounts
+
 # Run, test, migrate, or lint the product recommendation service.
 service action="run":
     #!/usr/bin/env bash
