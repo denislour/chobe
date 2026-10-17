@@ -1,9 +1,12 @@
 from django.contrib.auth.models import Permission
 from django.core.exceptions import ValidationError as ModelValidationError
+from django.core.management import call_command
+from django.core.management.base import CommandError
+from django.test import override_settings
 from rest_framework.test import APIClient
 
 from accounts.tests.base import AccountAPITestCase
-from categories.models import Category, CategoryRevision
+from categories.models import Category, CategoryAuditEvent, CategoryRevision
 
 
 class CategoryTests(AccountAPITestCase):
@@ -433,7 +436,22 @@ class CategoryTests(AccountAPITestCase):
         self.assertEqual(set(paths["/api/v1/categories/"]), {"get"})
         self.assertIn("/api/v1/admin/categories/{id}/publish/", paths)
 
+    @override_settings(DEMO_MODE=True)
+    def test_demo_seed_is_idempotent_and_never_overwrites_existing_categories(self):
+        category = self.create_category()
+        call_command("seed_demo_categories", username=self.user.username, verbosity=0)
+        count = Category.objects.count()
+        call_command("seed_demo_categories", username=self.user.username, verbosity=0)
+        self.assertEqual(Category.objects.count(), count)
+        category.refresh_from_db()
+        self.assertEqual(category.status, Category.Status.DRAFT)
+        self.assertEqual(category.name, "Electronics")
 
+    @override_settings(DEMO_MODE=False)
+    def test_demo_seed_requires_demo_mode(self):
+        with self.assertRaises(CommandError):
+            call_command("seed_demo_categories", username=self.user.username)
+        self.assertFalse(CategoryAuditEvent.objects.exists())
 
     def test_patch_attribute_entries_apply_defaults_and_require_complete_definitions(
         self,
