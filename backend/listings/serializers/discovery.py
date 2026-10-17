@@ -5,6 +5,46 @@ from categories.serializers.public import CategorySerializer
 from listings.models import Favorite, Listing
 
 
+class ListingSearchSerializer(serializers.Serializer):
+    q = serializers.CharField(max_length=160, required=False, allow_blank=True)
+    category = serializers.UUIDField(required=False)
+    shop = serializers.UUIDField(required=False)
+    location = serializers.CharField(max_length=120, required=False, allow_blank=True)
+    price_min = serializers.IntegerField(min_value=0, max_value=10**15, required=False)
+    price_max = serializers.IntegerField(min_value=0, max_value=10**15, required=False)
+    condition = serializers.ChoiceField(choices=Listing.Condition, required=False)
+    sort = serializers.ChoiceField(
+        choices=("newest", "price_asc", "price_desc"), required=False
+    )
+    attributes = serializers.JSONField(required=False)
+    page = serializers.IntegerField(min_value=1, max_value=1000, required=False)
+
+    def validate(self, attrs):
+        if len(str(self.initial_data)) > 6000:
+            raise serializers.ValidationError("The search filters are too long.")
+        if set(self.initial_data) - set(self.fields):
+            raise serializers.ValidationError("Use only supported search filters.")
+        if attrs.get("price_min", 0) > attrs.get("price_max", 9223372036854775807):
+            raise serializers.ValidationError(
+                {"price_max": ["The maximum must be at least the minimum."]}
+            )
+        values = attrs.get("attributes", {})
+        if not isinstance(values, dict) or len(values) > 30:
+            raise serializers.ValidationError(
+                {"attributes": ["Use up to 30 attribute filters."]}
+            )
+        if any(
+            not key.isidentifier() or key in ("constructor", "prototype") or "__" in key
+            for key in values
+        ):
+            raise serializers.ValidationError(
+                {"attributes": ["Use supported attribute keys."]}
+            )
+        if any(type(value) not in (str, int, float, bool) for value in values.values()):
+            raise serializers.ValidationError(
+                {"attributes": ["Use scalar attribute values."]}
+            )
+        return attrs
 
 
 
@@ -96,5 +136,26 @@ class ListingPublicSerializer(serializers.ModelSerializer):
         return result
 
 
+class ContactEventSerializer(serializers.Serializer):
+    kind = serializers.ChoiceField(choices=("call", "copy"))
 
 
+class CompareQuerySerializer(serializers.Serializer):
+    ids = serializers.CharField(max_length=80)
+
+    def validate_ids(self, value):
+        try:
+            ids = [int(item) for item in value.split(",")]
+        except ValueError as error:
+            raise serializers.ValidationError(
+                "Use listing IDs separated by commas."
+            ) from error
+        if (
+            not 1 <= len(ids) <= 3
+            or len(ids) != len(set(ids))
+            or any(pk < 1 or pk > 9223372036854775807 for pk in ids)
+        ):
+            raise serializers.ValidationError(
+                "Choose between one and three different listings."
+            )
+        return ids

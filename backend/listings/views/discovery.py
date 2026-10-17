@@ -13,8 +13,8 @@ from rest_framework.viewsets import ModelViewSet
 from categories.services.publication import visible_categories
 from listings.pagination import ListingPagination
 from listings.schemas.discovery import DiscoverySchema, HomeSchema
-from listings.serializers.discovery import ListingPublicSerializer
-from listings.services.search import public_listings
+from listings.serializers.discovery import ListingPublicSerializer, ListingSearchSerializer
+from listings.services.search import public_listings, search_listings
 from listings.throttles import MarketplaceReadThrottle
 
 
@@ -39,6 +39,10 @@ class ListingViewSet(ModelViewSet):
         return super().get_permissions()
 
     def get_queryset(self):
+        if self.action == "list":
+            serializer = ListingSearchSerializer(data=self.request.query_params)
+            serializer.is_valid(raise_exception=True)
+            return search_listings(serializer.validated_data)
         return public_listings()
 
 
