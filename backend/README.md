@@ -159,3 +159,37 @@ Reports require login. Staff need `listings.review_report`; hiding a listing als
 requires `listings.moderate_listing`, and suspending a shop requires
 `shops.change_shop`. Internal reasons and reporter identity are not public.
 
+## Complete marketplace demo
+
+From `backend/`, after applying migrations:
+
+```bash
+DJANGO_DEMO_MODE=true uv run python manage.py seed_demo_marketplace
+```
+
+This creates 10 seller accounts/shops, 5 buyer-only accounts, 3 staff accounts with
+separate permissions, and 3 inactive accounts for deletion scenarios. The 100
+listing scenarios cover all lifecycle states, draft/public differences, appeals,
+admin review, contact consent, retention and unavailable shops/categories. The
+seed also creates follows, favorites, history, saved searches, inbox entries,
+reports, audit records, aggregate demo metrics, exports and deletion receipts.
+
+The generated `../docs/DEMO_DATA.md` lists the demo login details and each
+account's shop, profile, privacy, follows, listings and interactions. Demo-only
+credentials and fictional data are clearly labeled. Read that guide for the
+manual review journeys. Email delivery states are fixtures, including `sent`;
+the command does not send email/SMS, call AI, enqueue outbox jobs or start workers.
+
+The command backs up SQLite into ignored `backend/backups/` before writing and
+uses one transaction. Re-running it preserves existing demo edits and passwords;
+it does not flush the database. Reserved demo usernames use `@demo.chobe.invalid`,
+shop/category slugs use `demo-`, and listing IDs 1101–2010 are reserved by this
+fixture. Conflicts with unrelated records stop the seed. Module seed logic stays
+in each app's services; `seed_demo_marketplace` coordinates their order.
+
+Photos in `listings/fixtures/demo/` are existing prototype stock images; their
+source URLs are recorded in `SOURCES.json`. They illustrate fictional items and
+are not evidence of an actual offer or transaction.
+
+Missing demo relationships may be added again on a later seed run. Existing
+records are preserved; this command is not a destructive reset operation.
