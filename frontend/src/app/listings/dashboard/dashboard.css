@@ -1,0 +1,21 @@
+@import '../marketplace.css';
+.row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-width: 480px;
+}
+.row-actions button,
+.row-actions a {
+  font-size: 12px;
+  padding: 8px;
+}
+table {
+  min-width: 800px;
+}
+.toolbar form {
+  max-width: 100%;
+}
+td:first-child {
+  min-width: 180px;
+}

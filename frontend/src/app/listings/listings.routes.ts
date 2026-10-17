@@ -3,6 +3,12 @@ import { authGuard } from '@app/auth/auth-guard';
 import { editorLeaveGuard } from '@app/listings/editor/editor-leave-guard';
 export const sellerListingRoutes: Routes = [
   {
+    path: '',
+    pathMatch: 'full',
+    canActivate: [authGuard],
+    loadComponent: () => import('@app/listings/dashboard/dashboard').then((m) => m.Dashboard),
+  },
+  {
     path: 'new',
     canActivate: [authGuard],
     canDeactivate: [editorLeaveGuard],

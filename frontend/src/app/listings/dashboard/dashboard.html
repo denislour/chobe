@@ -1,0 +1,181 @@
+<app-marketplace-nav />
+<main class="market-page">
+  <div class="intro">
+    <div>
+      <h1>My listings</h1>
+      <p>Manage your items and keep their availability up to date.</p>
+    </div>
+    <div class="toolbar">
+      <a class="button" routerLink="/seller/listings/new">Create listing</a
+      ><a class="button secondary" href="/api/v1/me/listings/export/" download
+        >Export CSV (up to 1,000)</a
+      >
+    </div>
+  </div>
+  <nav class="tabs" aria-label="Listing status">
+    <a routerLink="/seller/listings" [class.active]="!filters().state">All</a>
+    @for (status of statuses; track status) {
+      <a
+        routerLink="/seller/listings"
+        [queryParams]="{ state: status }"
+        [class.active]="filters().state === status"
+        >{{ status }} ({{ dashboard.summary()[status] ?? 0 }})</a
+      >
+    }
+  </nav>
+  <form class="toolbar" [formGroup]="form" (ngSubmit)="apply()">
+    <div>
+      <label for="owner-query">Search my listings</label
+      ><input id="owner-query" formControlName="q" maxlength="160" />
+    </div>
+    <div>
+      <label for="owner-retention">Activity deadline</label
+      ><select id="owner-retention" formControlName="retention">
+        <option value="">All deadlines</option>
+        <option value="due">Due in 14 days</option>
+      </select>
+    </div>
+    <button type="submit" [disabled]="dashboard.pending()">Filter</button>
+  </form>
+  @if (dashboard.loading()) {
+    <p role="status">Loading listings…</p>
+  }
+  @if (dashboard.error()) {
+    <p class="feedback error" role="alert">{{ dashboard.error() }}</p>
+    <button type="button" (click)="dashboard.load(filters())">Reload listings</button>
+  }
+  @if (dashboard.notice()) {
+    <p class="feedback success" role="status">{{ dashboard.notice() }}</p>
+  }
+  @if (confirmation(); as action) {
+    <section class="feedback">
+      <h2>
+        {{ action.kind === 'delete' ? 'Delete this listing permanently?' : 'Update this listing?' }}
+      </h2>
+      <p>{{ action.listing.title || 'Untitled draft' }}</p>
+      <p>
+        {{
+          action.kind === 'delete'
+            ? 'Its content and photos will be removed. This cannot be undone.'
+            : action.kind === 'renew'
+              ? 'Confirm the item is still available. The activity deadline moves forward six calendar months.'
+              : 'The public availability of this listing will change.'
+        }}
+      </p>
+      <div class="toolbar">
+        <button type="button" (click)="confirm()">Confirm</button
+        ><button type="button" class="secondary" (click)="confirmation.set(null)">Cancel</button>
+      </div>
+    </section>
+  }
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th>Item</th>
+          <th>Status</th>
+          <th>Price</th>
+          <th>Activity deadline</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (listing of dashboard.listings(); track listing.id) {
+          <tr>
+            <td>
+              <a [routerLink]="['/seller/listings', listing.id, 'edit']">{{
+                listing.title || 'Untitled draft'
+              }}</a>
+              <p class="muted">Version {{ listing.version }}</p>
+            </td>
+            <td>
+              <span class="badge">{{ listing.status }}</span>
+            </td>
+            <td class="numeric">{{ price(listing) }}</td>
+            <td>
+              {{ listing.retention_due_at | date: 'mediumDate' }}
+              <p class="muted">Deleted after six months without an owner action.</p>
+            </td>
+            <td>
+              <div class="row-actions">
+                <a class="button secondary" [routerLink]="['/seller/listings', listing.id, 'edit']"
+                  >Edit / preview / review</a
+                ><button
+                  type="button"
+                  class="secondary"
+                  [disabled]="dashboard.pending()"
+                  (click)="confirmation.set({ listing, kind: 'renew' })"
+                >
+                  Still available — renew
+                </button>
+                @if (
+                  listing.status === 'active' ||
+                  listing.status === 'pending' ||
+                  listing.status === 'rejected'
+                ) {
+                  <button
+                    type="button"
+                    class="secondary"
+                    [disabled]="dashboard.pending()"
+                    (click)="confirmation.set({ listing, kind: 'status', status: 'hidden' })"
+                  >
+                    Hide
+                  </button>
+                }
+                @if (
+                  (listing.status === 'hidden' || listing.status === 'sold') &&
+                  listing.published['title'] &&
+                  !listing.moderation_hold
+                ) {
+                  <button
+                    type="button"
+                    class="secondary"
+                    [disabled]="dashboard.pending()"
+                    (click)="confirmation.set({ listing, kind: 'status', status: 'active' })"
+                  >
+                    Show approved version
+                  </button>
+                }
+                @if (
+                  listing.status === 'active' ||
+                  listing.status === 'pending' ||
+                  listing.status === 'hidden'
+                ) {
+                  <button
+                    type="button"
+                    class="secondary"
+                    [disabled]="dashboard.pending()"
+                    (click)="confirmation.set({ listing, kind: 'status', status: 'sold' })"
+                  >
+                    Mark sold
+                  </button>
+                }
+                <button
+                  type="button"
+                  class="secondary danger"
+                  [disabled]="dashboard.pending()"
+                  (click)="confirmation.set({ listing, kind: 'delete' })"
+                >
+                  Delete
+                </button>
+              </div>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="5">No listings match this filter. Create a draft to get started.</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  <nav class="pagination" aria-label="My listing pages">
+    @if (filters().page > 1) {
+      <button type="button" (click)="page(filters().page - 1)">Previous</button>
+    }
+    <span>Page {{ filters().page }}</span>
+    @if (filters().page * 20 < dashboard.count()) {
+      <button type="button" (click)="page(filters().page + 1)">Next</button>
+    }
+  </nav>
+</main>
