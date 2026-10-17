@@ -279,4 +279,27 @@
       </div>
     </fieldset>
   </form>
+  @if (preview()) {
+    <section class="preview form-section" aria-labelledby="listing-preview">
+      <h2 id="listing-preview">Draft preview</h2>
+      <h3>{{ form.controls.title.value || 'Untitled draft' }}</h3>
+      <p class="numeric">
+        <strong>{{ price(form.getRawValue()) }}</strong>
+      </p>
+      <p>{{ form.controls.area.value }}</p>
+      <p class="description">{{ form.controls.description.value }}</p>
+      <div class="image-grid">
+        @for (image of editor.listing()?.images; track image.id) {
+          <img [src]="image.url" [alt]="form.controls.title.value || 'Draft item'" />
+        }
+      </div>
+      <dl>
+        @for (field of previewDetails(); track field.key) {
+          <dt>{{ field.label }}</dt>
+          <dd>{{ field.value }} {{ field.unit }}</dd>
+        }
+      </dl>
+      <p class="feedback">Private preview. This is not a public listing.</p>
+    </section>
+  }
 </main>
