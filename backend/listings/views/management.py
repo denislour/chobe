@@ -27,7 +27,13 @@ from listings.serializers.management import (
     ModerationSerializer,
 )
 from listings.services.images import add_image, arrange_images
-from listings.services.management import change_status, delete_listing, draft_snapshot, submit_listing
+from listings.services.management import (
+    change_status,
+    delete_listing,
+    draft_snapshot,
+    renew_listing,
+    submit_listing,
+)
 from listings.services.moderation import appeal_listing
 from listings.throttles import MarketplaceMutationThrottle, MarketplaceReadThrottle
 
@@ -140,7 +146,25 @@ class ListingManagementViewSet(ModelViewSet):
         )
         return Response(ListingDraftSerializer(listing).data)
 
+    @action(detail=True, methods=["post"], serializer_class=ListingVersionSerializer)
+    def renew(self, request, pk=None):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        listing = renew_listing(
+            request.user, self.get_object(), serializer.validated_data["version"]
+        )
+        return Response(ListingDraftSerializer(listing).data)
 
+    @action(detail=True, methods=["get"])
+    def retention(self, request, pk=None):
+        listing = self.get_object()
+        return Response(
+            {
+                "last_owner_action_at": listing.last_owner_action_at,
+                "retention_due_at": listing.retention_due_at,
+                "policy": "Deleted after six calendar months without an eligible owner action.",
+            }
+        )
 
     @action(detail=True, methods=["post"], serializer_class=ImageUploadSerializer)
     def images(self, request, pk=None):

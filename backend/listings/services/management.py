@@ -182,6 +182,15 @@ def change_status(user, listing, version, target):
     return listing
 
 
+def renew_listing(user, listing, version):
+    with transaction.atomic():
+        listing = locked_listing(listing, user)
+        check_version(listing, version)
+        listing.version += 1
+        owner_activity(listing)
+        listing.save()
+        audit(listing, user, "renewed")
+    return listing
 
 
 def delete_listing(user, listing, version):
