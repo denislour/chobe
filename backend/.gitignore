@@ -23,3 +23,5 @@ __pycache__/
 **/build/
 *.egg-info/
 /accounts/templates/accounts/emails/*.html
+
+/backups/
