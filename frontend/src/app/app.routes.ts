@@ -6,6 +6,11 @@ export const routes: Routes = [
     loadChildren: () => import('@app/categories/categories.routes').then((m) => m.categoriesRoutes),
   },
   {
+    path: 'admin/categories',
+    loadChildren: () =>
+      import('@app/categories/categories.routes').then((m) => m.categoryManagementRoutes),
+  },
+  {
     path: 'seller',
     loadChildren: () => import('@app/shops/shops.routes').then((m) => m.sellerShopRoutes),
   },

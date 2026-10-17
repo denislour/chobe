@@ -1,0 +1,405 @@
+<app-category-nav />
+<main class="categories-page">
+  <div class="page-heading">
+    <div>
+      <h1>Categories and attributes</h1>
+      <p>Save a draft, preview the fields, then publish a version for the marketplace.</p>
+    </div>
+    <div class="actions">
+      <a routerLink="/categories">View public categories</a
+      ><button
+        type="button"
+        class="secondary"
+        [disabled]="taxonomy.pending() || taxonomy.selecting() || taxonomy.loading()"
+        (click)="taxonomy.load()"
+      >
+        Refresh categories
+      </button>
+    </div>
+  </div>
+  @if (taxonomy.loading()) {
+    <p role="status">Loading taxonomy…</p>
+  }
+  @if (taxonomy.error()) {
+    <p class="error" role="alert">{{ taxonomy.error() }}</p>
+  }
+  @if (fieldErrorText().length) {
+    <ul class="error" aria-label="Category errors">
+      @for (message of fieldErrorText(); track $index) {
+        <li>{{ message }}</li>
+      }
+    </ul>
+  }
+  @if (!taxonomy.loading() && !taxonomy.capabilities()) {
+    <section class="empty">
+      <h2>Taxonomy access required</h2>
+      <p>This workspace requires category permissions. Ask an administrator to grant access.</p>
+      <div class="actions">
+        <button type="button" (click)="taxonomy.load()">Try again</button
+        ><a routerLink="/login">Log in again</a>
+      </div>
+    </section>
+  }
+  @if (pendingSelection()) {
+    <section class="notice" role="alert">
+      <p>Your unsaved draft changes will be cleared. Continue?</p>
+      <div class="actions">
+        <button type="button" (click)="confirmSelection()">Discard changes and continue</button
+        ><button class="secondary" type="button" (click)="pendingSelection.set(null)">
+          Keep editing
+        </button>
+      </div>
+    </section>
+  }
+  @if (taxonomy.capabilities(); as permissions) {
+    <div class="management-layout">
+      <aside aria-label="Manage categories">
+        @if (permissions.create) {
+          <button
+            type="button"
+            [disabled]="taxonomy.pending() || taxonomy.selecting()"
+            (click)="chooseCategory(null)"
+          >
+            New category
+          </button>
+        }
+        @if (!taxonomy.categories().length) {
+          <p class="hint">No categories yet. Create the first draft.</p>
+        }
+        <ul class="category-menu">
+          @for (category of taxonomy.categories(); track category.id) {
+            <li>
+              <button
+                type="button"
+                class="secondary"
+                [disabled]="taxonomy.pending() || taxonomy.selecting()"
+                [attr.aria-pressed]="taxonomy.draft()?.id === category.id"
+                (click)="chooseCategory(category.id)"
+              >
+                {{ category.name }}<small>{{ category.status }} · v{{ category.version }}</small>
+              </button>
+            </li>
+          }
+        </ul>
+      </aside>
+      <div class="editor">
+        @if (taxonomy.selecting()) {
+          <p role="status">Loading draft and history…</p>
+        }
+        @if (taxonomy.notice()) {
+          <p class="success" role="status">{{ taxonomy.notice() }}</p>
+        }
+        @if (restoring()) {
+          <p class="notice">
+            A previous version is loaded into the form. Save it as a new draft before publishing.
+          </p>
+        }
+        <h2>{{ taxonomy.draft()?.name || 'New category' }}</h2>
+        @if (taxonomy.draft(); as draft) {
+          <p class="hint">
+            {{ draft.status }} · Draft v{{ draft.version }} · Published
+            {{ publishedVersion() ? 'v' + publishedVersion() : 'never' }}
+          </p>
+          <button
+            type="button"
+            class="secondary"
+            [disabled]="taxonomy.pending() || taxonomy.selecting()"
+            (click)="chooseCategory(draft.id)"
+          >
+            Reload saved draft
+          </button>
+        }
+        <form [formGroup]="form" (ngSubmit)="save()">
+          <fieldset [disabled]="taxonomy.pending() || taxonomy.selecting() || !canEdit()">
+            <legend class="visually-hidden">Category draft</legend>
+            <div class="form-grid">
+              <div class="field">
+                <label for="category-name">Name</label
+                ><input id="category-name" formControlName="name" maxlength="80" required />
+              </div>
+              <div class="field">
+                <label for="category-slug">Address</label
+                ><input
+                  id="category-slug"
+                  formControlName="slug"
+                  maxlength="80"
+                  required
+                  aria-describedby="slug-help"
+                /><small id="slug-help" class="hint"
+                  >Lowercase words separated by hyphens. Cannot change after first
+                  publication.</small
+                >
+              </div>
+              <div class="field">
+                <label for="category-parent">Parent category</label
+                ><select id="category-parent" formControlName="parent">
+                  <option [ngValue]="null">No parent</option>
+                  @for (parent of parentOptions(); track parent.id) {
+                    <option [ngValue]="parent.id">{{ parent.name }} ({{ parent.status }})</option>
+                  }
+                </select>
+              </div>
+              <div class="field">
+                <label for="category-order">Display order</label
+                ><input
+                  type="number"
+                  id="category-order"
+                  formControlName="sort_order"
+                  min="0"
+                  step="1"
+                  required
+                />
+              </div>
+              <div class="field full-width">
+                <label for="category-description">Description</label
+                ><textarea
+                  id="category-description"
+                  formControlName="description"
+                  maxlength="1000"
+                  rows="3"
+                ></textarea>
+              </div>
+            </div>
+            <label class="check-row"
+              ><input type="checkbox" formControlName="restricted" />Restricted category —
+              publication is blocked</label
+            >
+            <h3>Attribute fields</h3>
+            <p class="hint">
+              Keys are stable identifiers, such as storage_gb. Use a new key when changing a
+              published field's type or unit.
+            </p>
+            <div formArrayName="attributes">
+              @for (field of form.controls.attributes.controls; track field; let i = $index) {
+                <fieldset class="attribute-editor" [formGroupName]="i">
+                  <legend>Field {{ i + 1 }}</legend>
+                  <div class="form-grid">
+                    <div class="field">
+                      <label [for]="'key-' + i">Key</label
+                      ><input [id]="'key-' + i" formControlName="key" required maxlength="40" />
+                    </div>
+                    <div class="field">
+                      <label [for]="'label-' + i">Label</label
+                      ><input [id]="'label-' + i" formControlName="label" required maxlength="80" />
+                    </div>
+                    <div class="field">
+                      <label [for]="'type-' + i">Type</label
+                      ><select [id]="'type-' + i" formControlName="type">
+                        <option value="text">Text</option>
+                        <option value="integer">Integer</option>
+                        <option value="number">Number</option>
+                        <option value="boolean">Yes / No</option>
+                        <option value="select">Choice</option>
+                      </select>
+                    </div>
+                    @if (field.controls.type.value === 'text') {
+                      <div class="field">
+                        <label [for]="'length-' + i">Maximum characters</label
+                        ><input
+                          [id]="'length-' + i"
+                          type="number"
+                          formControlName="max_length"
+                          min="1"
+                          max="1000"
+                          step="1"
+                        />
+                      </div>
+                    }
+                    @if (
+                      field.controls.type.value === 'integer' ||
+                      field.controls.type.value === 'number'
+                    ) {
+                      <div class="field">
+                        <label [for]="'unit-' + i">Unit</label
+                        ><input
+                          [id]="'unit-' + i"
+                          formControlName="unit"
+                          maxlength="16"
+                          placeholder="GB, cm, kg…"
+                        />
+                      </div>
+                      <div class="field">
+                        <label [for]="'min-' + i">Minimum</label
+                        ><input
+                          [id]="'min-' + i"
+                          type="number"
+                          formControlName="min_value"
+                          step="any"
+                        />
+                      </div>
+                      <div class="field">
+                        <label [for]="'max-' + i">Maximum</label
+                        ><input
+                          [id]="'max-' + i"
+                          type="number"
+                          formControlName="max_value"
+                          step="any"
+                        />
+                      </div>
+                    }
+                    @if (field.controls.type.value === 'select') {
+                      <div class="field full-width">
+                        <label [for]="'choices-' + i">Choices</label
+                        ><textarea
+                          [id]="'choices-' + i"
+                          formControlName="choices"
+                          rows="3"
+                          [attr.aria-describedby]="'choice-help-' + i"
+                        ></textarea
+                        ><small [id]="'choice-help-' + i" class="hint"
+                          >One choice per line: code|Label, for example wood|Wood.</small
+                        >
+                      </div>
+                    }
+                  </div>
+                  <div class="actions">
+                    <label class="check-row"
+                      ><input type="checkbox" formControlName="required" />Required</label
+                    ><label class="check-row"
+                      ><input type="checkbox" formControlName="filterable" />Available as a
+                      filter</label
+                    ><button type="button" class="secondary" (click)="removeAttribute(i)">
+                      Remove field
+                    </button>
+                  </div>
+                </fieldset>
+              }
+            </div>
+            @if (form.controls.attributes.hasError('duplicateKeys')) {
+              <p class="error" role="alert">Each attribute needs a unique key.</p>
+            }
+            <div class="actions">
+              <button
+                type="button"
+                class="secondary"
+                [disabled]="form.controls.attributes.length >= 30"
+                (click)="addAttribute()"
+              >
+                Add field</button
+              ><button type="button" class="secondary" (click)="preview()">
+                Preview form and filters</button
+              ><button type="submit" [disabled]="form.invalid">
+                {{ taxonomy.pending() ? 'Saving…' : 'Save draft' }}
+              </button>
+            </div>
+            @if (form.touched && form.invalid) {
+              <p class="error" role="alert">
+                Complete the required fields and check the field keys, lengths and numbers.
+              </p>
+            }
+          </fieldset>
+        </form>
+        @if (previewFields(); as fields) {
+          <section class="section">
+            <h3>Form preview</h3>
+            <app-attribute-fields [fields]="fields" prefix="preview" />
+            <h3>Filter preview</h3>
+            <ul>
+              @for (field of fields; track field.key) {
+                @if (field.filterable) {
+                  <li>
+                    {{ field.label }} — {{ field.type
+                    }}{{ field.unit ? ' (' + field.unit + ')' : '' }}
+                  </li>
+                }
+              }
+            </ul>
+            <p class="hint">Preview uses the form above. Save the draft before publishing.</p>
+          </section>
+        }
+        @if (taxonomy.draft(); as draft) {
+          <section class="section">
+            <h3>Publication</h3>
+            <p>
+              Publishing replaces the public schema. Retiring removes the category from public
+              browsing. Published child categories must be moved or retired first.
+            </p>
+            @if (form.dirty) {
+              <p class="hint">Save or discard your form changes before publishing or retiring.</p>
+            }
+            <div class="actions">
+              @if (permissions.publish) {
+                <button
+                  type="button"
+                  [disabled]="
+                    form.dirty || draft.restricted || taxonomy.pending() || taxonomy.selecting()
+                  "
+                  (click)="confirmation.set('publish')"
+                >
+                  Publish saved draft
+                </button>
+              }
+              @if (permissions.retire && draft.status === 'active') {
+                <button
+                  type="button"
+                  class="secondary"
+                  [disabled]="form.dirty || taxonomy.pending() || taxonomy.selecting()"
+                  (click)="confirmation.set('retire')"
+                >
+                  Retire category
+                </button>
+              }
+            </div>
+            @if (confirmation(); as action) {
+              <div class="notice" role="alert">
+                <p>
+                  {{
+                    action === 'publish'
+                      ? 'Publish this saved draft for everyone?'
+                      : 'Remove this category from public browsing?'
+                  }}
+                </p>
+                <div class="actions">
+                  <button type="button" [disabled]="taxonomy.pending()" (click)="transition()">
+                    Confirm {{ action }}</button
+                  ><button type="button" class="secondary" (click)="confirmation.set(null)">
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            }
+          </section>
+          <section class="section">
+            <h3>Published versions</h3>
+            <p class="hint">
+              The latest 50 versions. Restoring copies a version into a new draft; published history
+              stays unchanged.
+            </p>
+            <ul class="history-list">
+              @for (revision of taxonomy.revisions(); track revision.version) {
+                <li>
+                  <span>v{{ revision.version }} · {{ revision.created_at | date: 'medium' }}</span>
+                  @if (permissions.edit) {
+                    <button
+                      type="button"
+                      class="secondary"
+                      [disabled]="taxonomy.pending() || taxonomy.selecting() || form.dirty"
+                      (click)="restore(revision)"
+                    >
+                      Use as draft
+                    </button>
+                  }
+                </li>
+              } @empty {
+                <li>No published versions yet.</li>
+              }
+            </ul>
+          </section>
+          <section class="section">
+            <h3>Audit history</h3>
+            <p class="hint">The latest 50 changes.</p>
+            <ul class="history-list">
+              @for (event of taxonomy.history(); track event.id) {
+                <li>
+                  {{ event.action }} · v{{ event.version }} ·
+                  {{ event.actor_id ? 'User #' + event.actor_id : 'Deleted user' }} ·
+                  {{ event.created_at | date: 'medium' }}
+                </li>
+              }
+            </ul>
+          </section>
+        }
+      </div>
+    </div>
+  }
+</main>

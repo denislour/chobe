@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { authGuard } from '@app/auth/auth-guard';
 
 export const categoriesRoutes: Routes = [
   {
@@ -13,3 +14,11 @@ export const categoriesRoutes: Routes = [
   },
 ];
 
+export const categoryManagementRoutes: Routes = [
+  {
+    path: '',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('@app/categories/management/category-management').then((m) => m.CategoryManagement),
+  },
+];
