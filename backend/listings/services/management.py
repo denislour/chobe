@@ -5,7 +5,9 @@ from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 
 from accounts.services.versioning import VersionConflict
-from listings.models import Listing, ListingAuditEvent
+from categories.services.attributes import validate_category_attributes
+from categories.services.publication import visible_categories
+from listings.models import Listing, ListingAuditEvent, ListingRevision, ModerationCase
 from shops.models import Shop
 
 DRAFT_FIELDS = (
@@ -103,6 +105,53 @@ def save_draft(user, values, instance=None):
     return instance
 
 
+def submit_listing(user, listing, version):
+    with transaction.atomic():
+        listing = locked_listing(listing, user)
+        if listing.submitted_version == listing.version and version in (
+            listing.version,
+            listing.version - 1,
+        ):
+            return listing
+        check_version(listing, version)
+        if listing.shop.status != "active":
+            raise ValidationError("Activate your shop before submitting a listing.")
+        errors = {}
+        for field in ("title", "description", "area"):
+            if not getattr(listing, field).strip():
+                errors[field] = ["This field is required before submission."]
+        if listing.price_mode == "fixed" and listing.price is None:
+            errors["price"] = ["Enter a price for a fixed-price listing."]
+        if listing.price_mode == "free" and listing.price not in (None, 0):
+            errors["price"] = ["A free listing cannot have a price."]
+        if not listing.rights_confirmed:
+            errors["rights_confirmed"] = [
+                "Confirm the item details and your rights to these images."
+            ]
+        if not listing.images.filter(attached=True).exists():
+            errors["images"] = ["Add at least one image."]
+        if listing.category_id is None:
+            errors["category"] = ["Choose a category."]
+        if errors:
+            raise ValidationError(errors)
+        listing.attributes = validate_category_attributes(
+            listing.category_id, listing.schema_version, listing.attributes
+        )
+        if listing.price_mode == "free":
+            listing.price = 0
+        listing.version += 1
+        listing.submitted_version = listing.version
+        listing.status = Listing.Status.PENDING
+        owner_activity(listing)
+        listing.save()
+        snapshot = draft_snapshot(listing)
+        snapshot["category_schema"] = visible_categories()[str(listing.category_id)]
+        revision = ListingRevision.objects.create(
+            listing=listing, version=listing.version, snapshot=snapshot
+        )
+        ModerationCase.objects.create(revision=revision)
+        audit(listing, user, "submitted")
+    return listing
 
 
 

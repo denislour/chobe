@@ -14,8 +14,9 @@ from rest_framework.viewsets import ModelViewSet
 from listings.models import Listing
 from listings.pagination import ListingPagination
 from listings.schemas.management import ListingManagementSchema
-from listings.serializers.management import ImageOrderSerializer, ImageUploadSerializer, ListingAuditSerializer, ListingDraftSerializer, ModerationSerializer
+from listings.serializers.management import ImageOrderSerializer, ImageUploadSerializer, ListingAuditSerializer, ListingDraftSerializer, ListingVersionSerializer, ModerationSerializer
 from listings.services.images import add_image, arrange_images
+from listings.services.management import draft_snapshot, submit_listing
 from listings.throttles import MarketplaceMutationThrottle, MarketplaceReadThrottle
 
 
@@ -94,7 +95,18 @@ class ListingManagementViewSet(ModelViewSet):
         return queryset
 
 
+    @action(detail=True, methods=["post"], serializer_class=ListingVersionSerializer)
+    def submit(self, request, pk=None):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        listing = submit_listing(
+            request.user, self.get_object(), serializer.validated_data["version"]
+        )
+        return Response(ListingDraftSerializer(listing).data)
 
+    @action(detail=True, methods=["get"])
+    def preview(self, request, pk=None):
+        return Response(draft_snapshot(self.get_object()))
 
 
 

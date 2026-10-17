@@ -2,6 +2,7 @@
 from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 
+from listings.models import ListingRevision
 from listings.tests.base import ListingAPITestCase
 
 
@@ -55,7 +56,34 @@ class ListingManagementTests(ListingAPITestCase):
         listing.refresh_from_db()
         self.assertEqual(listing.title, "Updated")
 
+    def test_submit_validates_required_data_and_current_schema(self):
+        listing = self.create_draft()
+        self.assertEqual(
+            self.request(
+                "post", f"me/listings/{listing.pk}/submit", {"version": 1}
+            ).status_code,
+            400,
+        )
+        self.upload(listing)
+        listing.schema_version = 1
+        listing.save()
+        self.assertEqual(
+            self.request(
+                "post", f"me/listings/{listing.pk}/submit", {"version": listing.version}
+            ).status_code,
+            409,
+        )
+        self.assertFalse(ListingRevision.objects.exists())
 
+    def test_false_boolean_is_valid_and_duplicate_submission_is_idempotent(self):
+        listing = self.create_draft()
+        self.submit(listing)
+        response = self.request(
+            "post", f"me/listings/{listing.pk}/submit", {"version": listing.version}
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(listing.revisions.count(), 1)
+        self.assertFalse(listing.revisions.get().snapshot["attributes"]["tested"])
 
     def test_invalid_image_bytes_do_not_advance_the_version(self):
         listing = self.create_draft()
@@ -108,5 +136,17 @@ class ListingManagementTests(ListingAPITestCase):
 
 
 
+    def test_submitted_revision_is_immutable(self):
+        from django.core.exceptions import ValidationError
+
+        listing = self.create_draft()
+        self.submit(listing)
+        revision = listing.revisions.get()
+        revision.snapshot["title"] = "Changed after submission"
+        with self.assertRaises(ValidationError):
+            revision.save()
+        self.assertEqual(
+            listing.revisions.get().snapshot["title"], self.values["title"]
+        )
 
 
