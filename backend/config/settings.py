@@ -135,6 +135,17 @@ SPECTACULAR_SETTINGS = {
     "TITLE": "Chobe API",
     "DESCRIPTION": "The core API for the Chobe portfolio.",
     "VERSION": "1.0.0",
+    "ENUM_NAME_OVERRIDES": {
+        "ShopStatusEnum": "shops.models.Shop.Status",
+        "OwnerShopStatusEnum": ["active", "paused", "closed"],
+        "CategoryStatusEnum": "categories.models.Category.Status",
+        "ListingStatusEnum": "listings.models.Listing.Status",
+        "ModerationStatusEnum": "listings.models.ModerationCase.Status",
+        "ReportStatusEnum": "listings.models.Report.Status",
+        "OwnerListingStatusEnum": ["active", "hidden", "sold"],
+        "AccountExportStatusEnum": "accounts.models.AccountDataExport.Status",
+        "AccountDeletionStatusEnum": "accounts.models.DeletionRequest.Status",
+    },
 }
 
 UNFOLD = backoffice_settings.UNFOLD

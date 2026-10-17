@@ -378,6 +378,18 @@ class MarketplaceDiscoveryTests(ListingAPITestCase):
         self.assertEqual(self.shop.status, "suspended")
         self.assertEqual(self.public.get("/api/v1/listings/").data["count"], 0)
 
+    def test_inherited_crud_outside_each_contract_stays_blocked(self):
+        for method, path in [
+            ("post", "listings"),
+            ("delete", "home/1"),
+            ("post", "me/favorites"),
+            ("put", "me/saved-searches/1"),
+            ("post", "me/notifications"),
+            ("delete", "admin/moderation/1"),
+            ("delete", "me/reports/00000000-0000-0000-0000-000000000000"),
+        ]:
+            with self.subTest(method=method, path=path):
+                self.assertEqual(self.request(method, path, {}).status_code, 405)
 
     def test_queued_email_is_blocked_when_search_filters_no_longer_match(self):
         search = SavedSearch.objects.create(
