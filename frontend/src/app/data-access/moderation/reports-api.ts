@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { components } from '@app/data-access/generated/schema';
 import { Page } from '@app/domain/listing/listing-types';
 export interface ReportValues {
   listing?: number;
@@ -8,30 +9,9 @@ export interface ReportValues {
   reason: string;
   description: string;
 }
-export interface ReportRecord {
-  id: string;
-  listing: number | null;
-  shop: string | null;
-  reason: string;
-  description: string;
-  status: string;
-  response: string;
-  version: number;
-  created_at: string;
-}
-export interface ReportDecisionValues {
-  version: number;
-  action: 'review' | 'dismiss' | 'resolve' | 'hide_listing' | 'suspend_shop';
-  reason: string;
-  response: string;
-}
-export interface ReportAudit {
-  id: number;
-  actor_id: number | null;
-  action: string;
-  reason: string;
-  created_at: string;
-}
+export type ReportRecord = Required<components['schemas']['Report']>;
+export type ReportDecisionValues = components['schemas']['ReportDecision'];
+export type ReportAudit = components['schemas']['ReportAudit'];
 @Injectable({ providedIn: 'root' })
 export class ReportsApi {
   constructor(private readonly http: HttpClient) {}
