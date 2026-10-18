@@ -3,7 +3,8 @@ from rest_framework import serializers
 from accounts.models import Profile
 from accounts.services.privacy import public_listing_phone
 from categories.serializers.public import CategorySerializer
-from listings.models import Favorite, Listing
+from engagement.public import favorite_listing_ids
+from listings.models import Listing
 
 
 class ListingSearchSerializer(serializers.Serializer):
@@ -71,14 +72,8 @@ class PublicListingListSerializer(serializers.ListSerializer):
         )
         request = self.context.get("request")
         user = getattr(request, "user", None)
-        self.context["favorite_ids"] = (
-            set(
-                Favorite.objects.filter(
-                    user=user, listing_id__in=[listing.pk for listing in instances]
-                ).values_list("listing_id", flat=True)
-            )
-            if user and user.is_authenticated
-            else set()
+        self.context["favorite_ids"] = favorite_listing_ids(
+            user, [listing.pk for listing in instances]
         )
         return super().to_representation(instances)
 
@@ -138,11 +133,7 @@ class ListingPublicSerializer(serializers.ModelSerializer):
         favorite = (
             instance.pk in favorite_ids
             if favorite_ids is not None
-            else bool(
-                user
-                and user.is_authenticated
-                and Favorite.objects.filter(user=user, listing=instance).exists()
-            )
+            else instance.pk in favorite_listing_ids(user, [instance.pk])
         )
         phone = (
             (phone_numbers.get(shop.owner_id) or None)

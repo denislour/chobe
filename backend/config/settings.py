@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     "categories",
     "listings.apps.ListingsConfig",
     "discovery.apps.DiscoveryConfig",
+    "engagement.apps.EngagementConfig",
 ]
 
 MIDDLEWARE = [
