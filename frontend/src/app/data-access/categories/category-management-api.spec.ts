@@ -1,7 +1,7 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import { categoryDraftFixture } from '@app/categories/category-fixtures';
+import { categoryDraftFixture } from '@app/domain/category/category-fixtures';
 import { CategoryManagementApi } from './category-management-api';
 
 describe('CategoryManagementApi', () => {

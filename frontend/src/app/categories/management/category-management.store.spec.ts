@@ -4,7 +4,7 @@ import { TestBed } from '@angular/core/testing';
 import {
   categoryDraftFixture,
   taxonomyCapabilitiesFixture,
-} from '@app/categories/category-fixtures';
+} from '@app/domain/category/category-fixtures';
 import { CategoryManagementStore } from './category-management.store';
 
 describe('CategoryManagementStore', () => {

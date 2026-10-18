@@ -11,7 +11,7 @@ import {
   AttributeDefinition,
   AttributeValue,
   AttributeValues,
-} from '@app/categories/category-types';
+} from '@app/domain/category/category-types';
 
 @Component({
   selector: 'app-attribute-fields',

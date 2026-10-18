@@ -4,7 +4,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { routes } from '@app/app.routes';
-import { categoryFixture } from '@app/categories/category-fixtures';
+import { categoryFixture } from '@app/domain/category/category-fixtures';
 
 describe('Marketplace search', () => {
   it('restores URL filters and keeps the query when clearing filters', async () => {

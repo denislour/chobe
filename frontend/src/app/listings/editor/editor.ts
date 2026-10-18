@@ -12,8 +12,8 @@ import {
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
-import { AttributeFields } from '@app/categories/attribute-fields/attribute-fields';
-import { AttributeValues } from '@app/categories/category-types';
+import { AttributeFields } from '@app/domain/category/attribute-fields/attribute-fields';
+import { AttributeValues } from '@app/domain/category/category-types';
 import { MarketplaceNav } from '@app/listings/marketplace-nav/marketplace-nav';
 import { ListingValues, listingPrice } from '@app/listings/listing-types';
 import { EditorStore } from './editor.store';

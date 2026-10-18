@@ -5,7 +5,7 @@ import { patchState, signalState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { Observable, exhaustMap, filter, forkJoin, of, pipe, switchMap, tap } from 'rxjs';
 import { CategoryApi } from '@app/data-access/categories/category-api';
-import { CategoryData } from '@app/categories/category-types';
+import { CategoryData } from '@app/domain/category/category-types';
 import { listingError } from '@app/shared/errors/listing-errors';
 import {
   ListingAudit,

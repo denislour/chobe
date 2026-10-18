@@ -5,7 +5,7 @@ import { patchState, signalState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { pipe, switchMap } from 'rxjs';
 import { CategoryApi } from '@app/data-access/categories/category-api';
-import { CategoryData } from '@app/categories/category-types';
+import { CategoryData } from '@app/domain/category/category-types';
 import { listingError } from '@app/shared/errors/listing-errors';
 import { PublicListing } from '@app/listings/listing-types';
 import { DiscoveryApi } from '@app/data-access/discovery/discovery-api';

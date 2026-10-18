@@ -1,4 +1,4 @@
-import { categoryFixture } from '@app/categories/category-fixtures';
+import { categoryFixture } from '@app/domain/category/category-fixtures';
 import { ListingDraft, ModerationCase, PublicListing } from './listing-types';
 export const listingFixture: PublicListing = {
   id: 12,

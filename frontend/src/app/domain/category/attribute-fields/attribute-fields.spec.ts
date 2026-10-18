@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { categoryFixture } from '@app/categories/category-fixtures';
+import { categoryFixture } from '@app/domain/category/category-fixtures';
 import { AttributeFields } from './attribute-fields';
 
 describe('AttributeFields', () => {

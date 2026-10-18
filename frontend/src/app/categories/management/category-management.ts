@@ -3,9 +3,9 @@ import { Component, computed, effect, OnInit, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { AttributeFields } from '@app/categories/attribute-fields/attribute-fields';
+import { AttributeFields } from '@app/domain/category/attribute-fields/attribute-fields';
 import { CategoryNav } from '@app/categories/category-nav/category-nav';
-import { AttributeDefinition, AttributeType, CategoryData } from '@app/categories/category-types';
+import { AttributeDefinition, AttributeType, CategoryData } from '@app/domain/category/category-types';
 import { CategoryDraft, CategoryDraftValues, CategoryRevision } from '@app/data-access/categories/category-management-api';
 import { CategoryManagementStore } from './category-management.store';
 

@@ -1,4 +1,4 @@
-import { AttributeValues, CategoryData } from '@app/categories/category-types';
+import { AttributeValues, CategoryData } from '@app/domain/category/category-types';
 
 export interface Page<T> {
   count: number;

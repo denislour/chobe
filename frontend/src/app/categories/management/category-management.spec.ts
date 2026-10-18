@@ -8,7 +8,7 @@ import { AuthStore } from '@app/auth/auth.store';
 import {
   categoryDraftFixture,
   taxonomyCapabilitiesFixture,
-} from '@app/categories/category-fixtures';
+} from '@app/domain/category/category-fixtures';
 
 describe('CategoryManagement', () => {
   let http: HttpTestingController;

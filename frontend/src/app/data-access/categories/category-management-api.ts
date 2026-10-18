@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { AttributeDefinition, CategoryData } from '@app/categories/category-types';
+import { AttributeDefinition, CategoryData } from '@app/domain/category/category-types';
 
 export interface CategoryDraft {
   id: string;

@@ -4,7 +4,7 @@ import { tapResponse } from '@ngrx/operators';
 import { patchState, signalState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { of, pipe, switchMap } from 'rxjs';
-import { AttributeDefinition } from '@app/categories/category-types';
+import { AttributeDefinition } from '@app/domain/category/category-types';
 import { listingError } from '@app/shared/errors/listing-errors';
 import { PublicListing } from '@app/listings/listing-types';
 import { ComparisonApi } from '@app/data-access/discovery/comparison-api';

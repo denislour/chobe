@@ -6,7 +6,7 @@ import {
   CategoryData,
   CategoryFacets,
   ValidatedCategoryValues,
-} from '@app/categories/category-types';
+} from '@app/domain/category/category-types';
 
 @Injectable({ providedIn: 'root' })
 export class CategoryApi {

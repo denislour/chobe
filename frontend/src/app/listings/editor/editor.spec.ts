@@ -5,7 +5,7 @@ import { provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { routes } from '@app/app.routes';
 import { AuthStore } from '@app/auth/auth.store';
-import { categoryFixture } from '@app/categories/category-fixtures';
+import { categoryFixture } from '@app/domain/category/category-fixtures';
 import { draftFixture } from '@app/listings/listing-fixtures';
 
 describe('Listing editor', () => {
