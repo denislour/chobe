@@ -8,10 +8,13 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from accounts.throttles import AccountMutationThrottle
-from shops.models import Shop, ShopFollow
-from shops.schemas.following import FollowingSchema
+from engagement.schemas.following import FollowingSchema
+from engagement.services.following import follow_shop
+from shops.models import (
+    Shop,
+    ShopFollow,
+)
 from shops.serializers.storefront import StorefrontSerializer
-from shops.services.following import follow_shop
 
 
 class FollowedShopsPagination(PageNumberPagination):
