@@ -6,7 +6,7 @@ import { AttributeFields } from '@app/categories/attribute-fields/attribute-fiel
 import { CategoryStore } from '@app/categories/browse/category.store';
 import { AttributeValues } from '@app/categories/category-types';
 import { MarketplaceNav } from '@app/listings/marketplace-nav/marketplace-nav';
-import { SavedSearch } from './alerts-api';
+import { SavedSearch } from '@app/data-access/engagement/alerts-api';
 import { AlertsStore } from './alerts.store';
 @Component({
   selector: 'app-alerts',

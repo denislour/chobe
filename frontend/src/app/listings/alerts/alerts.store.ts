@@ -11,7 +11,7 @@ import {
   NotificationPreferences,
   SavedSearch,
   SavedSearchValues,
-} from './alerts-api';
+} from '@app/data-access/engagement/alerts-api';
 interface AlertsState {
   searches: SavedSearch[];
   notifications: NotificationItem[];
