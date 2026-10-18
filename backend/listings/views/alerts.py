@@ -10,49 +10,15 @@ from rest_framework.viewsets import ModelViewSet
 from common.pagination import ListingPagination
 from common.throttles import MarketplaceMutationThrottle, MarketplaceReadThrottle
 from discovery.queries import public_listings
-from listings.models import Notification, NotificationPreference, SavedSearch
+from listings.models import Notification, NotificationPreference
 from listings.schemas.alerts import (
     NotificationSchema,
     PreferenceSchema,
-    SavedSearchSchema,
 )
 from listings.serializers.alerts import (
     NotificationPreferenceSerializer,
     NotificationSerializer,
-    SavedSearchSerializer,
 )
-
-
-@method_decorator(never_cache, name="dispatch")
-class SavedSearchViewSet(ModelViewSet):
-    permission_classes = (IsAuthenticated,)
-    throttle_classes = (
-        MarketplaceReadThrottle,
-        MarketplaceMutationThrottle,
-    )
-    serializer_class = SavedSearchSerializer
-    pagination_class = ListingPagination
-    schema = SavedSearchSchema()
-    lookup_value_converter = "int"
-
-    def get_permissions(self):
-        actions = (
-            self.action_map.values() if self.action == "metadata" else (self.action,)
-        )
-        if not any(
-            action in ("list", "retrieve", "create", "partial_update", "destroy")
-            for action in actions
-        ):
-            raise MethodNotAllowed(self.request.method)
-        return super().get_permissions()
-
-    def get_queryset(self):
-        if (
-            getattr(self, "swagger_fake_view", False)
-            or not self.request.user.is_authenticated
-        ):
-            return SavedSearch.objects.none()
-        return SavedSearch.objects.filter(user=self.request.user)
 
 
 @method_decorator(never_cache, name="dispatch")

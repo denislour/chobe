@@ -3,7 +3,6 @@ from rest_framework.routers import SimpleRouter
 from listings.views.alerts import (
     NotificationPreferenceViewSet,
     NotificationViewSet,
-    SavedSearchViewSet,
 )
 from listings.views.management import ListingManagementViewSet
 from listings.views.moderation import ModerationViewSet
@@ -11,7 +10,6 @@ from listings.views.reports import ReportManagementViewSet, ReportViewSet
 
 router = SimpleRouter(use_regex_path=False)
 router.register("me/listings", ListingManagementViewSet, basename="my-listing")
-router.register("me/saved-searches", SavedSearchViewSet, basename="saved-search")
 router.register("me/notifications", NotificationViewSet, basename="notification")
 router.register(
     "me/notification-preferences",
