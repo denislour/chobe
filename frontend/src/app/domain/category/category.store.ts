@@ -4,7 +4,7 @@ import { tapResponse } from '@ngrx/operators';
 import { patchState, signalState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { exhaustMap, filter, forkJoin, of, pipe, switchMap, tap } from 'rxjs';
-import { AttributeValues, CategoryData, CategoryFacets } from './category-types';
+import { AttributeValues, CategoryData, CategoryFacets } from '@app/domain/category/category-types';
 import { CategoryApi } from '@app/data-access/categories/category-api';
 
 interface CategoryState {

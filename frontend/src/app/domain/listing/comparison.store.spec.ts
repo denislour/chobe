@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { ComparisonStore } from './comparison.store';
+import { ComparisonStore } from '@app/domain/listing/comparison.store';
 describe('ComparisonStore', () => {
   it('limits the tray to three IDs and lets users remove and add another', () => {
     const store = TestBed.inject(ComparisonStore);
