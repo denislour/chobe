@@ -6,7 +6,7 @@ import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { exhaustMap, filter, map, pipe, switchMap, tap } from 'rxjs';
 import { listingError } from '@app/shared/errors/listing-errors';
 import { PublicListing } from '@app/listings/listing-types';
-import { LibraryApi } from './library-api';
+import { LibraryApi } from '@app/data-access/engagement/library-api';
 interface LibraryState {
   listings: PublicListing[];
   count: number;

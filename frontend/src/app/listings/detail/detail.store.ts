@@ -4,7 +4,7 @@ import { tapResponse } from '@ngrx/operators';
 import { patchState, signalState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { exhaustMap, filter, pipe, switchMap, tap } from 'rxjs';
-import { LibraryApi } from '@app/listings/library/library-api';
+import { LibraryApi } from '@app/data-access/engagement/library-api';
 import { listingError } from '@app/shared/errors/listing-errors';
 import { PublicListing } from '@app/listings/listing-types';
 import { DiscoveryApi } from '@app/data-access/discovery/discovery-api';
