@@ -4,7 +4,7 @@ import { tapResponse } from '@ngrx/operators';
 import { patchState, signalState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { Observable, exhaustMap, filter, forkJoin, pipe, switchMap, tap } from 'rxjs';
-import { listingError } from '@app/listings/listing-errors';
+import { listingError } from '@app/shared/errors/listing-errors';
 import { ListingDraft } from '@app/listings/listing-types';
 import { ListingManagementApi, OwnerFilters } from './listing-management-api';
 interface DashboardState {

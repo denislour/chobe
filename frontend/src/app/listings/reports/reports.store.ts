@@ -4,7 +4,7 @@ import { tapResponse } from '@ngrx/operators';
 import { patchState, signalState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { exhaustMap, filter, pipe, switchMap, tap } from 'rxjs';
-import { listingError } from '@app/listings/listing-errors';
+import { listingError } from '@app/shared/errors/listing-errors';
 import { ReportAudit, ReportDecisionValues, ReportRecord, ReportsApi } from './reports-api';
 interface ReportFilters {
   admin: boolean;

@@ -4,7 +4,7 @@ import { tapResponse } from '@ngrx/operators';
 import { patchState, signalState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { exhaustMap, filter, forkJoin, pipe, switchMap, tap } from 'rxjs';
-import { listingError } from '@app/listings/listing-errors';
+import { listingError } from '@app/shared/errors/listing-errors';
 import { ListingAudit, ModerationCase } from '@app/listings/listing-types';
 import { ModerationApi } from './moderation-api';
 interface ReviewFilters {

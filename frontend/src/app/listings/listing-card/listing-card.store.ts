@@ -5,7 +5,7 @@ import { patchState, signalState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { exhaustMap, filter, pipe, tap } from 'rxjs';
 import { LibraryApi } from '@app/listings/library/library-api';
-import { listingError } from '@app/listings/listing-errors';
+import { listingError } from '@app/shared/errors/listing-errors';
 interface CardState {
   saved: boolean | null;
   pending: boolean;

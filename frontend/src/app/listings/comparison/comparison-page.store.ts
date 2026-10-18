@@ -5,7 +5,7 @@ import { patchState, signalState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { of, pipe, switchMap } from 'rxjs';
 import { AttributeDefinition } from '@app/categories/category-types';
-import { listingError } from '@app/listings/listing-errors';
+import { listingError } from '@app/shared/errors/listing-errors';
 import { PublicListing } from '@app/listings/listing-types';
 import { ComparisonApi } from './comparison-api';
 interface CompareState {
