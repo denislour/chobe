@@ -5,7 +5,7 @@ import { provideRouter } from '@angular/router';
 import { vi } from 'vitest';
 import { AuthStore } from '@app/auth/auth.store';
 import { shopFixture } from '@app/domain/shop/shop-fixtures';
-import { ShopStore } from '@app/shops/shop.store';
+import { ShopStore } from './shop.store';
 import { ShopManagement } from './shop-management';
 
 describe('ShopManagement', () => {

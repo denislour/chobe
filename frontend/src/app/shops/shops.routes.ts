@@ -7,7 +7,7 @@ export const sellerShopRoutes: Routes = [
     path: 'shop',
     canActivate: [authGuard],
     loadComponent: () =>
-      import('@app/shops/shop-management/shop-management').then((m) => m.ShopManagement),
+      import('@app/features/seller/shop-settings/shop-management').then((m) => m.ShopManagement),
   },
   {
     path: 'shop/preview/:slug',
