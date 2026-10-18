@@ -13,7 +13,6 @@ import { HomeStore } from './home.store';
 export class Home implements OnInit {
   constructor(protected readonly home: HomeStore) {}
   ngOnInit(): void {
-    this.home.loadCategories();
-    this.home.loadListings();
+    this.home.load();
   }
 }

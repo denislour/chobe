@@ -21,11 +21,9 @@ describe('App', () => {
     const fixture = TestBed.createComponent(App);
     await TestBed.inject(Router).navigateByUrl('/');
     await fixture.whenStable();
+    expect(TestBed.inject(Router).url).toBe('/');
     const http = TestBed.inject(HttpTestingController);
-    http.expectOne('/api/v1/categories/').flush([]);
-    http
-      .expectOne('/api/v1/listings/')
-      .flush({ results: [], count: 0, next: null, previous: null });
+    http.expectOne('/api/v1/home/').flush({ categories: [], latest: [] });
     fixture.detectChanges();
     expect(fixture.nativeElement.querySelector('h1')?.textContent).toBe(
       'Good things deserve another home.',
