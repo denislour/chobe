@@ -1,3 +1,4 @@
+import { components } from '@app/data-access/generated/schema';
 import { AttributeValues, CategoryData } from '@app/domain/category/category-types';
 
 export interface Page<T> {
@@ -10,8 +11,7 @@ export interface ListingImage {
   id: string;
   url: string;
 }
-export type ListingStatus =
-  'draft' | 'pending' | 'rejected' | 'active' | 'hidden' | 'sold' | 'deleted';
+export type ListingStatus = components['schemas']['ListingStatusEnum'];
 export interface ListingValues {
   title: string;
   description: string;
@@ -25,28 +25,16 @@ export interface ListingValues {
   phone_consent: boolean;
   rights_confirmed: boolean;
 }
-export interface ListingDraft extends ListingValues {
-  id: number;
-  status: ListingStatus;
-  version: number;
-  submitted_version: number | null;
-  moderation_hold: boolean;
+export interface ListingDraft extends Omit<Required<components['schemas']['ListingDraft']>,
+  'attributes' | 'images' | 'published'> {
+  attributes: AttributeValues;
+  images: ListingImage[];
   published: Record<string, unknown>;
-  images: ListingImage[];
-  retention_due_at: string;
-  last_owner_action_at: string;
-  created_at: string;
-  updated_at: string;
 }
-export interface PublicListing extends Omit<ListingValues, 'phone_consent' | 'rights_confirmed'> {
-  id: number;
-  version: number;
-  images: ListingImage[];
-  published_at: string;
+export interface PublicListing extends Omit<components['schemas']['ListingPublic'],
+  'attributes' | 'category_schema'> {
+  attributes: AttributeValues;
   category_schema: CategoryData;
-  shop: { id: string; name: string; slug: string };
-  phone: string | null;
-  is_favorite: boolean;
 }
 export interface ListingSnapshot extends ListingValues {
   id: number;
@@ -54,30 +42,10 @@ export interface ListingSnapshot extends ListingValues {
   images: string[];
   category_schema?: CategoryData;
 }
-export interface ModerationCase {
-  id: number;
-  listing_id: number;
-  listing_version: number;
+export interface ModerationCase extends Omit<components['schemas']['Moderation'], 'snapshot'> {
   snapshot: ListingSnapshot;
-  current: boolean;
-  status: 'pending' | 'approved' | 'rejected';
-  source: string;
-  reason: string;
-  appeal: string;
-  appeal_open: boolean;
-  version: number;
-  created_at: string;
-  updated_at: string;
 }
-export interface ListingAudit {
-  id: number;
-  actor_id: number | null;
-  action: string;
-  source: string;
-  version: number;
-  reason: string;
-  created_at: string;
-}
+export type ListingAudit = Required<components['schemas']['ListingAudit']>;
 export interface SearchFilters {
   q?: string;
   category?: string;
