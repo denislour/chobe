@@ -6,9 +6,7 @@ from rest_framework.exceptions import ValidationError
 
 from categories.services.attributes import validate_category_attributes
 from categories.services.publication import visible_categories
-from common.exceptions import (
-    VersionConflict,
-)
+from common.exceptions import VersionConflict
 from listings.models import Listing, ListingAuditEvent, ListingRevision
 from shops.models import Shop
 
@@ -192,55 +190,3 @@ def renew_listing(user, listing, version):
         listing.save()
         audit(listing, user, "renewed")
     return listing
-
-
-def delete_listing(user, listing, version):
-    with transaction.atomic():
-        listing = locked_listing(listing, user)
-        check_version(listing, version)
-        erase_listing(listing, user, "owner_deleted")
-
-
-def erase_listing(listing, user, action):
-    from accounts.models import ViewingHistory
-
-    listing.version += 1
-    listing.status = "deleted"
-    listing.deleted_at = timezone.now()
-    listing.title = ""
-    listing.description = ""
-    listing.area = ""
-    listing.attributes = {}
-    listing.category = None
-    listing.price = None
-    listing.rights_confirmed = False
-    listing.audit_events.update(reason="")
-    listing.published = {}
-    listing.phone_consent = False
-    listing.submitted_version = None
-    listing.save()
-    listing.images.all().delete()
-    listing.revisions.all().delete()
-    listing.favorites.all().delete()
-    listing.notification_set.all().delete()
-    ViewingHistory.objects.filter(listing_id=listing.pk).delete()
-    audit(listing, user, action)
-
-
-def cleanup_inactive_listings():
-    count = 0
-    for pk in (
-        Listing.objects.filter(retention_due_at__lte=timezone.now())
-        .exclude(status="deleted")
-        .values_list("pk", flat=True)
-        .iterator()
-    ):
-        with transaction.atomic():
-            listing = Listing.objects.select_for_update().get(pk=pk)
-            if (
-                listing.status != "deleted"
-                and listing.retention_due_at <= timezone.now()
-            ):
-                erase_listing(listing, None, "retention_deleted")
-                count += 1
-    return count

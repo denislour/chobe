@@ -29,12 +29,14 @@ from listings.serializers.management import (
 from listings.services.images import add_image, arrange_images
 from listings.services.management import (
     change_status,
-    delete_listing,
     draft_snapshot,
     renew_listing,
 )
 from moderation.serializers.reviews import (
     ModerationSerializer,
+)
+from workflows.listing_erasure import (
+    delete_listing,
 )
 from workflows.listing_moderation import appeal_listing
 from workflows.listing_submission import submit_for_review

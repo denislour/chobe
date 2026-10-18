@@ -5,7 +5,9 @@ from rest_framework import serializers
 from categories.models import Category
 from categories.services.publication import visible_categories
 from listings.models import Listing, ListingAuditEvent
-from listings.services.management import save_draft
+from listings.services.management import (
+    save_draft,
+)
 
 
 class ListingDraftSerializer(serializers.ModelSerializer):

@@ -1,8 +1,10 @@
 from huey import crontab
 from huey.contrib.djhuey import db_periodic_task
 
-from listings.services.management import cleanup_inactive_listings
 from notifications.services import match_searches
+from workflows.listing_erasure import (
+    cleanup_inactive_listings,
+)
 
 
 @db_periodic_task(crontab(hour="3", minute="15"), retries=3, retry_delay=60)

@@ -7,7 +7,9 @@ from listings.models import (
     ModerationCase,
 )
 from listings.public import apply_review_decision
-from listings.services.management import audit
+from listings.services.management import (
+    audit,
+)
 
 
 def decide_listing(user, case, values):

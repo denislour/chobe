@@ -5,7 +5,9 @@ from rest_framework.exceptions import ValidationError
 from categories.services.attributes import validate_category_attributes
 from categories.services.publication import visible_categories
 from listings.models import ListingMetric
-from listings.services.management import audit
+from listings.services.management import (
+    audit,
+)
 
 
 def apply_review_decision(listing, revision, user, decision, reason):
@@ -43,6 +45,27 @@ def hide_reported_listing(listing, user, reason):
         listing.submitted_version = None
         listing.save()
         audit(listing, user, "report_hidden", reason)
+
+
+def erase_listing_content(listing, user, action):
+    listing.version += 1
+    listing.status = "deleted"
+    listing.deleted_at = timezone.now()
+    listing.title = ""
+    listing.description = ""
+    listing.area = ""
+    listing.attributes = {}
+    listing.category = None
+    listing.price = None
+    listing.rights_confirmed = False
+    listing.audit_events.update(reason="")
+    listing.published = {}
+    listing.phone_consent = False
+    listing.submitted_version = None
+    listing.save()
+    listing.images.all().delete()
+    listing.revisions.all().delete()
+    audit(listing, user, action)
 
 
 def record_listing_metric(listing, kind):

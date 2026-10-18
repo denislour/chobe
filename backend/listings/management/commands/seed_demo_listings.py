@@ -35,9 +35,15 @@ from listings.models import (
     SavedSearch,
 )
 from listings.services.images import process_listing_image
-from listings.services.management import draft_snapshot, erase_listing, six_months_after
+from listings.services.management import (
+    draft_snapshot,
+    six_months_after,
+)
 from shops.management.commands.seed_demo_shops import demo_shops
 from shops.models import ShopFollow
+from workflows.listing_erasure import (
+    erase_listing,
+)
 
 
 def story_event(listing, actor, action, when, reason=""):

@@ -1,6 +1,8 @@
 from django.db import transaction
 
-from listings.services.management import submit_listing
+from listings.services.management import (
+    submit_listing,
+)
 from moderation.public import open_listing_review
 
 

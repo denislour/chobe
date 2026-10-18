@@ -6,8 +6,13 @@ from django.utils import timezone
 from django_tasks_db.models import DBTaskResult
 
 from listings.models import Listing, ListingRevision, ModerationCase
-from listings.services.management import cleanup_inactive_listings, six_months_after
+from listings.services.management import (
+    six_months_after,
+)
 from listings.tests.base import ListingAPITestCase
+from workflows.listing_erasure import (
+    cleanup_inactive_listings,
+)
 
 
 class ListingManagementTests(ListingAPITestCase):
