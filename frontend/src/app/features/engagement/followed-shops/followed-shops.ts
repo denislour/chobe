@@ -11,7 +11,7 @@ import { FollowedShopsStore } from './followed-shops.store';
   imports: [RouterLink, ShopNav],
   providers: [FollowedShopsStore],
   templateUrl: './followed-shops.html',
-  styleUrls: ['../../shared/styles/shops.css', './followed-shops.css'],
+  styleUrls: ['../../../shared/styles/shops.css', './followed-shops.css'],
 })
 export class FollowedShops implements OnInit {
   private readonly viewer;

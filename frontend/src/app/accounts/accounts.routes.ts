@@ -6,7 +6,7 @@ export const accountsRoutes: Routes = [
     path: 'followed-shops',
     canActivate: [authGuard],
     loadComponent: () =>
-      import('@app/shops/followed-shops/followed-shops').then((m) => m.FollowedShops),
+      import('@app/features/engagement/followed-shops/followed-shops').then((m) => m.FollowedShops),
   },
   {
     path: 'profile',
