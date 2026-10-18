@@ -18,12 +18,12 @@ After signing in, open `/seller/shop` or choose **My shop** in the account navig
 The Django backend must be running with the shop migration applied. Public storefronts are available at `/shops/{slug}`. Guests can read active shops;
 following a shop asks them to log in and returns to the same page. Signed-in users
 can open `/account/followed-shops` to browse or unfollow shops, with pagination.
-The storefront and following pages use the Django API and require migration
-`shops/0002_shopfollow`. Hidden shops are not shown publicly.
+The storefront and following pages use the Django API. Apply the full backend
+migration graph, including the domain ownership migrations. Hidden shops are not
+shown publicly.
 
-Listing data, filters and sorting will be connected in F-011. The Listings tab
-currently shows an empty state. Shop metrics, reports and follow notifications
-are not included.
+Storefront listings, filters and sorting use public listing snapshots. Reports
+use the moderation API; follow notifications are not included.
 
 `pnpm run prepare` sets up a Git pre-commit hook. It runs lint and unit tests for the backend, frontend, and recommendation service before each commit. The hook uses `just`, `uv`, and `mise` with Node.js 24 and pnpm. A failed check blocks the commit.
 
@@ -41,8 +41,8 @@ version into a new draft. The Django admin links to this workspace. No admin
 permissions are inferred from a username or from the route guard.
 
 Apply the backend category migration first. The optional backend demo seed can
-populate sample categories. Listing results and the listing editor will be
-connected in later features; this feature shows their empty states.
+populate sample categories. Listing results and the listing editor use published
+category schemas.
 
 ## Marketplace routes
 
@@ -61,3 +61,21 @@ connected in later features; this feature shows their empty states.
 Angular calls Django only. Automatic moderation and FastAPI services are planned
 for a later phase. Draft changes are separate from approved public snapshots;
 forms retain input on errors and require a reload after version conflicts.
+
+## Source and API types
+
+Pages and their local stores live in `features/marketplace`, `features/seller`,
+`features/admin`, `features/engagement` and `features/moderation`. Each workspace
+has its own lazy route tree. HTTP clients live in `data-access`; reused business
+UI and scoped state live in `domain`. Navigation lives in `layouts`; shared
+styles and technical error handling live in `shared`. Auth and account modules
+keep their existing layout. Public URLs stay the same.
+
+Home initially reads `/api/v1/home/`. Section retries use the existing categories
+and listings resource APIs, so either section can recover on its own.
+
+Marketplace DTOs derive from `data-access/generated/schema.d.ts`, with small
+adapters for typed JSON fields. To regenerate the file after serializer changes,
+run `pnpm api:types` from this directory with `uv` available. This generates the
+Django schema and TypeScript definitions; it does not run tests, build the app or
+apply database migrations. Do not edit the generated file by hand.
