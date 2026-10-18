@@ -1,3 +1,4 @@
+from drf_spectacular.utils import extend_schema_serializer
 from rest_framework import serializers
 
 from accounts.models import Profile
@@ -155,6 +156,12 @@ class ListingPublicSerializer(serializers.ModelSerializer):
             else None,
         )
         return result
+
+
+@extend_schema_serializer(many=False)
+class HomePayloadSerializer(serializers.Serializer):
+    categories = CategorySerializer(many=True, read_only=True)
+    latest = ListingPublicSerializer(many=True, read_only=True)
 
 
 class ContactEventSerializer(serializers.Serializer):

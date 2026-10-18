@@ -3,7 +3,10 @@ from typing import ClassVar
 from drf_spectacular.types import OpenApiTypes
 
 from common.schemas import CSRFSchema
-from discovery.serializers import ListingPublicSerializer
+from discovery.serializers import (
+    HomePayloadSerializer,
+    ListingPublicSerializer,
+)
 
 
 class DiscoverySchema(CSRFSchema):
@@ -21,7 +24,7 @@ class DiscoverySchema(CSRFSchema):
 
 class HomeSchema(CSRFSchema):
     responses: ClassVar[dict] = {
-        "list": {200: OpenApiTypes.OBJECT},
+        "list": {200: HomePayloadSerializer(many=False)},
     }
 
     def get_response_serializers(self):
