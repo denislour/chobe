@@ -8,7 +8,8 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "lint": "ng lint",
-    "prepare": "cd .. && husky frontend/.husky"
+    "prepare": "cd .. && husky frontend/.husky",
+    "api:types": "cd ../backend && uv run python manage.py spectacular --format openapi-json --file .generated/openapi.json --skip-checks && cd ../frontend && openapi-typescript ../backend/.generated/openapi.json --output src/app/data-access/generated/schema.d.ts"
   },
   "private": true,
   "packageManager": "pnpm@12.11.2",
