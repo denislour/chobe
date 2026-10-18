@@ -3,7 +3,9 @@ from typing import ClassVar
 from django.db import transaction
 from rest_framework import serializers
 
-from accounts.services.versioning import VersionConflict
+from common.exceptions import (
+    VersionConflict,
+)
 from listings.models import Notification, NotificationPreference, SavedSearch
 from listings.serializers.discovery import ListingSearchSerializer
 from listings.services.search import search_listings

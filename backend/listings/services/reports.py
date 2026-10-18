@@ -1,7 +1,9 @@
 from django.db import transaction
 from rest_framework.exceptions import PermissionDenied, ValidationError
 
-from accounts.services.versioning import VersionConflict
+from common.exceptions import (
+    VersionConflict,
+)
 from listings.models import Listing, Report, ReportDecision
 from listings.services.management import audit
 from shops.services.moderation import moderate_shop

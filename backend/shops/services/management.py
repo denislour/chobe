@@ -2,7 +2,12 @@ from django.contrib.auth import get_user_model
 from django.db import IntegrityError, transaction
 from rest_framework.exceptions import PermissionDenied, ValidationError
 
-from accounts.services.versioning import VersionConflict, save_versioned
+from accounts.services.versioning import (
+    save_versioned,
+)
+from common.exceptions import (
+    VersionConflict,
+)
 from shops.models import Shop, ShopSlug
 from shops.services.audit import audit_change
 

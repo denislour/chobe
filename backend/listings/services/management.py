@@ -4,9 +4,11 @@ from django.db import transaction
 from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 
-from accounts.services.versioning import VersionConflict
 from categories.services.attributes import validate_category_attributes
 from categories.services.publication import visible_categories
+from common.exceptions import (
+    VersionConflict,
+)
 from listings.models import Listing, ListingAuditEvent, ListingRevision, ModerationCase
 from shops.models import Shop
 

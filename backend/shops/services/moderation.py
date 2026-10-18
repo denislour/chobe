@@ -1,7 +1,9 @@
 from django.db import transaction
 from rest_framework.exceptions import PermissionDenied, ValidationError
 
-from accounts.services.versioning import save_versioned
+from accounts.services.versioning import (
+    save_versioned,
+)
 from shops.models import Shop
 from shops.services.audit import audit_change
 
