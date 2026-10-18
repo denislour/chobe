@@ -3,7 +3,7 @@ import { Component, OnInit, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MarketplaceNav } from '@app/listings/marketplace-nav/marketplace-nav';
-import { ReportDecisionValues } from './reports-api';
+import { ReportDecisionValues } from '@app/data-access/moderation/reports-api';
 import { ReportsStore } from './reports.store';
 @Component({
   selector: 'app-reports',

@@ -5,7 +5,7 @@ import { patchState, signalState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { exhaustMap, filter, pipe, tap } from 'rxjs';
 import { listingError } from '@app/shared/errors/listing-errors';
-import { ReportsApi, ReportValues } from '@app/listings/reports/reports-api';
+import { ReportsApi, ReportValues } from '@app/data-access/moderation/reports-api';
 interface ReportFormState {
   pending: boolean;
   error: string;

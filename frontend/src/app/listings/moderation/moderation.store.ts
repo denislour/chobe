@@ -6,7 +6,7 @@ import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { exhaustMap, filter, forkJoin, pipe, switchMap, tap } from 'rxjs';
 import { listingError } from '@app/shared/errors/listing-errors';
 import { ListingAudit, ModerationCase } from '@app/listings/listing-types';
-import { ModerationApi } from './moderation-api';
+import { ModerationApi } from '@app/data-access/moderation/moderation-api';
 interface ReviewFilters {
   status: string;
   appeals: boolean;

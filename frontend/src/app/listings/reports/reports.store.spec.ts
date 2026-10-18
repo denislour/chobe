@@ -2,7 +2,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { ReportsStore } from './reports.store';
-import { ReportRecord } from './reports-api';
+import { ReportRecord } from '@app/data-access/moderation/reports-api';
 const report: ReportRecord = {
   id: '11111111-1111-4111-8111-111111111111',
   listing: 12,
