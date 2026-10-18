@@ -3,7 +3,7 @@ import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 import { AuthStore } from '@app/auth/auth.store';
-import { CategoryStore } from '@app/categories/browse/category.store';
+import { CategoryStore } from '@app/domain/category/category.store';
 import { AttributeFields } from '@app/domain/category/attribute-fields/attribute-fields';
 import { AttributeValues } from '@app/domain/category/category-types';
 import { AlertsStore } from '@app/listings/alerts/alerts.store';

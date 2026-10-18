@@ -3,7 +3,7 @@ import { Component, OnInit, computed, effect, signal, viewChild } from '@angular
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { AttributeFields } from '@app/domain/category/attribute-fields/attribute-fields';
-import { CategoryStore } from '@app/categories/browse/category.store';
+import { CategoryStore } from '@app/domain/category/category.store';
 import { AttributeValues } from '@app/domain/category/category-types';
 import { MarketplaceNav } from '@app/listings/marketplace-nav/marketplace-nav';
 import { SavedSearch } from '@app/data-access/engagement/alerts-api';

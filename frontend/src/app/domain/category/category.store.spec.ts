@@ -1,7 +1,7 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import { categoryFixture } from '@app/domain/category/category-fixtures';
+import { categoryFixture } from './category-fixtures';
 import { CategoryStore } from './category.store';
 
 describe('CategoryStore', () => {

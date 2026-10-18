@@ -5,7 +5,7 @@ import { map } from 'rxjs';
 import { AttributeFields } from '@app/domain/category/attribute-fields/attribute-fields';
 import { CategoryNav } from '@app/categories/category-nav/category-nav';
 import { CategoryData } from '@app/domain/category/category-types';
-import { CategoryStore } from './category.store';
+import { CategoryStore } from '@app/domain/category/category.store';
 
 @Component({
   selector: 'app-category-browser',
