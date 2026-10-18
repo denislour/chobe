@@ -1,4 +1,4 @@
-import { ListingSearchPanel } from '@app/listings/search/listing-search-panel';
+import { ListingSearchPanel } from '@app/domain/listing/search/listing-search-panel';
 import { Component, Injector, OnInit, signal, viewChild } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { map } from 'rxjs';

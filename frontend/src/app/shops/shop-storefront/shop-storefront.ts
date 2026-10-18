@@ -1,4 +1,4 @@
-import { ListingSearchPanel } from '@app/listings/search/listing-search-panel';
+import { ListingSearchPanel } from '@app/domain/listing/search/listing-search-panel';
 import { ReportForm } from '@app/domain/moderation/report-form/report-form';
 import { DatePipe } from '@angular/common';
 import { Component, DestroyRef, Injector, effect, OnInit, signal } from '@angular/core';
