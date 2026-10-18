@@ -47,6 +47,28 @@ module.exports = defineConfig([
     },
   },
   {
+    files: [
+      'src/app/domain/**/*.ts',
+      'src/app/data-access/**/*.ts',
+      'src/app/layouts/**/*.ts',
+      'src/app/shared/**/*.ts',
+    ],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            { group: ['../**'], message: 'Use @app/ for parent imports.' },
+            {
+              group: ['@app/features/**'],
+              message: 'Shared code must not import a page or workspace feature.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
     files: ['**/*.html'],
     extends: [angular.configs.templateRecommended, angular.configs.templateAccessibility],
     rules: {},
