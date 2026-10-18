@@ -1,4 +1,4 @@
-@import '../../shared/styles/marketplace.css';
+@import '../../../shared/styles/marketplace.css';
 .search-layout {
   display: grid;
   grid-template-columns: 240px minmax(0, 1fr);

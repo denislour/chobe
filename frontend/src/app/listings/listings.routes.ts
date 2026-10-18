@@ -9,7 +9,7 @@ export const marketplaceRoutes: Routes = [
   },
   {
     path: 'search',
-    loadComponent: () => import('@app/listings/search/search').then((m) => m.Search),
+    loadComponent: () => import('@app/features/marketplace/search/search').then((m) => m.Search),
   },
   {
     path: 'listings/:id',
