@@ -32,12 +32,8 @@ from listings.services.management import (
     draft_snapshot,
     renew_listing,
 )
-from moderation.serializers.reviews import (
-    ModerationSerializer,
-)
-from workflows.listing_erasure import (
-    delete_listing,
-)
+from moderation.serializers.reviews import ModerationSerializer
+from workflows.listing_erasure import delete_listing
 from workflows.listing_moderation import appeal_listing
 from workflows.listing_submission import submit_for_review
 

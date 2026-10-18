@@ -12,7 +12,8 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
-from shops.models import Shop, ShopFollow
+from engagement.models import ShopFollow
+from shops.models import Shop
 from shops.schemas.storefront import StorefrontSchema
 from shops.serializers.storefront import StorefrontSerializer
 from shops.throttles import StorefrontReadThrottle

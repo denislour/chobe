@@ -8,12 +8,10 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from accounts.throttles import AccountMutationThrottle
+from engagement.models import ShopFollow
 from engagement.schemas.following import FollowingSchema
 from engagement.services.following import follow_shop
-from shops.models import (
-    Shop,
-    ShopFollow,
-)
+from shops.models import Shop
 from shops.serializers.storefront import StorefrontSerializer
 
 

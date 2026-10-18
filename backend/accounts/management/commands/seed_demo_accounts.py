@@ -69,9 +69,9 @@ ROLE_PERMISSIONS = {
     "moderator": (
         "listings.view_listing",
         "listings.moderate_listing",
-        "listings.view_moderationcase",
-        "listings.view_report",
-        "listings.review_report",
+        "moderation.view_moderationcase",
+        "moderation.view_report",
+        "moderation.review_report",
         "shops.view_shop",
         "shops.change_shop",
     ),
@@ -84,7 +84,7 @@ ROLE_PERMISSIONS = {
         "categories.view_categoryrevision",
         "categories.view_categoryauditevent",
     ),
-    "reports": ("listings.view_report", "listings.review_report"),
+    "reports": ("moderation.view_report", "moderation.review_report"),
 }
 
 

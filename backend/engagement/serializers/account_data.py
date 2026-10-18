@@ -1,12 +1,6 @@
 from rest_framework import serializers
 
-from listings.models import (
-    Favorite,
-    SavedSearch,
-)
-from shops.models import (
-    ShopFollow,
-)
+from engagement.models import Favorite, SavedSearch, ShopFollow
 
 
 class FavoriteSnapshotSerializer(serializers.ModelSerializer):

@@ -3,10 +3,8 @@ from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import PermissionDenied
 
 from accounts.models import User
-from shops.models import (
-    Shop,
-    ShopFollow,
-)
+from engagement.models import ShopFollow
+from shops.models import Shop
 
 
 def follow_shop(user, shop_id):

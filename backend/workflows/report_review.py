@@ -2,12 +2,9 @@ from django.db import transaction
 from rest_framework.exceptions import PermissionDenied, ValidationError
 
 from common.exceptions import VersionConflict
-from listings.models import (
-    Listing,
-    Report,
-    ReportDecision,
-)
+from listings.models import Listing
 from listings.public import hide_reported_listing
+from moderation.models import Report, ReportDecision
 from shops.services.moderation import moderate_shop
 
 
@@ -15,7 +12,7 @@ def decide_report(user, report, values):
     if (
         not user.is_active
         or not user.is_staff
-        or not user.has_perm("listings.review_report")
+        or not user.has_perm("moderation.review_report")
     ):
         raise PermissionDenied()
     with transaction.atomic():

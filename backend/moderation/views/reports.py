@@ -12,9 +12,7 @@ from common.throttles import (
     MarketplaceReadThrottle,
     ReportThrottle,
 )
-from listings.models import (
-    Report,
-)
+from moderation.models import Report
 from moderation.permissions import ReportReviewPermission
 from moderation.schemas.reports import ReportManagementSchema, ReportSchema
 from moderation.serializers.reports import (
@@ -94,7 +92,7 @@ class ReportManagementViewSet(ModelViewSet):
         )
         return Response(ReportSerializer(report).data)
 
-    @action(detail=True, methods=["get"], pagination_class=None)
+    @action(detail=True, methods=["get"])
     def history(self, request, pk=None):
         return Response(
             ReportAuditSerializer(

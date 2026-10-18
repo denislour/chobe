@@ -5,9 +5,7 @@ from rest_framework.exceptions import ValidationError
 from categories.services.attributes import validate_category_attributes
 from categories.services.publication import visible_categories
 from listings.models import ListingMetric
-from listings.services.management import (
-    audit,
-)
+from listings.services.management import audit
 
 
 def apply_review_decision(listing, revision, user, decision, reason):

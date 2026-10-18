@@ -1,8 +1,6 @@
 from rest_framework import serializers
 
-from listings.models import (
-    NotificationPreference,
-)
+from notifications.models import NotificationPreference
 
 
 class NotificationPreferenceSnapshotSerializer(serializers.ModelSerializer):

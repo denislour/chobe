@@ -7,9 +7,7 @@ from rest_framework.exceptions import ValidationError
 
 from accounts.models import Profile
 from accounts.services.privacy import withdraw_phone_consent
-from accounts.services.versioning import (
-    save_versioned,
-)
+from accounts.services.versioning import save_versioned
 
 
 def profile_for(user):

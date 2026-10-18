@@ -20,30 +20,23 @@ from categories.management.commands.seed_demo_categories import demo_categories
 from categories.services.attributes import validate_category_attributes
 from categories.services.publication import retire_category
 from discovery.queries import public_listings
+from engagement.models import Favorite, SavedSearch, ShopFollow
 from listings.models import (
-    Favorite,
     Listing,
     ListingAuditEvent,
     ListingImage,
     ListingMetric,
     ListingRevision,
-    ModerationCase,
-    Notification,
-    NotificationPreference,
-    Report,
-    ReportDecision,
-    SavedSearch,
 )
 from listings.services.images import process_listing_image
 from listings.services.management import (
     draft_snapshot,
     six_months_after,
 )
+from moderation.models import ModerationCase, Report, ReportDecision
+from notifications.models import Notification, NotificationPreference
 from shops.management.commands.seed_demo_shops import demo_shops
-from shops.models import ShopFollow
-from workflows.listing_erasure import (
-    erase_listing,
-)
+from workflows.listing_erasure import erase_listing
 
 
 def story_event(listing, actor, action, when, reason=""):

@@ -7,11 +7,8 @@ from django.db.models import Exists, OuterRef
 from django.utils import timezone
 
 from discovery.queries import public_listings, search_listings
-from listings.models import (
-    Notification,
-    NotificationPreference,
-    SavedSearch,
-)
+from engagement.models import SavedSearch
+from notifications.models import Notification, NotificationPreference
 
 
 def match_searches(listing_id=None, version=None, *, frequency="immediate"):
@@ -82,7 +79,7 @@ def match_searches(listing_id=None, version=None, *, frequency="immediate"):
                 if added:
                     created += 1
                     if preferences.email:
-                        from listings.tasks.notifications import deliver_notification
+                        from notifications.tasks import deliver_notification
 
                         deliver_notification.enqueue(notification.pk)
     return created

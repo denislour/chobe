@@ -1,13 +1,9 @@
 from accounts.models import PrivacySettings, ViewingHistory
-from listings.models import (
-    Favorite,
-    Listing,
-    Notification,
-    NotificationPreference,
-    Report,
-    SavedSearch,
-)
+from engagement.models import Favorite, SavedSearch
+from listings.models import Listing
 from listings.tests.base import ListingAPITestCase
+from moderation.models import Report
+from notifications.models import Notification, NotificationPreference
 from notifications.services import match_searches, send_notification_email
 
 

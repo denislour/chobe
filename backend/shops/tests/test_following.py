@@ -4,7 +4,8 @@ from rest_framework.test import APIClient
 from accounts.constants import DEMO_ADMIN_PASSWORD
 from accounts.models import User
 from accounts.tests.base import AccountAPITestCase
-from shops.models import Shop, ShopFollow
+from engagement.models import ShopFollow
+from shops.models import Shop
 from shops.services.management import create_shop
 
 

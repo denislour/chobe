@@ -1,6 +1,4 @@
-from listings.models import (
-    ModerationCase,
-)
+from moderation.models import ModerationCase
 
 
 def open_listing_review(listing):

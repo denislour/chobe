@@ -1,8 +1,6 @@
 from rest_framework import serializers
 
-from listings.models import (
-    Report,
-)
+from moderation.models import Report
 
 
 class ReportSnapshotSerializer(serializers.ModelSerializer):

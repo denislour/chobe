@@ -5,14 +5,11 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.utils import timezone
 from django_tasks_db.models import DBTaskResult
 
-from listings.models import Listing, ListingRevision, ModerationCase
-from listings.services.management import (
-    six_months_after,
-)
+from listings.models import Listing, ListingRevision
+from listings.services.management import six_months_after
 from listings.tests.base import ListingAPITestCase
-from workflows.listing_erasure import (
-    cleanup_inactive_listings,
-)
+from moderation.models import ModerationCase
+from workflows.listing_erasure import cleanup_inactive_listings
 
 
 class ListingManagementTests(ListingAPITestCase):
@@ -162,7 +159,7 @@ class ListingManagementTests(ListingAPITestCase):
         self.assertNotIn("rights_confirmed", response.data)
         self.assertTrue(
             DBTaskResult.objects.filter(
-                task_path="listings.tasks.notifications.match_listing_searches"
+                task_path="notifications.tasks.match_listing_searches"
             ).exists()
         )
 

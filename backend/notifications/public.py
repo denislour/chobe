@@ -1,6 +1,4 @@
-from listings.models import (
-    Notification,
-)
+from notifications.models import Notification
 
 
 def clear_listing_notifications(listing_id):

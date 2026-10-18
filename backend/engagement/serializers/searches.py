@@ -6,9 +6,7 @@ from rest_framework import serializers
 from common.exceptions import VersionConflict
 from discovery.queries import search_listings
 from discovery.serializers import ListingSearchSerializer
-from listings.models import (
-    SavedSearch,
-)
+from engagement.models import SavedSearch
 
 
 class SavedSearchSerializer(serializers.ModelSerializer):

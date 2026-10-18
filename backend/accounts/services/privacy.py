@@ -10,9 +10,7 @@ from accounts.models import (
     Profile,
     ViewingHistory,
 )
-from accounts.services.versioning import (
-    save_versioned,
-)
+from accounts.services.versioning import save_versioned
 
 
 def privacy_for(user):

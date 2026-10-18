@@ -7,14 +7,11 @@ from django.db.models import Q
 
 from accounts.management.commands.seed_demo_accounts import demo_accounts
 from accounts.models import ViewingHistory
+from engagement.models import Favorite, SavedSearch
 from listings.management.commands.seed_demo_listings import DEMO_PRODUCTS
-from listings.models import (
-    Favorite,
-    Listing,
-    NotificationPreference,
-    Report,
-    SavedSearch,
-)
+from listings.models import Listing
+from moderation.models import Report
+from notifications.models import NotificationPreference
 
 
 @transaction.atomic

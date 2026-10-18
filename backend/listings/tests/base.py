@@ -9,7 +9,8 @@ from rest_framework.test import APIClient
 from accounts.models import PrivacySettings, Profile
 from accounts.tests.base import AccountAPITestCase
 from categories.models import Category
-from listings.models import Listing, ModerationCase
+from listings.models import Listing
+from moderation.models import ModerationCase
 from shops.models import Shop
 
 

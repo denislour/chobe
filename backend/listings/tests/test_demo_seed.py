@@ -23,7 +23,9 @@ from listings.management.commands.seed_demo_listings import (
     seed_demo_listings,
     write_demo_guide,
 )
-from listings.models import Listing, Notification, Report
+from listings.models import Listing
+from moderation.models import Report
+from notifications.models import Notification
 from shops.management.commands.seed_demo_shops import seed_demo_shops
 from shops.models import Shop
 

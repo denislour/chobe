@@ -4,7 +4,8 @@ from PIL import Image
 from rest_framework.test import APIClient
 
 from accounts.tests.base import AccountAPITestCase
-from shops.models import Shop, ShopFollow
+from engagement.models import ShopFollow
+from shops.models import Shop
 from shops.services.management import create_shop, update_shop
 
 

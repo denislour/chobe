@@ -2,9 +2,7 @@ from typing import ClassVar
 
 from rest_framework import serializers
 
-from listings.models import (
-    ModerationCase,
-)
+from moderation.models import ModerationCase
 
 
 class ModerationSerializer(serializers.ModelSerializer):

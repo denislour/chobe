@@ -4,10 +4,7 @@ from django.db import transaction
 from rest_framework import serializers
 
 from discovery.queries import public_listings
-from listings.models import (
-    Report,
-    ReportDecision,
-)
+from moderation.models import Report, ReportDecision
 from shops.models import Shop
 
 

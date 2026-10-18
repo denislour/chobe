@@ -12,11 +12,9 @@ from common.pagination import ListingPagination
 from common.throttles import MarketplaceMutationThrottle, MarketplaceReadThrottle
 from discovery.queries import public_listings
 from discovery.serializers import ListingPublicSerializer
+from engagement.models import Favorite
 from engagement.schemas.favorites import FavoriteSchema
-from listings.models import (
-    Favorite,
-    Listing,
-)
+from listings.models import Listing
 
 
 @method_decorator(never_cache, name="dispatch")
@@ -62,7 +60,7 @@ class FavoriteViewSet(ModelViewSet):
         Favorite.objects.filter(user=request.user, listing_id=pk).delete()
         return Response(status=204)
 
-    @action(detail=False, methods=["get"], pagination_class=None)
+    @action(detail=False, methods=["get"])
     def history(self, request):
         ids = list(
             viewing_history_for(request.user).values_list("listing_id", flat=True)

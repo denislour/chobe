@@ -6,7 +6,7 @@ from engagement.views.searches import SavedSearchViewSet
 
 router = SimpleRouter(use_regex_path=False)
 router.register("me/favorites", FavoriteViewSet, basename="favorite")
-router.register("me/saved-searches", SavedSearchViewSet, basename="saved-search")
 router.register("me/followed-shops", FollowedShopsViewSet, basename="followed-shop")
+router.register("me/saved-searches", SavedSearchViewSet, basename="saved-search")
 
 urlpatterns = router.urls

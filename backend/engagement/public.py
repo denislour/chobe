@@ -1,6 +1,4 @@
-from listings.models import (
-    Favorite,
-)
+from engagement.models import Favorite
 
 
 def favorite_listing_ids(user, listing_ids):

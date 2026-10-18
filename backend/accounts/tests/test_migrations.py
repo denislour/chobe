@@ -37,6 +37,7 @@ class AccountTaskMigrationTests(TransactionTestCase):
             ),
         )
         executor = MigrationExecutor(connection)
+        latest = executor.loader.graph.leaf_nodes()
         try:
             executor.migrate(before)
             old_apps = executor.loader.project_state(before).apps
@@ -71,4 +72,4 @@ class AccountTaskMigrationTests(TransactionTestCase):
                 self.assertEqual(record.args_kwargs, arguments)
                 self.assertEqual(record.status, status)
         finally:
-            MigrationExecutor(connection).migrate(after)
+            MigrationExecutor(connection).migrate(latest)

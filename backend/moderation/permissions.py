@@ -17,5 +17,5 @@ class ReportReviewPermission(BasePermission):
             request.user.is_authenticated
             and request.user.is_active
             and request.user.is_staff
-            and request.user.has_perm("listings.review_report")
+            and request.user.has_perm("moderation.review_report")
         )

@@ -4,9 +4,7 @@ from django.http import Http404
 from rest_framework.exceptions import ValidationError
 
 from categories.services.publication import visible_categories
-from common.exceptions import (
-    VersionConflict,
-)
+from common.exceptions import VersionConflict
 
 
 def validate_category_attributes(category_id, schema_version, values):

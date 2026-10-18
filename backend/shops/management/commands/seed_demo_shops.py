@@ -7,7 +7,8 @@ from django.db import transaction
 from django.utils import timezone
 
 from accounts.management.commands.seed_demo_accounts import demo_accounts, demo_image
-from shops.models import Shop, ShopAuditEvent, ShopFollow, ShopSlug
+from engagement.models import ShopFollow
+from shops.models import Shop, ShopAuditEvent, ShopSlug
 
 DEMO_SHOPS = (
     (

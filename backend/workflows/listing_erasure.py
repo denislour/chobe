@@ -5,10 +5,7 @@ from accounts.models import ViewingHistory
 from engagement.public import clear_listing_favorites
 from listings.models import Listing
 from listings.public import erase_listing_content
-from listings.services.management import (
-    check_version,
-    locked_listing,
-)
+from listings.services.management import check_version, locked_listing
 from notifications.public import clear_listing_notifications
 
 

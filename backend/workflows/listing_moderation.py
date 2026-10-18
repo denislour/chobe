@@ -2,14 +2,10 @@ from django.db import transaction
 from rest_framework.exceptions import PermissionDenied, ValidationError
 
 from common.exceptions import VersionConflict
-from listings.models import (
-    Listing,
-    ModerationCase,
-)
+from listings.models import Listing
 from listings.public import apply_review_decision
-from listings.services.management import (
-    audit,
-)
+from listings.services.management import audit
+from moderation.models import ModerationCase
 
 
 def decide_listing(user, case, values):
@@ -42,7 +38,7 @@ def decide_listing(user, case, values):
         case.version += 1
         case.save()
         if decision == "approve":
-            from listings.tasks.notifications import match_listing_searches
+            from notifications.tasks import match_listing_searches
 
             match_listing_searches.enqueue(listing.pk, case.revision.version)
     return case

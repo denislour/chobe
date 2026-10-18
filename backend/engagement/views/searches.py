@@ -6,11 +6,9 @@ from rest_framework.viewsets import ModelViewSet
 
 from common.pagination import ListingPagination
 from common.throttles import MarketplaceMutationThrottle, MarketplaceReadThrottle
+from engagement.models import SavedSearch
 from engagement.schemas.searches import SavedSearchSchema
 from engagement.serializers.searches import SavedSearchSerializer
-from listings.models import (
-    SavedSearch,
-)
 
 
 @method_decorator(never_cache, name="dispatch")

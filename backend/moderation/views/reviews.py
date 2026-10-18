@@ -9,12 +9,8 @@ from rest_framework.viewsets import ModelViewSet
 
 from common.pagination import ListingPagination
 from common.throttles import MarketplaceMutationThrottle, MarketplaceReadThrottle
-from listings.models import (
-    ModerationCase,
-)
-from listings.serializers.management import (
-    ListingAuditSerializer,
-)
+from listings.serializers.management import ListingAuditSerializer
+from moderation.models import ModerationCase
 from moderation.permissions import ModerationPermission
 from moderation.schemas.reviews import ModerationSchema
 from moderation.serializers.reviews import (
@@ -73,7 +69,7 @@ class ModerationViewSet(ModelViewSet):
         )
         return Response(ModerationSerializer(case).data)
 
-    @action(detail=True, methods=["get"], pagination_class=None)
+    @action(detail=True, methods=["get"])
     def history(self, request, pk=None):
         case = self.get_object()
         return Response(
