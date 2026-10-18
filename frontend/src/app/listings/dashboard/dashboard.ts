@@ -6,7 +6,7 @@ import { map } from 'rxjs';
 import { MarketplaceNav } from '@app/listings/marketplace-nav/marketplace-nav';
 import { listingPrice } from '@app/listings/listing-types';
 import { DashboardStore, OwnerAction } from './dashboard.store';
-import { OwnerFilters } from './listing-management-api';
+import { OwnerFilters } from '@app/data-access/listings/listing-management-api';
 @Component({
   selector: 'app-dashboard',
   imports: [DatePipe, RouterLink, ReactiveFormsModule, MarketplaceNav],

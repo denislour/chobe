@@ -13,7 +13,7 @@ import {
   ListingValues,
   ModerationCase,
 } from '@app/listings/listing-types';
-import { ListingEditorApi } from './listing-editor-api';
+import { ListingEditorApi } from '@app/data-access/listings/listing-editor-api';
 interface EditorState {
   listing: ListingDraft | null;
   categories: CategoryData[];
