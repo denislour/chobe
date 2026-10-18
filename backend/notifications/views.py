@@ -10,12 +10,12 @@ from rest_framework.viewsets import ModelViewSet
 from common.pagination import ListingPagination
 from common.throttles import MarketplaceMutationThrottle, MarketplaceReadThrottle
 from discovery.queries import public_listings
-from listings.models import Notification, NotificationPreference
-from listings.schemas.alerts import (
-    NotificationSchema,
-    PreferenceSchema,
+from listings.models import (
+    Notification,
+    NotificationPreference,
 )
-from listings.serializers.alerts import (
+from notifications.schemas import NotificationSchema, PreferenceSchema
+from notifications.serializers import (
     NotificationPreferenceSerializer,
     NotificationSerializer,
 )

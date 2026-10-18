@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     "discovery.apps.DiscoveryConfig",
     "engagement.apps.EngagementConfig",
     "moderation.apps.ModerationConfig",
+    "notifications.apps.NotificationsConfig",
 ]
 
 MIDDLEWARE = [

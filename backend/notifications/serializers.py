@@ -3,10 +3,11 @@ from typing import ClassVar
 from django.db import transaction
 from rest_framework import serializers
 
-from common.exceptions import (
-    VersionConflict,
+from common.exceptions import VersionConflict
+from listings.models import (
+    Notification,
+    NotificationPreference,
 )
-from listings.models import Notification, NotificationPreference
 
 
 class NotificationPreferenceSerializer(serializers.ModelSerializer):

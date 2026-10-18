@@ -1,7 +1,7 @@
 from typing import ClassVar
 
 from common.schemas import CSRFSchema
-from listings.serializers.alerts import (
+from notifications.serializers import (
     NotificationPreferenceSerializer,
     NotificationSerializer,
 )
