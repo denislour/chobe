@@ -5,7 +5,7 @@ import { patchState, signalState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { exhaustMap, filter, pipe, switchMap, tap } from 'rxjs';
 import { FollowedShopsApi } from '@app/shops/followed-shops/followed-shops-api';
-import { StorefrontApi, StorefrontData } from './storefront-api';
+import { StorefrontApi, StorefrontData } from '@app/data-access/shops/storefront-api';
 
 interface StorefrontQuery {
   slug: string;

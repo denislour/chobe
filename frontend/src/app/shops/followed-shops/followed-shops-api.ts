@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { StorefrontData } from '@app/shops/shop-storefront/storefront-api';
+import { StorefrontData } from '@app/data-access/shops/storefront-api';
 
 export interface FollowedShopsPage {
   count: number;

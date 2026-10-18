@@ -1,5 +1,5 @@
-import { StorefrontData } from '@app/shops/shop-storefront/storefront-api';
-import { ShopData } from './shop-api';
+import { StorefrontData } from '@app/data-access/shops/storefront-api';
+import { ShopData } from '@app/data-access/shops/shop-api';
 
 export const shopFixture: ShopData = {
   id: '11111111-1111-4111-8111-111111111111',

@@ -1,5 +1,5 @@
 import { Component, input } from '@angular/core';
-import { ShopDisplayData } from '@app/shops/shop-api';
+import { ShopDisplayData } from '@app/data-access/shops/shop-api';
 
 @Component({
   selector: 'app-shop-card',

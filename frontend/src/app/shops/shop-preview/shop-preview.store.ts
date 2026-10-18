@@ -4,7 +4,7 @@ import { tapResponse } from '@ngrx/operators';
 import { patchState, signalState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { pipe, switchMap } from 'rxjs';
-import { ShopApi, ShopData } from '@app/shops/shop-api';
+import { ShopApi, ShopData } from '@app/data-access/shops/shop-api';
 
 interface ShopPreviewState {
   shop: ShopData | null;

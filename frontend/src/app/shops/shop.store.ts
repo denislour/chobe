@@ -5,7 +5,7 @@ import { patchState, signalState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { exhaustMap, filter, pipe, switchMap, tap } from 'rxjs';
 import { accountError, FieldErrors } from '@app/accounts/account-errors';
-import { ShopApi, ShopData, ShopSaveRequest, ShopStatusRequest } from './shop-api';
+import { ShopApi, ShopData, ShopSaveRequest, ShopStatusRequest } from '@app/data-access/shops/shop-api';
 
 interface ShopState {
   shop: ShopData | null;
