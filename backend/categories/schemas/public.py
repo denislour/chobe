@@ -1,11 +1,11 @@
 from typing import ClassVar
 
-from accounts.schemas.base import CSRFSchema
 from categories.serializers.public import (
     CategoryFacetsSerializer,
     CategorySerializer,
     ValidatedCategoryValuesSerializer,
 )
+from common.schemas import CSRFSchema
 
 
 class CategorySchema(CSRFSchema):

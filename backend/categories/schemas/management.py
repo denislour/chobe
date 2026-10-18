@@ -1,12 +1,12 @@
 from typing import ClassVar
 
-from accounts.schemas.base import CSRFSchema
 from categories.serializers.management import (
     CategoryAuditSerializer,
     CategoryDraftSerializer,
     CategoryRevisionSerializer,
     TaxonomyCapabilitiesSerializer,
 )
+from common.schemas import CSRFSchema
 
 
 class CategoryManagementSchema(CSRFSchema):

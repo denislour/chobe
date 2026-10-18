@@ -3,7 +3,7 @@ from typing import ClassVar
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, OpenApiResponse
 
-from accounts.schemas.base import CSRFSchema
+from common.schemas import CSRFSchema
 from shops.serializers.storefront import StorefrontSerializer
 
 

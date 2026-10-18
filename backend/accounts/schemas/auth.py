@@ -1,7 +1,7 @@
 from typing import ClassVar
 
-from accounts.schemas.base import CSRFSchema
 from accounts.serializers.session import AuthUserSerializer, SessionSerializer
+from common.schemas import CSRFSchema
 
 
 class AuthSchema(CSRFSchema):

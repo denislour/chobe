@@ -10,7 +10,6 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from accounts.schemas.auth import AuthSchema
-from accounts.schemas.base import CSRFSchema
 from accounts.schemas.password_reset import PasswordResetSchema
 from accounts.serializers.login import LoginSerializer
 from accounts.serializers.password_reset import (
@@ -28,6 +27,7 @@ from accounts.throttles import (
     RegisterIPThrottle,
     ResetPasswordIPThrottle,
 )
+from common.schemas import CSRFSchema
 
 
 @method_decorator(never_cache, name="dispatch")

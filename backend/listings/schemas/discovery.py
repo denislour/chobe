@@ -2,7 +2,7 @@ from typing import ClassVar
 
 from drf_spectacular.types import OpenApiTypes
 
-from accounts.schemas.base import CSRFSchema
+from common.schemas import CSRFSchema
 from listings.serializers.discovery import ListingPublicSerializer
 
 

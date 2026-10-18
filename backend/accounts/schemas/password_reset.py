@@ -1,6 +1,6 @@
 from typing import ClassVar
 
-from accounts.schemas.base import CSRFSchema
+from common.schemas import CSRFSchema
 
 
 class PasswordResetSchema(CSRFSchema):
