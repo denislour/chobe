@@ -59,7 +59,7 @@ export const reviewRoutes: Routes = [
   {
     path: 'moderation',
     canActivate: [authGuard],
-    loadComponent: () => import('@app/listings/moderation/moderation').then((m) => m.Moderation),
+    loadComponent: () => import('@app/features/admin/moderation/moderation').then((m) => m.Moderation),
   },
   {
     path: 'reports',
