@@ -6,7 +6,7 @@ import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { pipe, switchMap } from 'rxjs';
 import { listingError } from '@app/shared/errors/listing-errors';
 import { PublicListing, SearchFilters } from '@app/listings/listing-types';
-import { DiscoveryApi } from './discovery-api';
+import { DiscoveryApi } from '@app/data-access/discovery/discovery-api';
 interface SearchState {
   listings: PublicListing[];
   count: number;

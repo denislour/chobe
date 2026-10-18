@@ -7,7 +7,7 @@ import { exhaustMap, filter, pipe, switchMap, tap } from 'rxjs';
 import { LibraryApi } from '@app/listings/library/library-api';
 import { listingError } from '@app/shared/errors/listing-errors';
 import { PublicListing } from '@app/listings/listing-types';
-import { DiscoveryApi } from '@app/listings/search/discovery-api';
+import { DiscoveryApi } from '@app/data-access/discovery/discovery-api';
 interface DetailState {
   listing: PublicListing | null;
   loading: boolean;

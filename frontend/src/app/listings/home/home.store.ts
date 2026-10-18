@@ -8,7 +8,7 @@ import { CategoryApi } from '@app/data-access/categories/category-api';
 import { CategoryData } from '@app/categories/category-types';
 import { listingError } from '@app/shared/errors/listing-errors';
 import { PublicListing } from '@app/listings/listing-types';
-import { DiscoveryApi } from '@app/listings/search/discovery-api';
+import { DiscoveryApi } from '@app/data-access/discovery/discovery-api';
 interface HomeState {
   categories: CategoryData[];
   listings: PublicListing[];

@@ -7,7 +7,7 @@ import { of, pipe, switchMap } from 'rxjs';
 import { AttributeDefinition } from '@app/categories/category-types';
 import { listingError } from '@app/shared/errors/listing-errors';
 import { PublicListing } from '@app/listings/listing-types';
-import { ComparisonApi } from './comparison-api';
+import { ComparisonApi } from '@app/data-access/discovery/comparison-api';
 interface CompareState {
   listings: PublicListing[];
   unavailable: number[];
