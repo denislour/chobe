@@ -15,13 +15,13 @@ from listings.models import (
 from listings.serializers.management import (
     ListingAuditSerializer,
 )
-from listings.services.moderation import decide_listing
 from moderation.permissions import ModerationPermission
 from moderation.schemas.reviews import ModerationSchema
 from moderation.serializers.reviews import (
     ModerationDecisionSerializer,
     ModerationSerializer,
 )
+from workflows.listing_moderation import decide_listing
 
 
 @method_decorator(never_cache, name="dispatch")
