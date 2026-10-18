@@ -12,7 +12,7 @@ import { CategoryStore } from '@app/domain/category/category.store';
   imports: [ListingSearchPanel, RouterLink, AttributeFields, CategoryNav],
   providers: [CategoryStore],
   templateUrl: './category-browser.html',
-  styleUrls: ['../../shared/styles/categories.css', './category-browser.css'],
+  styleUrls: ['../../../shared/styles/categories.css', './category-browser.css'],
 })
 export class CategoryBrowser implements OnInit {
   protected readonly attributes = viewChild(AttributeFields);
