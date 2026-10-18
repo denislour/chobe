@@ -1,6 +1,6 @@
 from django.tasks import task
 
-from listings.services.notifications import match_searches, send_notification_email
+from notifications.services import match_searches, send_notification_email
 
 
 @task

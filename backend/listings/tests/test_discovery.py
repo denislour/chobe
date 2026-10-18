@@ -7,8 +7,8 @@ from listings.models import (
     Report,
     SavedSearch,
 )
-from listings.services.notifications import match_searches, send_notification_email
 from listings.tests.base import ListingAPITestCase
+from notifications.services import match_searches, send_notification_email
 
 
 class MarketplaceDiscoveryTests(ListingAPITestCase):
