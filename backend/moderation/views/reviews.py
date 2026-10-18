@@ -69,7 +69,7 @@ class ModerationViewSet(ModelViewSet):
         )
         return Response(ModerationSerializer(case).data)
 
-    @action(detail=True, methods=["get"])
+    @action(detail=True, methods=["get"], pagination_class=None)
     def history(self, request, pk=None):
         case = self.get_object()
         return Response(

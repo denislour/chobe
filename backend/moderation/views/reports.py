@@ -92,7 +92,7 @@ class ReportManagementViewSet(ModelViewSet):
         )
         return Response(ReportSerializer(report).data)
 
-    @action(detail=True, methods=["get"])
+    @action(detail=True, methods=["get"], pagination_class=None)
     def history(self, request, pk=None):
         return Response(
             ReportAuditSerializer(

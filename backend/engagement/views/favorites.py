@@ -60,7 +60,7 @@ class FavoriteViewSet(ModelViewSet):
         Favorite.objects.filter(user=request.user, listing_id=pk).delete()
         return Response(status=204)
 
-    @action(detail=False, methods=["get"])
+    @action(detail=False, methods=["get"], pagination_class=None)
     def history(self, request):
         ids = list(
             viewing_history_for(request.user).values_list("listing_id", flat=True)
