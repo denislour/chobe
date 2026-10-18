@@ -118,8 +118,11 @@ The Django Unfold admin is available at `http://localhost:8000/admin/`. With `DJ
 
 ## Listings and marketplace
 
-The `listings` app provides private drafts, local image processing, immutable
-submitted snapshots and manual moderation. Seller APIs live at
+The `listings` app provides private drafts, local image processing and immutable
+submitted snapshots. `discovery` owns public queries, `engagement` owns favorites,
+shop follows and saved searches, `moderation` owns reviews and reports, and
+`notifications` owns preferences, inbox and delivery. Cross-app transactions live
+in `workflows`; shared technical code lives in `common`. Seller APIs live at
 `/api/v1/me/listings/`; public discovery uses `/api/v1/home/` and
 `/api/v1/listings/`. All routes use the native DRF SimpleRouter.
 
@@ -144,7 +147,9 @@ account, category, status and activity deadline.
 Private APIs also support favorites, saved searches, notification preferences,
 inbox and reports. Inbox and email require explicit opt-in. Saved-search matching
 and email run through Huey/outbox tasks, with deduplication and delivery-time
-consent checks. Daily matching runs at 04:00 UTC; maintenance runs at 03:15 UTC.
+consent checks. Daily matching runs at 04:00 UTC; listing maintenance runs at
+03:15 UTC and notification cleanup runs at 03:30 UTC. The existing native Huey
+daily task name is retained so stored retries can still execute.
 No workers are started by installing the app. Use the existing `run_huey` command.
 
 Eligible owner actions renew a six-calendar-month deadline. Views, contacts,
@@ -154,9 +159,17 @@ minimal audit; deletion cannot be undone. Public queries hide expired listings
 before maintenance runs. Development data is not migrated, seeded or cleaned
 as part of implementation.
 
-Reports require login. Staff need `listings.review_report`; hiding a listing also
+Reports require login. Staff need `moderation.review_report`; hiding a listing also
 requires `listings.moderate_listing`, and suspending a shop requires
 `shops.change_shop`. Internal reasons and reporter identity are not public.
+
+Apply the full migration graph before running this source. The new ownership
+migrations keep existing table names, data IDs, permission grants and queued
+outbox arguments; they move model state, content types and notification task paths.
+Stop the web app and worker, back up the business database, run
+`uv run python manage.py migrate`, then restart both with the new source.
+Do not migrate only an intermediate app, fake migrations or reset the database.
+These migrations have not been applied or tested as part of this refactor.
 
 ## Demo seed data
 
