@@ -9,7 +9,7 @@ from categories.services.publication import visible_categories
 from common.exceptions import (
     VersionConflict,
 )
-from listings.models import Listing, ListingAuditEvent, ListingRevision, ModerationCase
+from listings.models import Listing, ListingAuditEvent, ListingRevision
 from shops.models import Shop
 
 DRAFT_FIELDS = (
@@ -148,10 +148,9 @@ def submit_listing(user, listing, version):
         listing.save()
         snapshot = draft_snapshot(listing)
         snapshot["category_schema"] = visible_categories()[str(listing.category_id)]
-        revision = ListingRevision.objects.create(
+        ListingRevision.objects.create(
             listing=listing, version=listing.version, snapshot=snapshot
         )
-        ModerationCase.objects.create(revision=revision)
         audit(listing, user, "submitted")
     return listing
 

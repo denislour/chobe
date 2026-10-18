@@ -32,12 +32,12 @@ from listings.services.management import (
     delete_listing,
     draft_snapshot,
     renew_listing,
-    submit_listing,
 )
 from listings.services.moderation import appeal_listing
 from moderation.serializers.reviews import (
     ModerationSerializer,
 )
+from workflows.listing_submission import submit_for_review
 
 
 @method_decorator(never_cache, name="dispatch")
@@ -127,7 +127,7 @@ class ListingManagementViewSet(ModelViewSet):
     def submit(self, request, pk=None):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        listing = submit_listing(
+        listing = submit_for_review(
             request.user, self.get_object(), serializer.validated_data["version"]
         )
         return Response(ListingDraftSerializer(listing).data)
