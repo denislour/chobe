@@ -13,8 +13,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
+from common.pagination import ListingPagination
 from listings.models import Listing
-from listings.pagination import ListingPagination
 from listings.schemas.management import ListingManagementSchema
 from listings.serializers.management import (
     AppealSerializer,

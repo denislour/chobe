@@ -14,8 +14,8 @@ from rest_framework.viewsets import ModelViewSet
 
 from accounts.services.privacy import viewing_history_for
 from categories.services.publication import visible_categories
+from common.pagination import ListingPagination
 from listings.models import Favorite, Listing, ListingMetric
-from listings.pagination import ListingPagination
 from listings.schemas.discovery import DiscoverySchema, FavoriteSchema, HomeSchema
 from listings.serializers.discovery import (
     CompareQuerySerializer,

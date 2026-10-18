@@ -7,8 +7,8 @@ from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
+from common.pagination import ListingPagination
 from listings.models import ModerationCase
-from listings.pagination import ListingPagination
 from listings.permissions import ModerationPermission
 from listings.schemas.moderation import ModerationSchema
 from listings.serializers.management import (

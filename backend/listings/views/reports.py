@@ -6,8 +6,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
+from common.pagination import ListingPagination
 from listings.models import Report
-from listings.pagination import ListingPagination
 from listings.permissions import ReportReviewPermission
 from listings.schemas.reports import ReportManagementSchema, ReportSchema
 from listings.serializers.reports import (

@@ -7,8 +7,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
+from common.pagination import ListingPagination
 from listings.models import Notification, NotificationPreference, SavedSearch
-from listings.pagination import ListingPagination
 from listings.schemas.alerts import (
     NotificationSchema,
     PreferenceSchema,
