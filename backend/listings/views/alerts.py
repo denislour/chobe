@@ -9,6 +9,7 @@ from rest_framework.viewsets import ModelViewSet
 
 from common.pagination import ListingPagination
 from common.throttles import MarketplaceMutationThrottle, MarketplaceReadThrottle
+from discovery.queries import public_listings
 from listings.models import Notification, NotificationPreference, SavedSearch
 from listings.schemas.alerts import (
     NotificationSchema,
@@ -20,7 +21,6 @@ from listings.serializers.alerts import (
     NotificationSerializer,
     SavedSearchSerializer,
 )
-from listings.services.search import public_listings
 
 
 @method_decorator(never_cache, name="dispatch")

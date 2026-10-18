@@ -6,9 +6,9 @@ from rest_framework import serializers
 from common.exceptions import (
     VersionConflict,
 )
+from discovery.queries import search_listings
 from listings.models import Notification, NotificationPreference, SavedSearch
 from listings.serializers.discovery import ListingSearchSerializer
-from listings.services.search import search_listings
 
 
 class SavedSearchSerializer(serializers.ModelSerializer):

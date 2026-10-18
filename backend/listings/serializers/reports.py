@@ -3,8 +3,8 @@ from typing import ClassVar
 from django.db import transaction
 from rest_framework import serializers
 
+from discovery.queries import public_listings
 from listings.models import Report, ReportDecision
-from listings.services.search import public_listings
 from shops.models import Shop
 
 

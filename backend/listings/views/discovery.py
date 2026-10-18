@@ -18,6 +18,7 @@ from common.throttles import (
     MarketplaceMutationThrottle,
     MarketplaceReadThrottle,
 )
+from discovery.queries import public_listings, search_listings
 from listings.models import Favorite, Listing
 from listings.public import record_listing_metric
 from listings.schemas.discovery import DiscoverySchema, FavoriteSchema, HomeSchema
@@ -27,7 +28,6 @@ from listings.serializers.discovery import (
     ListingPublicSerializer,
     ListingSearchSerializer,
 )
-from listings.services.search import public_listings, search_listings
 
 
 @method_decorator(never_cache, name="dispatch")

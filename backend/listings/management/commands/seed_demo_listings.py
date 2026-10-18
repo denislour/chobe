@@ -19,6 +19,7 @@ from accounts.models import AccountDataExport, DeletionRequest, ViewingHistory
 from categories.management.commands.seed_demo_categories import demo_categories
 from categories.services.attributes import validate_category_attributes
 from categories.services.publication import retire_category
+from discovery.queries import public_listings
 from listings.models import (
     Favorite,
     Listing,
@@ -35,7 +36,6 @@ from listings.models import (
 )
 from listings.services.images import process_listing_image
 from listings.services.management import draft_snapshot, erase_listing, six_months_after
-from listings.services.search import public_listings
 from shops.management.commands.seed_demo_shops import demo_shops
 from shops.models import ShopFollow
 

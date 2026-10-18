@@ -6,8 +6,8 @@ from django.db import transaction
 from django.db.models import Exists, OuterRef
 from django.utils import timezone
 
+from discovery.queries import public_listings, search_listings
 from listings.models import Notification, NotificationPreference, SavedSearch
-from listings.services.search import public_listings, search_listings
 
 
 def match_searches(listing_id=None, version=None, *, frequency="immediate"):

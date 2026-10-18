@@ -17,13 +17,13 @@ from categories.management.commands.seed_demo_categories import (
     finish_demo_taxonomy,
     seed_demo_taxonomy,
 )
+from discovery.queries import public_listings
 from listings.management.commands.seed_demo_listings import (
     seed_demo_engagement,
     seed_demo_listings,
     write_demo_guide,
 )
 from listings.models import Listing, Notification, Report
-from listings.services.search import public_listings
 from shops.management.commands.seed_demo_shops import seed_demo_shops
 from shops.models import Shop
 
