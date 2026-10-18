@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     "shops",
     "categories",
     "listings.apps.ListingsConfig",
+    "discovery.apps.DiscoveryConfig",
 ]
 
 MIDDLEWARE = [

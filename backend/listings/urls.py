@@ -5,14 +5,14 @@ from listings.views.alerts import (
     NotificationViewSet,
     SavedSearchViewSet,
 )
-from listings.views.discovery import FavoriteViewSet, HomeViewSet, ListingViewSet
+from listings.views.discovery import (
+    FavoriteViewSet,
+)
 from listings.views.management import ListingManagementViewSet
 from listings.views.moderation import ModerationViewSet
 from listings.views.reports import ReportManagementViewSet, ReportViewSet
 
 router = SimpleRouter(use_regex_path=False)
-router.register("listings", ListingViewSet, basename="listing")
-router.register("home", HomeViewSet, basename="home")
 router.register("me/listings", ListingManagementViewSet, basename="my-listing")
 router.register("me/favorites", FavoriteViewSet, basename="favorite")
 router.register("me/saved-searches", SavedSearchViewSet, basename="saved-search")
@@ -25,4 +25,5 @@ router.register(
 router.register("me/reports", ReportViewSet, basename="report")
 router.register("admin/moderation", ModerationViewSet, basename="moderation")
 router.register("admin/reports", ReportManagementViewSet, basename="report-management")
+
 urlpatterns = router.urls

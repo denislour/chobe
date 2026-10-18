@@ -7,8 +7,8 @@ from common.exceptions import (
     VersionConflict,
 )
 from discovery.queries import search_listings
+from discovery.serializers import ListingSearchSerializer
 from listings.models import Notification, NotificationPreference, SavedSearch
-from listings.serializers.discovery import ListingSearchSerializer
 
 
 class SavedSearchSerializer(serializers.ModelSerializer):
