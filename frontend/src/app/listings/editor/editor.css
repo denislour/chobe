@@ -1,4 +1,4 @@
-@import '../marketplace.css';
+@import '../../shared/styles/marketplace.css';
 fieldset {
   border: 0;
   padding: 0;

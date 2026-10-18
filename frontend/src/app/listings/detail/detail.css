@@ -1,4 +1,4 @@
-@import '../marketplace.css';
+@import '../../shared/styles/marketplace.css';
 .detail-layout {
   display: grid;
   grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);

@@ -27,7 +27,7 @@ interface AttributeControls {
   imports: [DatePipe, RouterLink, ReactiveFormsModule, AttributeFields, CategoryNav],
   providers: [CategoryManagementStore],
   templateUrl: './category-management.html',
-  styleUrls: ['../categories.css', './category-management.css'],
+  styleUrls: ['../../shared/styles/categories.css', './category-management.css'],
 })
 export class CategoryManagement implements OnInit {
   protected readonly form = new FormGroup({
