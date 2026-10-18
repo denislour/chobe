@@ -1,4 +1,4 @@
-@import '../../shared/styles/marketplace.css';
+@import '../../../shared/styles/marketplace.css';
 .row-actions {
   display: flex;
   flex-wrap: wrap;

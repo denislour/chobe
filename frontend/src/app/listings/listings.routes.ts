@@ -40,7 +40,7 @@ export const sellerListingRoutes: Routes = [
     path: '',
     pathMatch: 'full',
     canActivate: [authGuard],
-    loadComponent: () => import('@app/listings/dashboard/dashboard').then((m) => m.Dashboard),
+    loadComponent: () => import('@app/features/seller/listing-management/dashboard').then((m) => m.Dashboard),
   },
   {
     path: 'new',
