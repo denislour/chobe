@@ -23,7 +23,7 @@ export const marketplaceRoutes: Routes = [
   {
     path: 'alerts',
     canActivate: [authGuard],
-    loadComponent: () => import('@app/listings/alerts/alerts').then((m) => m.Alerts),
+    loadComponent: () => import('@app/features/engagement/alerts/alerts').then((m) => m.Alerts),
   },
   {
     path: 'compare',
