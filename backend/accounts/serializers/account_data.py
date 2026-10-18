@@ -5,6 +5,11 @@ from django.utils import timezone
 from rest_framework import serializers
 
 from accounts.models import ConsentEvent, PrivacySettings, Profile, User, ViewingHistory
+from engagement.serializers.account_data import (
+    FavoriteSnapshotSerializer,
+    SavedSearchSnapshotSerializer,
+    ShopFollowSnapshotSerializer,
+)
 from listings.models import (
     Favorite,
     Listing,
@@ -12,18 +17,11 @@ from listings.models import (
     Report,
     SavedSearch,
 )
-from listings.serializers.account_data import (
-    FavoriteSnapshotSerializer,
-    ListingSnapshotSerializer,
-    NotificationPreferenceSnapshotSerializer,
-    ReportSnapshotSerializer,
-    SavedSearchSnapshotSerializer,
-)
+from listings.serializers.account_data import ListingSnapshotSerializer
+from moderation.serializers.account_data import ReportSnapshotSerializer
+from notifications.account_data import NotificationPreferenceSnapshotSerializer
 from shops.models import Shop
-from shops.serializers.account_data import (
-    ShopFollowSnapshotSerializer,
-    ShopSnapshotSerializer,
-)
+from shops.serializers.account_data import ShopSnapshotSerializer
 
 
 class AccountSnapshotSerializer(serializers.ModelSerializer):
