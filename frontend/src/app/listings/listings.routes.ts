@@ -27,7 +27,7 @@ export const marketplaceRoutes: Routes = [
   },
   {
     path: 'compare',
-    loadComponent: () => import('@app/listings/comparison/comparison').then((m) => m.Comparison),
+    loadComponent: () => import('@app/features/marketplace/comparison/comparison').then((m) => m.Comparison),
   },
   {
     path: 'reports',

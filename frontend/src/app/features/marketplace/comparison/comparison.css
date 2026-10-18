@@ -1,4 +1,4 @@
-@import '../../shared/styles/marketplace.css';
+@import '../../../shared/styles/marketplace.css';
 table {
   min-width: 640px;
   table-layout: fixed;
