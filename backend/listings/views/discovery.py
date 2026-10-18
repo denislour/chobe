@@ -15,6 +15,11 @@ from rest_framework.viewsets import ModelViewSet
 from accounts.services.privacy import viewing_history_for
 from categories.services.publication import visible_categories
 from common.pagination import ListingPagination
+from common.throttles import (
+    ContactThrottle,
+    MarketplaceMutationThrottle,
+    MarketplaceReadThrottle,
+)
 from listings.models import Favorite, Listing, ListingMetric
 from listings.schemas.discovery import DiscoverySchema, FavoriteSchema, HomeSchema
 from listings.serializers.discovery import (
@@ -24,11 +29,6 @@ from listings.serializers.discovery import (
     ListingSearchSerializer,
 )
 from listings.services.search import public_listings, search_listings
-from listings.throttles import (
-    ContactThrottle,
-    MarketplaceMutationThrottle,
-    MarketplaceReadThrottle,
-)
 
 
 @method_decorator(never_cache, name="dispatch")

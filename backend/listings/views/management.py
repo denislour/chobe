@@ -14,6 +14,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from common.pagination import ListingPagination
+from common.throttles import MarketplaceMutationThrottle, MarketplaceReadThrottle
 from listings.models import Listing
 from listings.schemas.management import ListingManagementSchema
 from listings.serializers.management import (
@@ -35,7 +36,6 @@ from listings.services.management import (
     submit_listing,
 )
 from listings.services.moderation import appeal_listing
-from listings.throttles import MarketplaceMutationThrottle, MarketplaceReadThrottle
 
 
 @method_decorator(never_cache, name="dispatch")

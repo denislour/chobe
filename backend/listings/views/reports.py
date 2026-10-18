@@ -7,6 +7,11 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from common.pagination import ListingPagination
+from common.throttles import (
+    MarketplaceMutationThrottle,
+    MarketplaceReadThrottle,
+    ReportThrottle,
+)
 from listings.models import Report
 from listings.permissions import ReportReviewPermission
 from listings.schemas.reports import ReportManagementSchema, ReportSchema
@@ -16,11 +21,6 @@ from listings.serializers.reports import (
     ReportSerializer,
 )
 from listings.services.reports import decide_report
-from listings.throttles import (
-    MarketplaceMutationThrottle,
-    MarketplaceReadThrottle,
-    ReportThrottle,
-)
 
 
 @method_decorator(never_cache, name="dispatch")

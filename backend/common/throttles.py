@@ -1,7 +1,5 @@
 from rest_framework.throttling import SimpleRateThrottle, UserRateThrottle
 
-from accounts.throttles import AccountMutationThrottle
-
 
 class MarketplaceReadThrottle(SimpleRateThrottle):
     scope = "marketplace_read"
@@ -15,7 +13,9 @@ class MarketplaceReadThrottle(SimpleRateThrottle):
         return self.cache_format % {"scope": self.scope, "ident": ident}
 
 
-class MarketplaceMutationThrottle(AccountMutationThrottle):
+class MarketplaceMutationThrottle(UserRateThrottle):
+    scope = "account_mutation"
+
     def get_cache_key(self, request, view):
         if request.method in ("GET", "HEAD", "OPTIONS"):
             return None

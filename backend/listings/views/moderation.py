@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from common.pagination import ListingPagination
+from common.throttles import MarketplaceMutationThrottle, MarketplaceReadThrottle
 from listings.models import ModerationCase
 from listings.permissions import ModerationPermission
 from listings.schemas.moderation import ModerationSchema
@@ -17,7 +18,6 @@ from listings.serializers.management import (
     ModerationSerializer,
 )
 from listings.services.moderation import decide_listing
-from listings.throttles import MarketplaceMutationThrottle, MarketplaceReadThrottle
 
 
 @method_decorator(never_cache, name="dispatch")
