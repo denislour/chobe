@@ -1,11 +1,13 @@
 from django.db import transaction
 from rest_framework.exceptions import PermissionDenied, ValidationError
 
-from common.exceptions import (
-    VersionConflict,
+from common.exceptions import VersionConflict
+from listings.models import (
+    Listing,
+    Report,
+    ReportDecision,
 )
-from listings.models import Listing, Report, ReportDecision
-from listings.services.management import audit
+from listings.public import hide_reported_listing
 from shops.services.moderation import moderate_shop
 
 
@@ -27,13 +29,7 @@ def decide_report(user, report, values):
             if report.listing_id is None:
                 raise ValidationError("This report does not target a listing.")
             listing = Listing.objects.select_for_update().get(pk=report.listing_id)
-            if listing.status != "deleted":
-                listing.status = "hidden"
-                listing.moderation_hold = True
-                listing.version += 1
-                listing.submitted_version = None
-                listing.save()
-                audit(listing, user, "report_hidden", values["reason"])
+            hide_reported_listing(listing, user, values["reason"])
         if action == "suspend_shop":
             shop_id = report.shop_id or report.listing.shop_id
             moderate_shop(shop_id, user, suspend=True)

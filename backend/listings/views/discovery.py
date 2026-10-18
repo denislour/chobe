@@ -1,9 +1,7 @@
 import io
 
-from django.db.models import F
 from django.http import FileResponse, Http404
 from django.shortcuts import get_object_or_404
-from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
 from rest_framework.decorators import action
@@ -20,7 +18,8 @@ from common.throttles import (
     MarketplaceMutationThrottle,
     MarketplaceReadThrottle,
 )
-from listings.models import Favorite, Listing, ListingMetric
+from listings.models import Favorite, Listing
+from listings.public import record_listing_metric
 from listings.schemas.discovery import DiscoverySchema, FavoriteSchema, HomeSchema
 from listings.serializers.discovery import (
     CompareQuerySerializer,
@@ -60,10 +59,7 @@ class ListingViewSet(ModelViewSet):
 
     def retrieve(self, request, pk=None):
         listing = self.get_object()
-        metric, _ = ListingMetric.objects.get_or_create(
-            listing=listing, day=timezone.localdate(), kind="view"
-        )
-        ListingMetric.objects.filter(pk=metric.pk).update(count=F("count") + 1)
+        record_listing_metric(listing, "view")
         return Response(self.get_serializer(listing).data)
 
     @action(detail=True, methods=["get"], url_path="image/<uuid:image_id>")
@@ -91,12 +87,7 @@ class ListingViewSet(ModelViewSet):
         listing = self.get_object()
         if not ListingPublicSerializer(listing).data["phone"]:
             raise ValidationError("This seller has not shared a phone number.")
-        metric, _ = ListingMetric.objects.get_or_create(
-            listing=listing,
-            day=timezone.localdate(),
-            kind=serializer.validated_data["kind"],
-        )
-        ListingMetric.objects.filter(pk=metric.pk).update(count=F("count") + 1)
+        record_listing_metric(listing, serializer.validated_data["kind"])
         return Response(status=204)
 
     @action(detail=False, methods=["get"])

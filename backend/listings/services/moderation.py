@@ -1,13 +1,12 @@
 from django.db import transaction
-from django.utils import timezone
 from rest_framework.exceptions import PermissionDenied, ValidationError
 
-from categories.services.attributes import validate_category_attributes
-from categories.services.publication import visible_categories
-from common.exceptions import (
-    VersionConflict,
+from common.exceptions import VersionConflict
+from listings.models import (
+    Listing,
+    ModerationCase,
 )
-from listings.models import Listing, ModerationCase
+from listings.public import apply_review_decision
 from listings.services.management import audit
 
 
@@ -32,40 +31,18 @@ def decide_listing(user, case, values):
             raise VersionConflict(
                 "This review is out of date. Reload the current submitted version."
             )
-        if listing.status == "deleted" or listing.retention_due_at <= timezone.now():
-            raise ValidationError("This listing is no longer available for review.")
         decision = values["decision"]
-        if decision == "approve":
-            if listing.shop.status != "active" or not listing.shop.owner.is_active:
-                raise ValidationError("The shop must be active before publishing.")
-            snapshot = case.revision.snapshot
-            if snapshot["category"] not in visible_categories():
-                raise ValidationError("The category is no longer available.")
-            validate_category_attributes(
-                snapshot["category"], snapshot["schema_version"], snapshot["attributes"]
-            )
-            listing.published = snapshot
-            listing.published_at = timezone.now()
-            listing.status = "active"
-            listing.moderation_hold = False
-        else:
-            listing.status = "rejected"
-            if listing.published.get("version") == case.revision.version:
-                listing.published = {}
-                listing.published_at = None
+        apply_review_decision(listing, case.revision, user, decision, values["reason"])
         case.status = "approved" if decision == "approve" else "rejected"
         case.source = "manual"
         case.reason = values["reason"]
         case.appeal_open = False
         case.version += 1
         case.save()
-        listing.version += 1
-        listing.save()
-        audit(listing, user, decision, values["reason"])
         if decision == "approve":
             from listings.tasks.notifications import match_listing_searches
 
-            match_listing_searches.enqueue(listing.pk, snapshot["version"])
+            match_listing_searches.enqueue(listing.pk, case.revision.version)
     return case
 
 
