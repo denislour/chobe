@@ -18,7 +18,7 @@ export const marketplaceRoutes: Routes = [
   {
     path: 'saved',
     canActivate: [authGuard],
-    loadComponent: () => import('@app/listings/library/library').then((m) => m.Library),
+    loadComponent: () => import('@app/features/engagement/library/library').then((m) => m.Library),
   },
   {
     path: 'alerts',
