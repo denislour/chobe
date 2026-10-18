@@ -1,7 +1,7 @@
 from typing import ClassVar
 
 from common.schemas import CSRFSchema
-from listings.serializers.reports import ReportAuditSerializer, ReportSerializer
+from moderation.serializers.reports import ReportAuditSerializer, ReportSerializer
 
 
 class ReportSchema(CSRFSchema):

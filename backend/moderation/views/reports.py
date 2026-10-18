@@ -12,15 +12,17 @@ from common.throttles import (
     MarketplaceReadThrottle,
     ReportThrottle,
 )
-from listings.models import Report
-from listings.schemas.reports import ReportManagementSchema, ReportSchema
-from listings.serializers.reports import (
+from listings.models import (
+    Report,
+)
+from listings.services.reports import decide_report
+from moderation.permissions import ReportReviewPermission
+from moderation.schemas.reports import ReportManagementSchema, ReportSchema
+from moderation.serializers.reports import (
     ReportAuditSerializer,
     ReportDecisionSerializer,
     ReportSerializer,
 )
-from listings.services.reports import decide_report
-from moderation.permissions import ReportReviewPermission
 
 
 @method_decorator(never_cache, name="dispatch")
@@ -92,7 +94,7 @@ class ReportManagementViewSet(ModelViewSet):
         )
         return Response(ReportSerializer(report).data)
 
-    @action(detail=True, methods=["get"])
+    @action(detail=True, methods=["get"], pagination_class=None)
     def history(self, request, pk=None):
         return Response(
             ReportAuditSerializer(
