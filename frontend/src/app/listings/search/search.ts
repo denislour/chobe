@@ -6,7 +6,7 @@ import { AuthStore } from '@app/auth/auth.store';
 import { CategoryStore } from '@app/domain/category/category.store';
 import { AttributeFields } from '@app/domain/category/attribute-fields/attribute-fields';
 import { AttributeValues } from '@app/domain/category/category-types';
-import { AlertsStore } from '@app/listings/alerts/alerts.store';
+import { AlertsStore } from '@app/domain/engagement/alerts.store';
 import { ListingCard } from '@app/domain/listing/listing-card/listing-card';
 import { MarketplaceNav } from '@app/listings/marketplace-nav/marketplace-nav';
 import { SearchFilters } from '@app/domain/listing/listing-types';

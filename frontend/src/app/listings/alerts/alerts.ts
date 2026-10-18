@@ -7,7 +7,7 @@ import { CategoryStore } from '@app/domain/category/category.store';
 import { AttributeValues } from '@app/domain/category/category-types';
 import { MarketplaceNav } from '@app/listings/marketplace-nav/marketplace-nav';
 import { SavedSearch } from '@app/data-access/engagement/alerts-api';
-import { AlertsStore } from './alerts.store';
+import { AlertsStore } from '@app/domain/engagement/alerts.store';
 @Component({
   selector: 'app-alerts',
   imports: [AttributeFields, DatePipe, ReactiveFormsModule, RouterLink, MarketplaceNav],
