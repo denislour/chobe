@@ -25,7 +25,6 @@ from listings.serializers.management import (
     ListingDraftSerializer,
     ListingStatusSerializer,
     ListingVersionSerializer,
-    ModerationSerializer,
 )
 from listings.services.images import add_image, arrange_images
 from listings.services.management import (
@@ -36,6 +35,9 @@ from listings.services.management import (
     submit_listing,
 )
 from listings.services.moderation import appeal_listing
+from moderation.serializers.reviews import (
+    ModerationSerializer,
+)
 
 
 @method_decorator(never_cache, name="dispatch")

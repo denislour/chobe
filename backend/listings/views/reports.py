@@ -13,7 +13,6 @@ from common.throttles import (
     ReportThrottle,
 )
 from listings.models import Report
-from listings.permissions import ReportReviewPermission
 from listings.schemas.reports import ReportManagementSchema, ReportSchema
 from listings.serializers.reports import (
     ReportAuditSerializer,
@@ -21,6 +20,7 @@ from listings.serializers.reports import (
     ReportSerializer,
 )
 from listings.services.reports import decide_report
+from moderation.permissions import ReportReviewPermission
 
 
 @method_decorator(never_cache, name="dispatch")

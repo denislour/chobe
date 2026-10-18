@@ -3,7 +3,10 @@ from typing import ClassVar
 from drf_spectacular.types import OpenApiTypes
 
 from common.schemas import CSRFSchema
-from listings.serializers.management import ListingAuditSerializer, ModerationSerializer
+from listings.serializers.management import (
+    ListingAuditSerializer,
+)
+from moderation.serializers.reviews import ModerationSerializer
 
 
 class ModerationSchema(CSRFSchema):

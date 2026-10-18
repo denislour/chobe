@@ -6,6 +6,8 @@ from common.schemas import CSRFSchema
 from listings.serializers.management import (
     ListingAuditSerializer,
     ListingDraftSerializer,
+)
+from moderation.serializers.reviews import (
     ModerationSerializer,
 )
 
