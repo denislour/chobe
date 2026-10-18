@@ -19,6 +19,6 @@ export const categoryManagementRoutes: Routes = [
     path: '',
     canActivate: [authGuard],
     loadComponent: () =>
-      import('@app/categories/management/category-management').then((m) => m.CategoryManagement),
+      import('@app/features/admin/categories/category-management').then((m) => m.CategoryManagement),
   },
 ];
