@@ -5,7 +5,7 @@ export const marketplaceRoutes: Routes = [
   {
     path: '',
     pathMatch: 'full',
-    loadComponent: () => import('@app/listings/home/home').then((m) => m.Home),
+    loadComponent: () => import('@app/features/marketplace/home/home').then((m) => m.Home),
   },
   {
     path: 'search',
