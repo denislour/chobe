@@ -22,6 +22,6 @@ export const shopsRoutes: Routes = [
   {
     path: ':slug',
     loadComponent: () =>
-      import('@app/shops/shop-storefront/shop-storefront').then((m) => m.ShopStorefront),
+      import('@app/features/marketplace/shop-storefront/shop-storefront').then((m) => m.ShopStorefront),
   },
 ];

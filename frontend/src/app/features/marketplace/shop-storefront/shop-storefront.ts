@@ -15,7 +15,7 @@ import { StorefrontStore } from './storefront.store';
   imports: [ListingSearchPanel, ReportForm, DatePipe, RouterLink, ShopNav],
   providers: [StorefrontStore],
   templateUrl: './shop-storefront.html',
-  styleUrls: ['../../shared/styles/shops.css', './shop-storefront.css'],
+  styleUrls: ['../../../shared/styles/shops.css', './shop-storefront.css'],
 })
 export class ShopStorefront implements OnInit {
   protected readonly slug = signal('');
