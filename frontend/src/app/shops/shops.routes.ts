@@ -13,7 +13,7 @@ export const sellerShopRoutes: Routes = [
     path: 'shop/preview/:slug',
     canActivate: [authGuard],
     loadComponent: () =>
-      import('@app/shops/shop-preview/shop-preview').then((m) => m.ShopPreview),
+      import('@app/features/seller/shop-preview/shop-preview').then((m) => m.ShopPreview),
   },
 ];
 

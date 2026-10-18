@@ -9,7 +9,7 @@ import { ShopPreviewStore } from './shop-preview.store';
   imports: [RouterLink, ShopCard],
   providers: [ShopPreviewStore],
   templateUrl: './shop-preview.html',
-  styleUrls: ['../../accounts/account.css', './shop-preview.css'],
+  styleUrls: ['../../../accounts/account.css', './shop-preview.css'],
 })
 export class ShopPreview implements OnInit {
   protected readonly slug = signal('');
