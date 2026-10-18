@@ -8,7 +8,7 @@ import { AttributeFields } from '@app/domain/category/attribute-fields/attribute
 import { AttributeValues } from '@app/domain/category/category-types';
 import { AlertsStore } from '@app/domain/engagement/alerts.store';
 import { ListingCard } from '@app/domain/listing/listing-card/listing-card';
-import { MarketplaceNav } from '@app/listings/marketplace-nav/marketplace-nav';
+import { MarketplaceNav } from '@app/layouts/marketplace-nav/marketplace-nav';
 import { SearchFilters } from '@app/domain/listing/listing-types';
 import { SearchStore } from '@app/domain/listing/search/search.store';
 @Component({

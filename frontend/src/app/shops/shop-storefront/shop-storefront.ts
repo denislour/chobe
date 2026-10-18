@@ -7,7 +7,7 @@ import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { combineLatest, map } from 'rxjs';
 import { AuthStore } from '@app/auth/auth.store';
-import { ShopNav } from '@app/shops/shop-nav/shop-nav';
+import { ShopNav } from '@app/layouts/shop-nav/shop-nav';
 import { StorefrontStore } from './storefront.store';
 
 @Component({

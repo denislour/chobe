@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { MarketplaceNav } from '@app/listings/marketplace-nav/marketplace-nav';
+import { MarketplaceNav } from '@app/layouts/marketplace-nav/marketplace-nav';
 import { ListingCard } from '@app/domain/listing/listing-card/listing-card';
 import { HomeStore } from './home.store';
 @Component({

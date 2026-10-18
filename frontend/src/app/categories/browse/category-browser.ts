@@ -3,7 +3,7 @@ import { Component, Injector, OnInit, signal, viewChild } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 import { AttributeFields } from '@app/domain/category/attribute-fields/attribute-fields';
-import { CategoryNav } from '@app/categories/category-nav/category-nav';
+import { CategoryNav } from '@app/layouts/category-nav/category-nav';
 import { CategoryData } from '@app/domain/category/category-types';
 import { CategoryStore } from '@app/domain/category/category.store';
 

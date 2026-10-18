@@ -6,7 +6,7 @@ import { map } from 'rxjs';
 import { AuthStore } from '@app/auth/auth.store';
 import { ComparisonStore } from '@app/domain/listing/comparison.store';
 import { listingPrice } from '@app/domain/listing/listing-types';
-import { MarketplaceNav } from '@app/listings/marketplace-nav/marketplace-nav';
+import { MarketplaceNav } from '@app/layouts/marketplace-nav/marketplace-nav';
 import { ReportForm } from '@app/domain/moderation/report-form/report-form';
 import { DetailStore } from './detail.store';
 @Component({

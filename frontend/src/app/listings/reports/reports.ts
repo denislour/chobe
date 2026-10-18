@@ -2,7 +2,7 @@ import { DatePipe } from '@angular/common';
 import { Component, OnInit, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { MarketplaceNav } from '@app/listings/marketplace-nav/marketplace-nav';
+import { MarketplaceNav } from '@app/layouts/marketplace-nav/marketplace-nav';
 import { ReportDecisionValues } from '@app/data-access/moderation/reports-api';
 import { ReportsStore } from './reports.store';
 @Component({

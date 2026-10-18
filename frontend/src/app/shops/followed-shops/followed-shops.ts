@@ -3,7 +3,7 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { Router, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 import { AuthStore } from '@app/auth/auth.store';
-import { ShopNav } from '@app/shops/shop-nav/shop-nav';
+import { ShopNav } from '@app/layouts/shop-nav/shop-nav';
 import { FollowedShopsStore } from './followed-shops.store';
 
 @Component({

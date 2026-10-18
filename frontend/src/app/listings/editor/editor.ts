@@ -14,7 +14,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 import { AttributeFields } from '@app/domain/category/attribute-fields/attribute-fields';
 import { AttributeValues } from '@app/domain/category/category-types';
-import { MarketplaceNav } from '@app/listings/marketplace-nav/marketplace-nav';
+import { MarketplaceNav } from '@app/layouts/marketplace-nav/marketplace-nav';
 import { ListingValues, listingPrice } from '@app/domain/listing/listing-types';
 import { EditorStore } from './editor.store';
 @Component({

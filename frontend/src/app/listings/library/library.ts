@@ -2,7 +2,7 @@ import { Component, Injector, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 import { ListingCard } from '@app/domain/listing/listing-card/listing-card';
-import { MarketplaceNav } from '@app/listings/marketplace-nav/marketplace-nav';
+import { MarketplaceNav } from '@app/layouts/marketplace-nav/marketplace-nav';
 import { LibraryStore } from './library.store';
 @Component({
   selector: 'app-library',
