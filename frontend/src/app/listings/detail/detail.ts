@@ -4,7 +4,7 @@ import { Meta, Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 import { AuthStore } from '@app/auth/auth.store';
-import { ComparisonStore } from '@app/listings/comparison/comparison.store';
+import { ComparisonStore } from '@app/domain/listing/comparison.store';
 import { listingPrice } from '@app/domain/listing/listing-types';
 import { MarketplaceNav } from '@app/listings/marketplace-nav/marketplace-nav';
 import { ReportForm } from '@app/domain/moderation/report-form/report-form';

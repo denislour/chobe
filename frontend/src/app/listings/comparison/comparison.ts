@@ -4,7 +4,7 @@ import { map } from 'rxjs';
 import { MarketplaceNav } from '@app/listings/marketplace-nav/marketplace-nav';
 import { listingPrice } from '@app/domain/listing/listing-types';
 import { ComparisonPageStore } from './comparison-page.store';
-import { ComparisonStore } from './comparison.store';
+import { ComparisonStore } from '@app/domain/listing/comparison.store';
 @Component({
   selector: 'app-comparison',
   imports: [RouterLink, MarketplaceNav],

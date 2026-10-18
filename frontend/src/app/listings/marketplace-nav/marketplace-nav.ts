@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
-import { ComparisonStore } from '@app/listings/comparison/comparison.store';
+import { ComparisonStore } from '@app/domain/listing/comparison.store';
 @Component({
   selector: 'app-marketplace-nav',
   imports: [RouterLink, RouterLinkActive, ReactiveFormsModule],
