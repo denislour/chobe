@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { components } from '@app/data-access/generated/schema';
 import { Page, SearchFilters } from '@app/domain/listing/listing-types';
 export interface SavedSearchValues {
   name: string;
@@ -9,26 +10,11 @@ export interface SavedSearchValues {
   frequency: 'daily' | 'immediate';
   version?: number;
 }
-export interface SavedSearch extends SavedSearchValues {
-  id: number;
-  version: number;
-  created_at: string;
+export interface SavedSearch extends Omit<Required<components['schemas']['SavedSearch']>, 'filters'> {
+  filters: SearchFilters;
 }
-export interface NotificationItem {
-  id: number;
-  listing_id: number;
-  title: string;
-  available: boolean;
-  search_name: string;
-  read_at: string | null;
-  email_status: string;
-  created_at: string;
-}
-export interface NotificationPreferences {
-  inbox: boolean;
-  email: boolean;
-  version: number;
-}
+export type NotificationItem = components['schemas']['Notification'];
+export type NotificationPreferences = Required<components['schemas']['NotificationPreference']>;
 @Injectable({ providedIn: 'root' })
 export class AlertsApi {
   constructor(private readonly http: HttpClient) {}
