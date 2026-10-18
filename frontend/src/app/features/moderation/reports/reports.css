@@ -1,4 +1,4 @@
-@import '../../shared/styles/marketplace.css';
+@import '../../../shared/styles/marketplace.css';
 .reports-layout {
   display: grid;
   grid-template-columns: 320px minmax(0, 1fr);

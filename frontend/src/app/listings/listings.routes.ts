@@ -32,7 +32,7 @@ export const marketplaceRoutes: Routes = [
   {
     path: 'reports',
     canActivate: [authGuard],
-    loadComponent: () => import('@app/listings/reports/reports').then((m) => m.Reports),
+    loadComponent: () => import('@app/features/moderation/reports/reports').then((m) => m.Reports),
   },
 ];
 export const sellerListingRoutes: Routes = [
@@ -65,6 +65,6 @@ export const reviewRoutes: Routes = [
     path: 'reports',
     canActivate: [authGuard],
     data: { admin: true },
-    loadComponent: () => import('@app/listings/reports/reports').then((m) => m.Reports),
+    loadComponent: () => import('@app/features/moderation/reports/reports').then((m) => m.Reports),
   },
 ];
