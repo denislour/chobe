@@ -2,7 +2,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { ShopApi } from './shop-api';
-import { shopFixture } from '@app/shops/shop-fixtures';
+import { shopFixture } from '@app/domain/shop/shop-fixtures';
 
 describe('ShopApi', () => {
   let api: ShopApi;

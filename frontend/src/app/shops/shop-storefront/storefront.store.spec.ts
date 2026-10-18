@@ -1,7 +1,7 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import { storefrontFixture } from '@app/shops/shop-fixtures';
+import { storefrontFixture } from '@app/domain/shop/shop-fixtures';
 import { StorefrontStore } from './storefront.store';
 
 const url = '/api/v1/shop-storefronts/moc-home/';

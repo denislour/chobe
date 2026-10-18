@@ -1,7 +1,7 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { map, tap } from 'rxjs';
-import { ShopCard } from '@app/shops/shop-card/shop-card';
+import { ShopCard } from '@app/domain/shop/shop-card/shop-card';
 import { ShopPreviewStore } from './shop-preview.store';
 
 @Component({

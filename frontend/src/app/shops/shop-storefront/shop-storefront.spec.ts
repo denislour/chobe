@@ -5,7 +5,7 @@ import { provideRouter, Router } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { routes } from '@app/app.routes';
 import { AuthStore } from '@app/auth/auth.store';
-import { storefrontFixture } from '@app/shops/shop-fixtures';
+import { storefrontFixture } from '@app/domain/shop/shop-fixtures';
 
 describe('ShopStorefront', () => {
   let http: HttpTestingController;

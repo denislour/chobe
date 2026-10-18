@@ -4,7 +4,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { vi } from 'vitest';
 import { AuthStore } from '@app/auth/auth.store';
-import { shopFixture } from '@app/shops/shop-fixtures';
+import { shopFixture } from '@app/domain/shop/shop-fixtures';
 import { ShopStore } from '@app/shops/shop.store';
 import { ShopManagement } from './shop-management';
 

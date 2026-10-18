@@ -8,7 +8,7 @@ import { Router, RouterLink } from '@angular/router';
 import { AccountNav } from '@app/accounts/account-nav/account-nav';
 import { AuthStore } from '@app/auth/auth.store';
 import { OwnerShopStatus, ShopData, ShopDisplayData } from '@app/data-access/shops/shop-api';
-import { ShopCard } from '@app/shops/shop-card/shop-card';
+import { ShopCard } from '@app/domain/shop/shop-card/shop-card';
 import { ShopStore } from '@app/shops/shop.store';
 
 @Component({
