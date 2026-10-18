@@ -11,7 +11,7 @@ import {
   CategoryManagementApi,
   CategoryRevision,
   TaxonomyCapabilities,
-} from './category-management-api';
+} from '@app/data-access/categories/category-management-api';
 
 interface ManagementState {
   categories: CategoryDraft[];

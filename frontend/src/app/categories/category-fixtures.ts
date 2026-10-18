@@ -2,7 +2,7 @@ import { CategoryData } from './category-types';
 import {
   CategoryDraft,
   TaxonomyCapabilities,
-} from '@app/categories/management/category-management-api';
+} from '@app/data-access/categories/category-management-api';
 
 export const categoryFixture: CategoryData = {
   id: '22222222-2222-4222-8222-222222222222',

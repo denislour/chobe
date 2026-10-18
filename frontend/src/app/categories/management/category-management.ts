@@ -6,7 +6,7 @@ import { RouterLink } from '@angular/router';
 import { AttributeFields } from '@app/categories/attribute-fields/attribute-fields';
 import { CategoryNav } from '@app/categories/category-nav/category-nav';
 import { AttributeDefinition, AttributeType, CategoryData } from '@app/categories/category-types';
-import { CategoryDraft, CategoryDraftValues, CategoryRevision } from './category-management-api';
+import { CategoryDraft, CategoryDraftValues, CategoryRevision } from '@app/data-access/categories/category-management-api';
 import { CategoryManagementStore } from './category-management.store';
 
 interface AttributeControls {
