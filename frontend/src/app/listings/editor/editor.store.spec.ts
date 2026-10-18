@@ -2,7 +2,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { categoryFixture } from '@app/domain/category/category-fixtures';
-import { draftFixture } from '@app/listings/listing-fixtures';
+import { draftFixture } from '@app/domain/listing/listing-fixtures';
 import { EditorStore } from './editor.store';
 describe('EditorStore', () => {
   let store: EditorStore;

@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { ListingAudit, ModerationCase, Page } from '@app/listings/listing-types';
+import { ListingAudit, ModerationCase, Page } from '@app/domain/listing/listing-types';
 @Injectable({ providedIn: 'root' })
 export class ModerationApi {
   constructor(private readonly http: HttpClient) {}

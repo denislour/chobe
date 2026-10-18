@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Page, SearchFilters } from '@app/listings/listing-types';
+import { Page, SearchFilters } from '@app/domain/listing/listing-types';
 export interface SavedSearchValues {
   name: string;
   filters: SearchFilters;

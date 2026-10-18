@@ -6,7 +6,7 @@ import {
   ListingDraft,
   ListingValues,
   ModerationCase,
-} from '@app/listings/listing-types';
+} from '@app/domain/listing/listing-types';
 @Injectable({ providedIn: 'root' })
 export class ListingEditorApi {
   constructor(private readonly http: HttpClient) {}

@@ -2,7 +2,7 @@ import { Component, Injector, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 import { MarketplaceNav } from '@app/listings/marketplace-nav/marketplace-nav';
-import { listingPrice } from '@app/listings/listing-types';
+import { listingPrice } from '@app/domain/listing/listing-types';
 import { ComparisonPageStore } from './comparison-page.store';
 import { ComparisonStore } from './comparison.store';
 @Component({

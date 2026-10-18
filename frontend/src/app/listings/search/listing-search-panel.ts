@@ -1,6 +1,6 @@
 import { Component, effect, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { ListingCard } from '@app/listings/listing-card/listing-card';
+import { ListingCard } from '@app/domain/listing/listing-card/listing-card';
 import { SearchStore } from './search.store';
 @Component({
   selector: 'app-listing-search-panel',

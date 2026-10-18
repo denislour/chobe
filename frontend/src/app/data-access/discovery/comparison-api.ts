@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { PublicListing } from '@app/listings/listing-types';
+import { PublicListing } from '@app/domain/listing/listing-types';
 export interface ComparisonResult {
   results: PublicListing[];
   unavailable: number[];

@@ -3,7 +3,7 @@ import { Component, OnInit, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { MarketplaceNav } from '@app/listings/marketplace-nav/marketplace-nav';
-import { listingPrice } from '@app/listings/listing-types';
+import { listingPrice } from '@app/domain/listing/listing-types';
 import { ModerationStore } from './moderation.store';
 @Component({
   selector: 'app-moderation',

@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Page, PublicListing } from '@app/listings/listing-types';
+import { Page, PublicListing } from '@app/domain/listing/listing-types';
 @Injectable({ providedIn: 'root' })
 export class LibraryApi {
   constructor(private readonly http: HttpClient) {}

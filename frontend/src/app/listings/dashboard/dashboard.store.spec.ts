@@ -1,7 +1,7 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import { draftFixture } from '@app/listings/listing-fixtures';
+import { draftFixture } from '@app/domain/listing/listing-fixtures';
 import { DashboardStore } from './dashboard.store';
 describe('DashboardStore', () => {
   it('requires the current version for an owner action and keeps the list after conflict', () => {

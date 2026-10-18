@@ -1,7 +1,7 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import { reviewFixture } from '@app/listings/listing-fixtures';
+import { reviewFixture } from '@app/domain/listing/listing-fixtures';
 import { ModerationStore } from './moderation.store';
 describe('ModerationStore', () => {
   let store: ModerationStore;

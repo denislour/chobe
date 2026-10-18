@@ -12,7 +12,7 @@ import {
   ListingDraft,
   ListingValues,
   ModerationCase,
-} from '@app/listings/listing-types';
+} from '@app/domain/listing/listing-types';
 import { ListingEditorApi } from '@app/data-access/listings/listing-editor-api';
 interface EditorState {
   listing: ListingDraft | null;

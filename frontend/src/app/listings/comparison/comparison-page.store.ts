@@ -6,7 +6,7 @@ import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { of, pipe, switchMap } from 'rxjs';
 import { AttributeDefinition } from '@app/domain/category/category-types';
 import { listingError } from '@app/shared/errors/listing-errors';
-import { PublicListing } from '@app/listings/listing-types';
+import { PublicListing } from '@app/domain/listing/listing-types';
 import { ComparisonApi } from '@app/data-access/discovery/comparison-api';
 interface CompareState {
   listings: PublicListing[];

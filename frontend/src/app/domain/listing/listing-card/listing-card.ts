@@ -2,7 +2,7 @@ import { Component, input } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { AuthStore } from '@app/auth/auth.store';
 import { ComparisonStore } from '@app/listings/comparison/comparison.store';
-import { PublicListing, listingPrice } from '@app/listings/listing-types';
+import { PublicListing, listingPrice } from '@app/domain/listing/listing-types';
 import { ListingCardStore } from './listing-card.store';
 @Component({
   selector: 'app-listing-card',

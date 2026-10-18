@@ -7,7 +7,7 @@ import { pipe, switchMap } from 'rxjs';
 import { CategoryApi } from '@app/data-access/categories/category-api';
 import { CategoryData } from '@app/domain/category/category-types';
 import { listingError } from '@app/shared/errors/listing-errors';
-import { PublicListing } from '@app/listings/listing-types';
+import { PublicListing } from '@app/domain/listing/listing-types';
 import { DiscoveryApi } from '@app/data-access/discovery/discovery-api';
 interface HomeState {
   categories: CategoryData[];

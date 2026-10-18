@@ -5,7 +5,7 @@ import { patchState, signalState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { pipe, switchMap } from 'rxjs';
 import { listingError } from '@app/shared/errors/listing-errors';
-import { PublicListing, SearchFilters } from '@app/listings/listing-types';
+import { PublicListing, SearchFilters } from '@app/domain/listing/listing-types';
 import { DiscoveryApi } from '@app/data-access/discovery/discovery-api';
 interface SearchState {
   listings: PublicListing[];

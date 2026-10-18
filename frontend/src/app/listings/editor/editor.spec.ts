@@ -6,7 +6,7 @@ import { RouterTestingHarness } from '@angular/router/testing';
 import { routes } from '@app/app.routes';
 import { AuthStore } from '@app/auth/auth.store';
 import { categoryFixture } from '@app/domain/category/category-fixtures';
-import { draftFixture } from '@app/listings/listing-fixtures';
+import { draftFixture } from '@app/domain/listing/listing-fixtures';
 
 describe('Listing editor', () => {
   it('loads typed attributes, preserves unsaved text on conflict and does not submit automatically', async () => {

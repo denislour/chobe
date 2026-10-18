@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Page, PublicListing, SearchFilters } from '@app/listings/listing-types';
+import { Page, PublicListing, SearchFilters } from '@app/domain/listing/listing-types';
 @Injectable({ providedIn: 'root' })
 export class DiscoveryApi {
   constructor(private readonly http: HttpClient) {}

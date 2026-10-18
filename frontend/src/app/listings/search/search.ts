@@ -7,9 +7,9 @@ import { CategoryStore } from '@app/categories/browse/category.store';
 import { AttributeFields } from '@app/domain/category/attribute-fields/attribute-fields';
 import { AttributeValues } from '@app/domain/category/category-types';
 import { AlertsStore } from '@app/listings/alerts/alerts.store';
-import { ListingCard } from '@app/listings/listing-card/listing-card';
+import { ListingCard } from '@app/domain/listing/listing-card/listing-card';
 import { MarketplaceNav } from '@app/listings/marketplace-nav/marketplace-nav';
-import { SearchFilters } from '@app/listings/listing-types';
+import { SearchFilters } from '@app/domain/listing/listing-types';
 import { SearchStore } from './search.store';
 @Component({
   selector: 'app-search',

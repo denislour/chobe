@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { ListingDraft, Page } from '@app/listings/listing-types';
+import { ListingDraft, Page } from '@app/domain/listing/listing-types';
 export interface OwnerFilters {
   state: string;
   q: string;

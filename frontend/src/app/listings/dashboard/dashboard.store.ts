@@ -5,7 +5,7 @@ import { patchState, signalState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { Observable, exhaustMap, filter, forkJoin, pipe, switchMap, tap } from 'rxjs';
 import { listingError } from '@app/shared/errors/listing-errors';
-import { ListingDraft } from '@app/listings/listing-types';
+import { ListingDraft } from '@app/domain/listing/listing-types';
 import { ListingManagementApi, OwnerFilters } from '@app/data-access/listings/listing-management-api';
 interface DashboardState {
   listings: ListingDraft[];

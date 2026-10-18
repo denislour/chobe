@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Page } from '@app/listings/listing-types';
+import { Page } from '@app/domain/listing/listing-types';
 export interface ReportValues {
   listing?: number;
   shop?: string;

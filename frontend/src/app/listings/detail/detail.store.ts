@@ -6,7 +6,7 @@ import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { exhaustMap, filter, pipe, switchMap, tap } from 'rxjs';
 import { LibraryApi } from '@app/data-access/engagement/library-api';
 import { listingError } from '@app/shared/errors/listing-errors';
-import { PublicListing } from '@app/listings/listing-types';
+import { PublicListing } from '@app/domain/listing/listing-types';
 import { DiscoveryApi } from '@app/data-access/discovery/discovery-api';
 interface DetailState {
   listing: PublicListing | null;
